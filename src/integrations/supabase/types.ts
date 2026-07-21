@@ -14,16 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categorias: {
+        Row: {
+          criado_em: string
+          id: string
+          nome: string
+          ordem: number
+          slug: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          nome: string
+          ordem?: number
+          slug: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          slug?: string
+        }
+        Relationships: []
+      }
+      imagens_produto: {
+        Row: {
+          criado_em: string
+          id: string
+          ordem: number
+          principal: boolean
+          produto_id: string
+          storage_path: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          ordem?: number
+          principal?: boolean
+          produto_id: string
+          storage_path: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          ordem?: number
+          principal?: boolean
+          produto_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos: {
+        Row: {
+          ativo: boolean
+          categoria_id: string | null
+          criado_em: string
+          descricao: string | null
+          id: string
+          marca: string | null
+          nome: string
+          novidade: boolean
+          preco: number
+          promocao: boolean
+        }
+        Insert: {
+          ativo?: boolean
+          categoria_id?: string | null
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          marca?: string | null
+          nome: string
+          novidade?: boolean
+          preco: number
+          promocao?: boolean
+        }
+        Update: {
+          ativo?: boolean
+          categoria_id?: string | null
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          marca?: string | null
+          nome?: string
+          novidade?: boolean
+          preco?: number
+          promocao?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      variacoes_produto: {
+        Row: {
+          criado_em: string
+          hex_cor: string
+          id: string
+          nome_cor: string
+          produto_id: string
+          quantidade_estoque: number
+          tamanho: string
+        }
+        Insert: {
+          criado_em?: string
+          hex_cor?: string
+          id?: string
+          nome_cor: string
+          produto_id: string
+          quantidade_estoque?: number
+          tamanho: string
+        }
+        Update: {
+          criado_em?: string
+          hex_cor?: string
+          id?: string
+          nome_cor?: string
+          produto_id?: string
+          quantidade_estoque?: number
+          tamanho?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variacoes_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +320,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
