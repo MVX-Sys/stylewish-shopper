@@ -8,7 +8,7 @@ import { getProduto, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
-import { Plus, Minus, ShoppingCart, ChevronLeft } from "lucide-react";
+import { Plus, Minus, ShoppingBag, ChevronLeft, Truck, ShieldCheck, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/produto/$id")({
@@ -107,165 +107,259 @@ function ProductPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <Link
-          to="/"
-          className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ChevronLeft className="h-4 w-4" /> Continuar comprando
-        </Link>
+      <main className="mx-auto max-w-7xl px-4 py-6 md:py-10">
+        <nav className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
+          <Link to="/" className="hover:text-foreground">Início</Link>
+          <span>/</span>
+          <span className="text-foreground">
+            {isLoading ? "Carregando…" : p?.nome ?? "Produto"}
+          </span>
+        </nav>
 
         {isLoading || !p ? (
-          <p className="text-sm text-muted-foreground">Carregando…</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-[80px_1fr_1fr]">
-            <div className="order-2 flex flex-row gap-2 md:order-1 md:flex-col">
-              {imgs.map((u, i) => (
-                <button
-                  key={i}
-                  onClick={() => setMainIdx(i)}
-                  className={`h-20 w-20 shrink-0 overflow-hidden rounded-md border ${
-                    i === mainIdx ? "border-foreground" : "border-border"
-                  }`}
-                >
-                  <img src={u} alt="" className="h-full w-full object-cover" />
-                </button>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[88px_1fr_1fr]">
+            <div className="hidden md:block">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="skeleton mb-2 aspect-square rounded-lg" />
               ))}
             </div>
-
-            <div className="order-1 md:order-2">
-              <div className="relative aspect-square overflow-hidden rounded-md border border-border bg-muted">
-                {imgs[mainIdx] ? (
-                  <img
-                    src={imgs[mainIdx]}
-                    alt={p.nome}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">
-                    sem imagem
-                  </div>
-                )}
-                {isEsgotado(p) && (
-                  <div className="absolute inset-x-0 bottom-0 bg-destructive py-1.5 text-center text-xs font-bold tracking-wider text-destructive-foreground">
-                    ESGOTADO
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="order-3 space-y-5">
-              <div>
-                <h1 className="text-xl font-semibold uppercase tracking-wide">
-                  {p.nome}
-                </h1>
-                {p.descricao && (
-                  <p className="mt-2 text-sm text-muted-foreground">{p.descricao}</p>
-                )}
-                <p className="mt-3 text-2xl font-bold">{brl(p.preco)}</p>
-              </div>
-
-              {matriz.cores.length === 0 ? (
-                <p className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-                  Este produto ainda não possui variações cadastradas.
-                </p>
-              ) : (
-                <div className="overflow-x-auto rounded-md border border-border">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="p-2 text-left"></th>
-                        {matriz.tamanhos.map((t) => (
-                          <th key={t} className="p-2 text-center font-semibold">
-                            {t}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {matriz.cores.map((c) => (
-                        <tr key={c.nome} className="border-t border-border">
-                          <td className="p-2">
-                            <div className="flex items-center gap-2">
-                              <span
-                                className="h-6 w-6 rounded-full border border-border"
-                                style={{ backgroundColor: c.hex }}
-                              />
-                              <span className="text-xs">{c.nome}</span>
-                            </div>
-                          </td>
-                          {matriz.tamanhos.map((t) => {
-                            const v = getVar(c.nome, t);
-                            const key = `${c.nome}||${t}`;
-                            const q = qtys[key] ?? 0;
-                            const disponivel = v && v.quantidade_estoque > 0;
-                            if (!v)
-                              return (
-                                <td key={t} className="bg-muted/40 p-2 text-center text-muted-foreground">
-                                  —
-                                </td>
-                              );
-                            if (!disponivel)
-                              return (
-                                <td key={t} className="p-2 text-center text-xs text-destructive">
-                                  Esgotado
-                                </td>
-                              );
-                            return (
-                              <td key={t} className="p-2">
-                                {q === 0 ? (
-                                  <button
-                                    onClick={() => setQ(key, 1)}
-                                    className="mx-auto flex h-8 w-8 items-center justify-center rounded-md border border-border hover:bg-accent"
-                                    aria-label="Adicionar"
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                  </button>
-                                ) : (
-                                  <div className="mx-auto flex items-center justify-center gap-1">
-                                    <button
-                                      onClick={() => setQ(key, q - 1)}
-                                      className="rounded-md border border-border p-1 hover:bg-accent"
-                                    >
-                                      <Minus className="h-3 w-3" />
-                                    </button>
-                                    <span className="w-6 text-center">{q}</span>
-                                    <button
-                                      onClick={() =>
-                                        setQ(key, Math.min(v.quantidade_estoque, q + 1))
-                                      }
-                                      className="rounded-md border border-border p-1 hover:bg-accent"
-                                    >
-                                      <Plus className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between rounded-md border border-border p-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    {totalItens} pç{totalItens === 1 ? "" : "s"}
-                  </p>
-                  <p className="text-lg font-bold">{brl(subtotal)}</p>
-                </div>
-                <button
-                  onClick={addAoCarrinho}
-                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
-                >
-                  <ShoppingCart className="h-4 w-4" /> Adicionar ao carrinho
-                </button>
-              </div>
+            <div className="skeleton aspect-square rounded-lg" />
+            <div className="space-y-4">
+              <div className="skeleton h-8 w-3/4 rounded" />
+              <div className="skeleton h-4 w-full rounded" />
+              <div className="skeleton h-10 w-1/3 rounded" />
+              <div className="skeleton h-40 w-full rounded-lg" />
             </div>
           </div>
+        ) : (
+          <>
+            <Link
+              to="/"
+              className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
+            >
+              <ChevronLeft className="h-4 w-4" /> Continuar comprando
+            </Link>
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-[88px_1fr_1fr] md:gap-10">
+              {/* Thumbnails */}
+              <div className="order-2 flex flex-row gap-2 md:order-1 md:flex-col">
+                {imgs.map((u, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setMainIdx(i)}
+                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+                      i === mainIdx
+                        ? "border-foreground ring-2 ring-foreground/10"
+                        : "border-border opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={u} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+
+              {/* Main image */}
+              <div className="order-1 md:order-2">
+                <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted">
+                  {imgs[mainIdx] ? (
+                    <img
+                      src={imgs[mainIdx]}
+                      alt={p.nome}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="skeleton h-full w-full" />
+                  )}
+
+                  <div className="pointer-events-none absolute left-4 top-4 flex flex-col gap-1.5">
+                    {p.novidade && (
+                      <span className="rounded-full bg-background/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider shadow-sm backdrop-blur">
+                        Novidade
+                      </span>
+                    )}
+                    {p.promocao && (
+                      <span className="rounded-full bg-brand px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-foreground shadow-sm">
+                        Promoção
+                      </span>
+                    )}
+                  </div>
+
+                  {isEsgotado(p) && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+                      <span className="rounded-full bg-foreground px-5 py-2 text-xs font-bold uppercase tracking-[0.2em] text-background">
+                        Esgotado
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="order-3 space-y-6">
+                <div>
+                  {p.marca && (
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {p.marca}
+                    </p>
+                  )}
+                  <h1 className="mt-1 font-display text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+                    {p.nome}
+                  </h1>
+                  <p className="mt-4 font-display text-3xl font-bold tabular-nums">
+                    {brl(p.preco)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    ou em até 3x sem juros no combinado
+                  </p>
+                  {p.descricao && (
+                    <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+                      {p.descricao}
+                    </p>
+                  )}
+                </div>
+
+                {matriz.cores.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
+                    Este produto ainda não possui variações cadastradas.
+                  </div>
+                ) : (
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-xs font-semibold uppercase tracking-wider">
+                        Escolha cor e tamanho
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {matriz.cores.length} cor{matriz.cores.length > 1 ? "es" : ""} · {matriz.tamanhos.length} tam.
+                      </p>
+                    </div>
+                    <div className="overflow-x-auto rounded-xl border border-border bg-card">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/60">
+                          <tr>
+                            <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                              Cor
+                            </th>
+                            {matriz.tamanhos.map((t) => (
+                              <th
+                                key={t}
+                                className="p-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                              >
+                                {t}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {matriz.cores.map((c) => (
+                            <tr key={c.nome} className="border-t border-border">
+                              <td className="p-3">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="h-6 w-6 rounded-full border border-border shadow-inner"
+                                    style={{ backgroundColor: c.hex }}
+                                  />
+                                  <span className="text-xs font-medium">{c.nome}</span>
+                                </div>
+                              </td>
+                              {matriz.tamanhos.map((t) => {
+                                const v = getVar(c.nome, t);
+                                const key = `${c.nome}||${t}`;
+                                const q = qtys[key] ?? 0;
+                                const disponivel = v && v.quantidade_estoque > 0;
+                                if (!v)
+                                  return (
+                                    <td key={t} className="bg-muted/30 p-3 text-center text-muted-foreground/50">
+                                      —
+                                    </td>
+                                  );
+                                if (!disponivel)
+                                  return (
+                                    <td key={t} className="p-3 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+                                      esgotado
+                                    </td>
+                                  );
+                                return (
+                                  <td key={t} className="p-2">
+                                    {q === 0 ? (
+                                      <button
+                                        onClick={() => setQ(key, 1)}
+                                        className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-border transition-all hover:border-foreground hover:bg-foreground hover:text-background"
+                                        aria-label="Adicionar"
+                                      >
+                                        <Plus className="h-4 w-4" />
+                                      </button>
+                                    ) : (
+                                      <div className="mx-auto flex items-center justify-center gap-1 rounded-full bg-foreground p-0.5 text-background">
+                                        <button
+                                          onClick={() => setQ(key, q - 1)}
+                                          className="grid h-7 w-7 place-items-center rounded-full hover:bg-background/10"
+                                        >
+                                          <Minus className="h-3 w-3" />
+                                        </button>
+                                        <span className="w-5 text-center text-xs font-semibold tabular-nums">
+                                          {q}
+                                        </span>
+                                        <button
+                                          onClick={() =>
+                                            setQ(key, Math.min(v.quantidade_estoque, q + 1))
+                                          }
+                                          className="grid h-7 w-7 place-items-center rounded-full hover:bg-background/10"
+                                        >
+                                          <Plus className="h-3 w-3" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                <div className="sticky bottom-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur-md">
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {totalItens} pç{totalItens === 1 ? "" : "s"} · subtotal
+                    </p>
+                    <p className="font-display text-xl font-bold tabular-nums">
+                      {brl(subtotal)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={addAoCarrinho}
+                    disabled={totalItens === 0}
+                    className="btn-shine inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    Adicionar
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {[
+                    { icon: MessageCircle, t: "Pedido via WhatsApp", s: "Atendimento direto" },
+                    { icon: Truck, t: "Entrega combinada", s: "Regiões atendidas" },
+                    { icon: ShieldCheck, t: "Troca facilitada", s: "Peças novas" },
+                  ].map(({ icon: Icon, t, s }) => (
+                    <div
+                      key={t}
+                      className="flex items-start gap-3 rounded-xl border border-border bg-card p-3"
+                    >
+                      <Icon className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-xs font-semibold">{t}</p>
+                        <p className="text-[11px] text-muted-foreground">{s}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </main>
       <SiteFooter />

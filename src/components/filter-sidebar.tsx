@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import type { Categoria } from "@/lib/products";
+import { brl } from "@/lib/format";
 
 export type Filters = {
   q: string;
@@ -33,18 +34,166 @@ function Section({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="rounded-md border border-border bg-card">
+    <div className="border-b border-border pb-4 last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium"
+        className="flex w-full items-center justify-between py-2 text-xs font-semibold uppercase tracking-wider text-foreground"
       >
         {title}
         <ChevronDown
-          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${
+            open ? "rotate-180" : ""
+          }`}
         />
       </button>
-      {open && <div className="border-t border-border p-4">{children}</div>}
+      <div
+        className={`grid transition-all duration-300 ${
+          open ? "grid-rows-[1fr] pt-3 opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">{children}</div>
+      </div>
     </div>
+  );
+}
+
+function FilterContent({
+  categorias,
+  filters,
+  onChange,
+}: {
+  categorias: Categoria[];
+  filters: Filters;
+  onChange: (f: Filters) => void;
+}) {
+  const set = <K extends keyof Filters>(k: K, v: Filters[K]) =>
+    onChange({ ...filters, [k]: v });
+
+  const activeCount =
+    (filters.categoriaSlug ? 1 : 0) +
+    (filters.novidades ? 1 : 0) +
+    (filters.promocao ? 1 : 0) +
+    (filters.precoMax < 500 ? 1 : 0);
+
+  return (
+    <>
+      <div className="flex items-center justify-between pb-2">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <SlidersHorizontal className="h-4 w-4" />
+          Filtros
+          {activeCount > 0 && (
+            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-foreground px-1.5 text-[10px] font-bold text-background">
+              {activeCount}
+            </span>
+          )}
+        </div>
+        {activeCount > 0 && (
+          <button
+            onClick={() => onChange(defaultFilters)}
+            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            Limpar
+          </button>
+        )}
+      </div>
+
+      <Section title="Ordenar">
+        <div className="space-y-1.5">
+          {(
+            [
+              ["recentes", "Relevância"],
+              ["menor-preco", "Menor preço"],
+              ["maior-preco", "Maior preço"],
+              ["nome", "Nome (A–Z)"],
+            ] as const
+          ).map(([val, label]) => (
+            <label
+              key={val}
+              className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground"
+            >
+              <input
+                type="radio"
+                checked={filters.ordem === val}
+                onChange={() => set("ordem", val)}
+                className="h-3.5 w-3.5 accent-foreground"
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Categorias">
+        <div className="space-y-1.5">
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
+            <input
+              type="radio"
+              checked={filters.categoriaSlug === null}
+              onChange={() => set("categoriaSlug", null)}
+              className="h-3.5 w-3.5 accent-foreground"
+            />
+            Todas
+          </label>
+          {categorias.map((c) => (
+            <label
+              key={c.id}
+              className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground"
+            >
+              <input
+                type="radio"
+                checked={filters.categoriaSlug === c.slug}
+                onChange={() => set("categoriaSlug", c.slug)}
+                className="h-3.5 w-3.5 accent-foreground"
+              />
+              {c.nome}
+            </label>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Destaques" defaultOpen={false}>
+        <div className="space-y-1.5">
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
+            <input
+              type="checkbox"
+              checked={filters.novidades}
+              onChange={(e) => set("novidades", e.target.checked)}
+              className="h-3.5 w-3.5 accent-foreground"
+            />
+            Novidades
+          </label>
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
+            <input
+              type="checkbox"
+              checked={filters.promocao}
+              onChange={(e) => set("promocao", e.target.checked)}
+              className="h-3.5 w-3.5 accent-foreground"
+            />
+            Em promoção
+          </label>
+        </div>
+      </Section>
+
+      <Section title="Preço">
+        <div className="space-y-3 pt-1">
+          <input
+            type="range"
+            min={0}
+            max={500}
+            step={10}
+            value={filters.precoMax}
+            onChange={(e) => set("precoMax", Number(e.target.value))}
+            className="w-full accent-foreground"
+          />
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{brl(0)}</span>
+            <span className="font-semibold text-foreground">
+              até {brl(filters.precoMax)}
+            </span>
+          </div>
+        </div>
+      </Section>
+    </>
   );
 }
 
@@ -57,85 +206,71 @@ export function FilterSidebar({
   filters: Filters;
   onChange: (f: Filters) => void;
 }) {
-  const set = <K extends keyof Filters>(k: K, v: Filters[K]) =>
-    onChange({ ...filters, [k]: v });
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const activeCount =
+    (filters.categoriaSlug ? 1 : 0) +
+    (filters.novidades ? 1 : 0) +
+    (filters.promocao ? 1 : 0) +
+    (filters.precoMax < 500 ? 1 : 0);
 
   return (
-    <aside className="space-y-3">
-      <Section title="Ordenar por">
-        <select
-          value={filters.ordem}
-          onChange={(e) => set("ordem", e.target.value as Filters["ordem"])}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-        >
-          <option value="recentes">Relevância</option>
-          <option value="menor-preco">Menor preço</option>
-          <option value="maior-preco">Maior preço</option>
-          <option value="nome">Nome</option>
-        </select>
-      </Section>
+    <>
+      {/* Mobile trigger */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="mb-4 flex items-center gap-2 self-start rounded-full border border-border bg-card px-4 py-2 text-sm font-medium shadow-sm md:hidden"
+      >
+        <SlidersHorizontal className="h-4 w-4" />
+        Filtros
+        {activeCount > 0 && (
+          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-foreground px-1.5 text-[10px] font-bold text-background">
+            {activeCount}
+          </span>
+        )}
+      </button>
 
-      <Section title="Categorias">
-        <div className="space-y-2 text-sm">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked={filters.categoriaSlug === null}
-              onChange={() => set("categoriaSlug", null)}
-            />
-            Todas
-          </label>
-          {categorias.map((c) => (
-            <label key={c.id} className="flex items-center gap-2">
-              <input
-                type="radio"
-                checked={filters.categoriaSlug === c.slug}
-                onChange={() => set("categoriaSlug", c.slug)}
-              />
-              {c.nome}
-            </label>
-          ))}
+      {/* Desktop sidebar */}
+      <aside className="hidden md:block">
+        <div className="sticky top-40 space-y-1 rounded-xl border border-border bg-card p-5">
+          <FilterContent
+            categorias={categorias}
+            filters={filters}
+            onChange={onChange}
+          />
         </div>
-      </Section>
+      </aside>
 
-      <Section title="Novidades" defaultOpen={false}>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={filters.novidades}
-            onChange={(e) => set("novidades", e.target.checked)}
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
           />
-          Apenas novidades
-        </label>
-      </Section>
-
-      <Section title="Promoção" defaultOpen={false}>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={filters.promocao}
-            onChange={(e) => set("promocao", e.target.checked)}
-          />
-          Apenas promoções
-        </label>
-      </Section>
-
-      <Section title="Preço">
-        <div className="space-y-3">
-          <input
-            type="range"
-            min={0}
-            max={500}
-            value={filters.precoMax}
-            onChange={(e) => set("precoMax", Number(e.target.value))}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>R$ 0,00</span>
-            <span>Até R$ {filters.precoMax},00</span>
+          <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-background p-5 shadow-2xl animate-fade-in-up">
+            <div className="mb-2 flex items-center justify-between">
+              <div className="mx-auto h-1 w-10 rounded-full bg-border" />
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="absolute right-4 top-4 rounded-full p-1.5 hover:bg-accent"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <FilterContent
+              categorias={categorias}
+              filters={filters}
+              onChange={onChange}
+            />
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="mt-4 w-full rounded-full bg-foreground py-3 text-sm font-semibold text-background"
+            >
+              Ver resultados
+            </button>
           </div>
         </div>
-      </Section>
-    </aside>
+      )}
+    </>
   );
 }
