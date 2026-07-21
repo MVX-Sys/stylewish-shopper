@@ -5,10 +5,10 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { getProduto, isEsgotado } from "@/lib/products";
-import { getImageUrl } from "@/lib/storage";
+import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
-import { Plus, Minus, ShoppingBag, ChevronLeft, Truck, ShieldCheck, MessageCircle } from "lucide-react";
+import { Plus, Minus, ShoppingBag, ChevronLeft, Truck, ShieldCheck, MessageCircle, Download, Images } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/produto/$id")({
@@ -104,6 +104,34 @@ function ProductPage() {
     toast.success("Adicionado ao carrinho!");
   };
 
+  const [downloading, setDownloading] = useState(false);
+  const baixarAtual = async () => {
+    if (!imgs[mainIdx] || !p) return;
+    try {
+      setDownloading(true);
+      await downloadImage(imgs[mainIdx], `${p.nome}-${mainIdx + 1}`);
+      toast.success("Imagem baixada!");
+    } catch {
+      toast.error("Não foi possível baixar a imagem.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+  const baixarTodas = async () => {
+    if (imgs.length === 0 || !p) return;
+    try {
+      setDownloading(true);
+      await downloadImagesAsZip(imgs, p.nome);
+      toast.success(
+        imgs.length === 1 ? "Imagem baixada!" : `${imgs.length} imagens baixadas!`,
+      );
+    } catch {
+      toast.error("Não foi possível baixar as imagens.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -192,6 +220,31 @@ function ProductPage() {
                     </div>
                   )}
                 </div>
+
+                {imgs.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={baixarAtual}
+                      disabled={downloading}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-medium transition-colors hover:bg-accent disabled:opacity-50"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Baixar imagem
+                    </button>
+                    {imgs.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={baixarTodas}
+                        disabled={downloading}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-medium transition-colors hover:bg-accent disabled:opacity-50"
+                      >
+                        <Images className="h-3.5 w-3.5" />
+                        Baixar todas ({imgs.length})
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Details */}
