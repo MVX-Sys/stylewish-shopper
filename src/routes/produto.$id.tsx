@@ -220,6 +220,31 @@ function ProductPage() {
                     </div>
                   )}
                 </div>
+
+                {imgs.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={baixarAtual}
+                      disabled={downloading}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-medium transition-colors hover:bg-accent disabled:opacity-50"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Baixar imagem
+                    </button>
+                    {imgs.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={baixarTodas}
+                        disabled={downloading}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-medium transition-colors hover:bg-accent disabled:opacity-50"
+                      >
+                        <Images className="h-3.5 w-3.5" />
+                        Baixar todas ({imgs.length})
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Details */}
