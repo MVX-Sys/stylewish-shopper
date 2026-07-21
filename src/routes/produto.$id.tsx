@@ -104,6 +104,34 @@ function ProductPage() {
     toast.success("Adicionado ao carrinho!");
   };
 
+  const [downloading, setDownloading] = useState(false);
+  const baixarAtual = async () => {
+    if (!imgs[mainIdx] || !p) return;
+    try {
+      setDownloading(true);
+      await downloadImage(imgs[mainIdx], `${p.nome}-${mainIdx + 1}`);
+      toast.success("Imagem baixada!");
+    } catch {
+      toast.error("Não foi possível baixar a imagem.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+  const baixarTodas = async () => {
+    if (imgs.length === 0 || !p) return;
+    try {
+      setDownloading(true);
+      await downloadImagesAsZip(imgs, p.nome);
+      toast.success(
+        imgs.length === 1 ? "Imagem baixada!" : `${imgs.length} imagens baixadas!`,
+      );
+    } catch {
+      toast.error("Não foi possível baixar as imagens.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
