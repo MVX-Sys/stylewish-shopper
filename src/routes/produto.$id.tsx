@@ -5,10 +5,10 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { getProduto, isEsgotado } from "@/lib/products";
-import { getImageUrl } from "@/lib/storage";
+import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
-import { Plus, Minus, ShoppingBag, ChevronLeft, Truck, ShieldCheck, MessageCircle } from "lucide-react";
+import { Plus, Minus, ShoppingBag, ChevronLeft, Truck, ShieldCheck, MessageCircle, Download, Images } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/produto/$id")({
