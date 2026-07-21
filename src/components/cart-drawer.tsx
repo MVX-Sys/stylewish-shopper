@@ -1,28 +1,16 @@
 import { X, Minus, Plus, MessageCircle, Trash2, ShoppingBag } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { useCart } from "@/lib/cart";
 import { brl } from "@/lib/format";
-import { WHATSAPP_NUMBER, BRAND } from "@/lib/config";
 
 export function CartDrawer() {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
+  const nav = useNavigate();
 
   const finalizar = () => {
     if (items.length === 0) return;
-    const linhas = items.map(
-      (i) =>
-        `• ${i.quantidade}x ${i.nome} — Cor ${i.cor}, Tam ${i.tamanho} — ${brl(
-          i.preco * i.quantidade,
-        )}`,
-    );
-    const msg = [
-      `Olá, ${BRAND}! Gostaria de fazer o pedido:`,
-      "",
-      ...linhas,
-      "",
-      `Total: ${brl(total)}`,
-    ].join("\n");
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
+    setOpen(false);
+    nav({ to: "/checkout" });
   };
 
   return (
@@ -85,11 +73,9 @@ export function CartDrawer() {
                   key={i.key}
                   className="flex gap-3 rounded-xl border border-border bg-card p-3 transition-shadow hover:shadow-sm"
                 >
-                  <span
-                    className="mt-1 h-10 w-10 shrink-0 rounded-lg border border-border shadow-inner"
-                    style={{ backgroundColor: i.hexCor }}
-                    aria-hidden
-                  />
+                  <div className="mt-1 hidden h-10 w-10 shrink-0 place-items-center rounded-lg border border-border bg-muted text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:grid" aria-hidden>
+                    {i.cor.slice(0, 3)}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{i.nome}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
@@ -145,10 +131,10 @@ export function CartDrawer() {
             </div>
             <button
               onClick={finalizar}
-              className="btn-shine flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+              className="btn-shine flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-4 py-3.5 text-sm font-semibold text-background shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
             >
               <MessageCircle className="h-4 w-4" />
-              Finalizar pelo WhatsApp
+              Finalizar pedido
             </button>
             <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
               <button
