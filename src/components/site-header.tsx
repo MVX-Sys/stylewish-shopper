@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { BRAND } from "@/lib/config";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SiteHeader() {
   const { count, setOpen } = useCart();
@@ -86,6 +87,7 @@ export function SiteHeader() {
               <span className="hidden md:inline">Entrar</span>
             </Link>
           )}
+          <ThemeToggle />
           <button
             onClick={() => setOpen(true)}
             className="relative rounded-full p-2.5 transition-colors hover:bg-accent"
