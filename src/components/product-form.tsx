@@ -255,214 +255,227 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   };
 
   return (
-    <form onSubmit={submit} className="space-y-8">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="space-y-4">
-          <Field label="Nome do produto *">
-            <input
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              required
-              className="w-full rounded-md border border-input px-3 py-2 text-sm"
-            />
-          </Field>
-          <Field label="Descrição">
-            <textarea
-              value={descricao}
-              onChange={(e) => setDescricao(e.target.value)}
-              rows={3}
-              className="w-full rounded-md border border-input px-3 py-2 text-sm"
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Preço base *">
+    <form onSubmit={submit} className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+        {/* Main */}
+        <div className="space-y-6">
+          <Card title="Informações básicas">
+            <Field label="Nome do produto *">
               <input
-                type="number"
-                step="0.01"
-                min={0}
-                value={preco}
-                onChange={(e) => setPreco(Number(e.target.value))}
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
                 required
-                className="w-full rounded-md border border-input px-3 py-2 text-sm"
+                placeholder="Ex: Camiseta Oversized Preta"
+                className="input"
               />
             </Field>
-            <Field label="Marca">
-              <input
-                value={marca}
-                onChange={(e) => setMarca(e.target.value)}
-                className="w-full rounded-md border border-input px-3 py-2 text-sm"
+            <Field label="Descrição">
+              <textarea
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                rows={4}
+                placeholder="Detalhes de tecido, caimento, ocasião…"
+                className="input resize-none"
               />
             </Field>
-          </div>
-          <Field label="Categoria *">
-            <select
-              value={categoriaId}
-              onChange={(e) => setCategoriaId(e.target.value)}
-              required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Selecione…</option>
-              {categorias.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nome}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <div className="flex flex-wrap gap-4 text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={novidade}
-                onChange={(e) => setNovidade(e.target.checked)}
-              />
-              Novidade
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={promocao}
-                onChange={(e) => setPromocao(e.target.checked)}
-              />
-              Promoção
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={ativo}
-                onChange={(e) => setAtivo(e.target.checked)}
-              />
-              Ativo
-            </label>
-          </div>
-        </div>
-
-        <div>
-          <p className="mb-2 text-sm font-medium">Imagens</p>
-          <label className="mb-3 flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground hover:bg-accent">
-            <Upload className="h-4 w-4" />
-            Selecionar imagens
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => onPickFiles(e.target.files)}
-              className="hidden"
-            />
-          </label>
-          <div className="grid grid-cols-3 gap-3">
-            {imgs.map((img, i) => (
-              <div
-                key={i}
-                className={`group relative aspect-square overflow-hidden rounded-md border ${
-                  img.principal ? "border-foreground" : "border-border"
-                }`}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Preço base *">
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    R$
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    value={preco}
+                    onChange={(e) => setPreco(Number(e.target.value))}
+                    required
+                    className="input pl-9"
+                  />
+                </div>
+              </Field>
+              <Field label="Marca">
+                <input
+                  value={marca}
+                  onChange={(e) => setMarca(e.target.value)}
+                  placeholder="Opcional"
+                  className="input"
+                />
+              </Field>
+            </div>
+            <Field label="Categoria *">
+              <select
+                value={categoriaId}
+                onChange={(e) => setCategoriaId(e.target.value)}
+                required
+                className="input bg-background"
               >
-                {img.url && <img src={img.url} alt="" className="h-full w-full object-cover" />}
-                <button
-                  type="button"
-                  onClick={() => removeImg(i)}
-                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPrincipal(i)}
-                  className={`absolute inset-x-0 bottom-0 text-[10px] py-1 ${
-                    img.principal
-                      ? "bg-foreground text-background"
-                      : "bg-black/50 text-white opacity-0 group-hover:opacity-100"
-                  }`}
-                >
-                  {img.principal ? "Principal" : "Definir como principal"}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Variações · Cores × Tamanhos × Estoque</h3>
-          <button
-            type="button"
-            onClick={addCor}
-            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs hover:bg-accent"
-          >
-            <Plus className="h-3 w-3" /> Adicionar cor
-          </button>
-        </div>
-        {cores.length === 0 ? (
-          <p className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            Nenhuma cor cadastrada. Adicione ao menos uma cor para gerenciar estoque.
-          </p>
-        ) : (
-          <div className="overflow-x-auto rounded-md border border-border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="p-2 text-left">Cor</th>
-                  {TAMANHOS_PADRAO.map((t) => (
-                    <th key={t} className="p-2 text-center">
-                      {t}
-                    </th>
-                  ))}
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {cores.map((c) => (
-                  <tr key={c.nome} className="border-t border-border">
-                    <td className="p-2">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="h-5 w-5 rounded-full border border-border"
-                          style={{ backgroundColor: c.hex }}
-                        />
-                        <span>{c.nome}</span>
-                      </div>
-                    </td>
-                    {TAMANHOS_PADRAO.map((t) => (
-                      <td key={t} className="p-2 text-center">
-                        <input
-                          type="number"
-                          min={0}
-                          value={getEstoque(c.nome, t)}
-                          onChange={(e) => setEstoque(c.nome, t, Number(e.target.value))}
-                          className="w-16 rounded-md border border-input px-2 py-1 text-center text-sm"
-                        />
-                      </td>
-                    ))}
-                    <td className="p-2 text-right">
-                      <button
-                        type="button"
-                        onClick={() => removeCor(c.nome)}
-                        className="text-destructive hover:opacity-70"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
+                <option value="">Selecione…</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nome}
+                  </option>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </select>
+            </Field>
+          </Card>
+
+          <Card title="Variações · Cores × Tamanhos × Estoque"
+            action={
+              <button
+                type="button"
+                onClick={addCor}
+                className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+              >
+                <Plus className="h-3 w-3" /> Adicionar cor
+              </button>
+            }
+          >
+            {cores.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
+                Nenhuma cor cadastrada. Adicione ao menos uma cor para gerenciar estoque.
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-border">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/60">
+                    <tr className="text-xs uppercase tracking-wider text-muted-foreground">
+                      <th className="p-3 text-left font-semibold">Cor</th>
+                      {TAMANHOS_PADRAO.map((t) => (
+                        <th key={t} className="p-3 text-center font-semibold">
+                          {t}
+                        </th>
+                      ))}
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cores.map((c) => (
+                      <tr key={c.nome} className="border-t border-border">
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="h-6 w-6 rounded-full border border-border shadow-inner"
+                              style={{ backgroundColor: c.hex }}
+                            />
+                            <span className="font-medium">{c.nome}</span>
+                          </div>
+                        </td>
+                        {TAMANHOS_PADRAO.map((t) => (
+                          <td key={t} className="p-2 text-center">
+                            <input
+                              type="number"
+                              min={0}
+                              value={getEstoque(c.nome, t)}
+                              onChange={(e) => setEstoque(c.nome, t, Number(e.target.value))}
+                              className="w-16 rounded-lg border border-input bg-background px-2 py-1.5 text-center text-sm tabular-nums outline-none focus:border-foreground"
+                            />
+                          </td>
+                        ))}
+                        <td className="p-2 text-right">
+                          <button
+                            type="button"
+                            onClick={() => removeCor(c.nome)}
+                            className="rounded-full p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <Card title="Imagens">
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 text-sm text-muted-foreground transition-colors hover:border-foreground hover:bg-accent">
+              <Upload className="h-6 w-6" />
+              <span className="font-medium text-foreground">Selecionar imagens</span>
+              <span className="text-xs">Arraste ou clique para enviar</span>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => onPickFiles(e.target.files)}
+                className="hidden"
+              />
+            </label>
+            {imgs.length > 0 && (
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {imgs.map((img, i) => (
+                  <div
+                    key={i}
+                    className={`group relative aspect-square overflow-hidden rounded-lg border-2 transition-all ${
+                      img.principal ? "border-foreground ring-2 ring-foreground/10" : "border-border"
+                    }`}
+                  >
+                    {img.url && <img src={img.url} alt="" className="h-full w-full object-cover" />}
+                    <button
+                      type="button"
+                      onClick={() => removeImg(i)}
+                      className="absolute right-1 top-1 rounded-full bg-foreground/80 p-1 text-background opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPrincipal(i)}
+                      className={`absolute inset-x-0 bottom-0 text-[10px] font-semibold uppercase tracking-wider py-1 transition-opacity ${
+                        img.principal
+                          ? "bg-foreground text-background"
+                          : "bg-foreground/70 text-background opacity-0 group-hover:opacity-100"
+                      }`}
+                    >
+                      {img.principal ? "Principal" : "Tornar principal"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
+          <Card title="Visibilidade">
+            <div className="space-y-2.5">
+              {[
+                { key: "ativo", label: "Ativo (visível na loja)", val: ativo, set: setAtivo },
+                { key: "novidade", label: "Marcar como novidade", val: novidade, set: setNovidade },
+                { key: "promocao", label: "Em promoção", val: promocao, set: setPromocao },
+              ].map(({ key, label, val, set }) => (
+                <label
+                  key={key}
+                  className="flex cursor-pointer items-center justify-between rounded-lg border border-border bg-background p-3 text-sm transition-colors hover:bg-accent"
+                >
+                  <span>{label}</span>
+                  <input
+                    type="checkbox"
+                    checked={val}
+                    onChange={(e) => set(e.target.checked)}
+                    className="h-4 w-4 accent-foreground"
+                  />
+                </label>
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
 
-      <div className="flex justify-end gap-2 border-t border-border pt-4">
+      <div className="sticky bottom-4 z-10 flex flex-col-reverse gap-2 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur-md sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={() => nav({ to: "/admin" })}
-          className="rounded-md border border-border px-4 py-2 text-sm hover:bg-accent"
+          className="rounded-full border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
         >
           Cancelar
         </button>
         <button
           disabled={saving}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+          className="btn-shine inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {saving ? "Salvando…" : "Salvar produto"}
         </button>
@@ -471,11 +484,34 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   );
 }
 
+function Card({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border border-border bg-card p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="font-display text-base font-semibold">{title}</h3>
+        {action}
+      </div>
+      <div className="space-y-4">{children}</div>
+    </section>
+  );
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-muted-foreground">{label}</span>
+      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       {children}
     </label>
   );
 }
+

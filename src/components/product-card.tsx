@@ -19,32 +19,60 @@ export function ProductCard({ p }: { p: ProductListItem }) {
     <Link
       to="/produto/$id"
       params={{ id: p.id }}
-      className="group block overflow-hidden rounded-md border border-border bg-card transition-shadow hover:shadow-sm"
+      className="group block"
     >
-      <div className="relative aspect-square overflow-hidden bg-muted">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted">
         {img ? (
           <img
             src={img}
             alt={p.nome}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
         ) : (
-          <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">
-            sem imagem
-          </div>
+          <div className="skeleton h-full w-full" />
         )}
+
+        <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1.5">
+          {p.novidade && (
+            <span className="rounded-full bg-background/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground shadow-sm backdrop-blur">
+              Novo
+            </span>
+          )}
+          {p.promocao && (
+            <span className="rounded-full bg-brand px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-foreground shadow-sm">
+              Promo
+            </span>
+          )}
+        </div>
+
         {esgotado && (
-          <div className="absolute inset-x-0 bottom-0 bg-destructive py-1.5 text-center text-[11px] font-bold tracking-wider text-destructive-foreground">
-            ESGOTADO
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+            <span className="rounded-full bg-foreground px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-background">
+              Esgotado
+            </span>
           </div>
         )}
       </div>
-      <div className="p-3 text-center">
-        <h3 className="truncate text-sm font-medium uppercase tracking-wide">
+
+      <div className="mt-3 space-y-1 px-0.5">
+        <h3 className="line-clamp-1 text-sm font-medium tracking-wide text-foreground">
           {p.nome}
         </h3>
-        <p className="mt-1 text-sm font-semibold">{brl(p.preco)}</p>
+        <p className="text-sm font-semibold text-foreground">{brl(p.preco)}</p>
       </div>
     </Link>
+  );
+}
+
+export function ProductCardSkeleton() {
+  return (
+    <div>
+      <div className="skeleton aspect-[4/5] rounded-lg" />
+      <div className="mt-3 space-y-2 px-0.5">
+        <div className="skeleton h-4 w-3/4 rounded" />
+        <div className="skeleton h-4 w-1/3 rounded" />
+      </div>
+    </div>
   );
 }
