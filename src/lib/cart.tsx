@@ -15,7 +15,7 @@ type CartCtx = {
   items: CartItem[];
   open: boolean;
   setOpen: (v: boolean) => void;
-  add: (item: Omit<CartItem, "key">, qty?: number) => void;
+  add: (item: Omit<CartItem, "key" | "quantidade">, qty?: number) => void;
   setQty: (key: string, qty: number) => void;
   remove: (key: string) => void;
   clear: () => void;
