@@ -25,19 +25,26 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="border-b border-border/60">
-        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-1.5 text-[11px] tracking-wider text-muted-foreground">
+    <header className="sticky top-0 z-40 border-b border-border bg-primary text-primary-foreground shadow-md">
+      <div className="border-b border-white/10">
+        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-1.5 text-[11px] font-medium tracking-wider text-white/90">
           Frete e pedidos pelo WhatsApp · Atendimento personalizado
         </div>
       </div>
-      <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-4 md:gap-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 md:gap-8">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="grid h-10 w-10 place-items-center rounded-full bg-foreground text-background font-display text-lg font-semibold">
-            A
+          <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white">
+            <img
+              src={logoAsset.url}
+              alt={BRAND}
+              className="h-full w-full object-cover"
+            />
           </div>
-          <span className="hidden font-display text-lg font-semibold tracking-tight sm:inline">
-            {BRAND}
+          <span className="hidden font-display text-lg font-extrabold tracking-tight text-white sm:inline">
+            acha&amp;busca
+            <span className="ml-1 text-[10px] font-semibold tracking-[0.25em] text-white/80">
+              ATACADO
+            </span>
           </span>
         </Link>
 
@@ -53,7 +60,7 @@ export function SiteHeader() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="O que você procura hoje?"
-            className="w-full rounded-full border border-input bg-muted/40 py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-foreground focus:bg-background"
+            className="w-full rounded-full border border-white/20 bg-white py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-white focus:ring-2 focus:ring-white/40"
           />
         </form>
 
@@ -62,7 +69,7 @@ export function SiteHeader() {
             <div className="hidden items-center gap-1 sm:flex">
               <Link
                 to={isAdmin ? "/admin" : "/auth"}
-                className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm hover:bg-accent"
+                className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15"
               >
                 <User className="h-4 w-4" />
                 <span className="hidden md:inline">
@@ -73,7 +80,7 @@ export function SiteHeader() {
                 onClick={async () => {
                   await supabase.auth.signOut();
                 }}
-                className="rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="rounded-full p-2 text-white/80 hover:bg-white/15 hover:text-white"
                 aria-label="Sair"
               >
                 <LogOut className="h-4 w-4" />
@@ -82,7 +89,7 @@ export function SiteHeader() {
           ) : (
             <Link
               to="/auth"
-              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm hover:bg-accent sm:flex"
+              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15 sm:flex"
             >
               <User className="h-4 w-4" />
               <span className="hidden md:inline">Entrar</span>
@@ -91,12 +98,12 @@ export function SiteHeader() {
           <ThemeToggle />
           <button
             onClick={() => setOpen(true)}
-            className="relative rounded-full p-2.5 transition-colors hover:bg-accent"
+            className="relative rounded-full p-2.5 text-white transition-colors hover:bg-white/15"
             aria-label="Carrinho"
           >
             <ShoppingBag className="h-5 w-5" />
             {count > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-foreground px-1 text-[10px] font-semibold text-background">
+              <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-white px-1 text-[10px] font-bold text-primary">
                 {count}
               </span>
             )}
@@ -105,15 +112,15 @@ export function SiteHeader() {
       </div>
 
       {cats.length > 0 && (
-        <nav className="border-t border-border/60">
+        <nav className="border-t border-white/10 bg-primary">
           <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Link
               to="/"
               search={{} as never}
-              className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors ${
+              className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
                 currentPath === "/" && !currentSearch?.cat
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  ? "bg-white text-primary"
+                  : "text-white/85 hover:bg-white/15 hover:text-white"
               }`}
             >
               Todas
@@ -125,10 +132,10 @@ export function SiteHeader() {
                   key={c.id}
                   to="/"
                   search={{ cat: c.slug } as never}
-                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors ${
+                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
                     active
-                      ? "bg-foreground text-background"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      ? "bg-white text-primary"
+                      : "text-white/85 hover:bg-white/15 hover:text-white"
                   }`}
                 >
                   {c.nome}
