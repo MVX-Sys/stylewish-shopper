@@ -61,7 +61,7 @@ function AdminProductsList() {
     <div className="space-y-8">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight">
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
             Produtos
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -96,7 +96,7 @@ function AdminProductsList() {
                 <Icon className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-2 font-display text-2xl font-bold tabular-nums">
+            <p className="mt-2 font-display text-xl font-bold tabular-nums sm:text-2xl">
               {value}
             </p>
           </div>
