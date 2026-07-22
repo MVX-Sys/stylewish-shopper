@@ -26,8 +26,8 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-primary text-primary-foreground shadow-md">
-      <div className="border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-1.5 text-[11px] font-medium tracking-wider text-white/90">
+      <div className="border-b border-border bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-1.5 text-[11px] font-medium tracking-wider text-primary">
           Frete e pedidos pelo WhatsApp · Atendimento personalizado
         </div>
       </div>
