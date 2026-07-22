@@ -27,20 +27,26 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-primary text-primary-foreground shadow-md">
       <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 md:gap-8">
-        <Link to="/" className="flex items-center gap-0">
+        <Link to="/" className="group flex items-center gap-2">
           <img
             src={logoAsset.url}
             alt={BRAND}
-            className="h-16 w-16 shrink-0 object-contain"
+            className="h-16 w-16 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-300 group-hover:scale-105"
           />
 
-          <span className="hidden font-display text-lg font-extrabold tracking-tight text-white sm:inline">
-            acha&amp;busca
-            <span className="ml-1 text-[10px] font-semibold tracking-[0.25em] text-white/80">
-              ATACADO
-            </span>
-          </span>
+          <div className="hidden flex-col leading-none sm:flex">
+            <h1 className="font-display text-3xl font-extrabold tracking-tighter text-white">
+              acha<span className="mx-[1px] font-bold text-white/60">&amp;</span>busca
+            </h1>
+            <div className="mt-1.5 flex items-center gap-2">
+              <span className="h-px w-5 bg-white/40" />
+              <span className="font-display text-[10px] font-bold uppercase tracking-[0.35em] text-white/90">
+                Atacado
+              </span>
+            </div>
+          </div>
         </Link>
+
 
         <form
           onSubmit={(e) => {
