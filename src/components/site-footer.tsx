@@ -3,8 +3,8 @@ import { MessageCircle, Instagram, Mail } from "lucide-react";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-20 border-t border-border bg-primary text-primary-foreground">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="mt-16 border-t border-border bg-primary text-primary-foreground sm:mt-20">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 sm:gap-10 sm:py-14 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
           <div className="flex items-center gap-2.5">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground font-display text-lg font-bold">
