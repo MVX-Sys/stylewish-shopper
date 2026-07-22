@@ -299,12 +299,12 @@ function CheckoutPage() {
             O pedido será redirecionado para o WhatsApp!
           </p>
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-stretch sm:justify-end">
             <button
               type="button"
               onClick={finalizar}
               disabled={items.length === 0}
-              className="btn-shine inline-flex items-center gap-2 rounded-md bg-[#1a73e8] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              className="btn-shine inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
             >
               <MessageCircle className="h-4 w-4" />
               Finalizar
