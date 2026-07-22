@@ -8,7 +8,7 @@ import { BRAND } from "@/lib/config";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
-import logoAsset from "@/assets/acha-busca-logo.jpeg.asset.json";
+import logoAsset from "@/assets/acha-busca-logo.png.asset.json";
 
 export function SiteHeader() {
   const { count, setOpen } = useCart();
