@@ -24,18 +24,23 @@ export function SiteHeader() {
     cat?: string;
   };
 
+  const doSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    nav({ to: "/", search: { q } as never });
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-primary text-primary-foreground shadow-md">
-      <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 md:gap-8">
-        <Link to="/" className="group flex items-center gap-2">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3 md:gap-8">
+        <Link to="/" className="group flex min-w-0 items-center gap-2">
           <img
             src={logoAsset.url}
             alt={BRAND}
-            className="h-16 w-16 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-300 group-hover:scale-105"
+            className="h-11 w-11 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14 md:h-16 md:w-16"
           />
 
-          <div className="hidden flex-col leading-none sm:flex">
-            <h1 className="font-display text-3xl font-extrabold tracking-tighter text-white">
+          <div className="hidden min-w-0 flex-col leading-none sm:flex">
+            <h1 className="truncate font-display text-2xl font-extrabold tracking-tighter text-white md:text-3xl">
               acha<span className="mx-[1px] font-bold text-white/60">&amp;</span>busca
             </h1>
             <div className="mt-1.5 flex items-center gap-2">
@@ -49,11 +54,8 @@ export function SiteHeader() {
 
 
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            nav({ to: "/", search: { q } as never });
-          }}
-          className="relative mx-auto w-full max-w-xl"
+          onSubmit={doSearch}
+          className="relative mx-auto hidden w-full max-w-xl flex-1 sm:block"
         >
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -64,7 +66,7 @@ export function SiteHeader() {
           />
         </form>
 
-        <div className="flex items-center gap-1 text-sm sm:gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 text-sm sm:gap-2">
           {session ? (
             <div className="hidden items-center gap-1 sm:flex">
               <Link
@@ -98,7 +100,7 @@ export function SiteHeader() {
           <ThemeToggle />
           <button
             onClick={() => setOpen(true)}
-            className="relative rounded-full p-2.5 text-white transition-colors hover:bg-white/15"
+            className="relative rounded-full p-2 text-white transition-colors hover:bg-white/15 sm:p-2.5"
             aria-label="Carrinho"
           >
             <ShoppingBag className="h-5 w-5" />
@@ -111,9 +113,22 @@ export function SiteHeader() {
         </div>
       </div>
 
+      {/* Mobile search row */}
+      <form onSubmit={doSearch} className="border-t border-white/10 px-3 pb-2.5 pt-2 sm:hidden">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar produto…"
+            className="w-full rounded-full border border-white/20 bg-white py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-white"
+          />
+        </div>
+      </form>
+
       {cats.length > 0 && (
         <nav className="border-t border-white/10 bg-primary">
-          <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 py-2 text-sm sm:px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Link
               to="/"
               search={{} as never}
