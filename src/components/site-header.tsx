@@ -27,14 +27,13 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-primary text-primary-foreground shadow-md">
       <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 md:gap-8">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white">
-            <img
-              src={logoAsset.url}
-              alt={BRAND}
-              className="h-full w-full object-cover"
-            />
-          </div>
+        <Link to="/" className="flex items-center gap-2">
+          <img
+            src={logoAsset.url}
+            alt={BRAND}
+            className="h-11 w-11 shrink-0 object-contain"
+          />
+
           <span className="hidden font-display text-lg font-extrabold tracking-tight text-white sm:inline">
             acha&amp;busca
             <span className="ml-1 text-[10px] font-semibold tracking-[0.25em] text-white/80">
