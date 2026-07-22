@@ -168,7 +168,7 @@ function ProductPage() {
               <ChevronLeft className="h-4 w-4" /> Continuar comprando
             </Link>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-[88px_1fr_1fr] md:gap-10">
+            <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[88px_1fr_1fr] lg:gap-10">
               {/* Thumbnails */}
               <div className="order-2 flex flex-row gap-2 md:order-1 md:flex-col">
                 {imgs.map((u, i) => (
