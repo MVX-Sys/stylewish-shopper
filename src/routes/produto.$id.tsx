@@ -145,8 +145,8 @@ function ProductPage() {
         </nav>
 
         {isLoading || !p ? (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-[88px_1fr_1fr]">
-            <div className="hidden md:block">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[88px_1fr_1fr]">
+            <div className="hidden lg:block">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="skeleton mb-2 aspect-square rounded-lg" />
               ))}
@@ -163,19 +163,19 @@ function ProductPage() {
           <>
             <Link
               to="/"
-              className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
+              className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground lg:hidden"
             >
               <ChevronLeft className="h-4 w-4" /> Continuar comprando
             </Link>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-[88px_1fr_1fr] md:gap-10">
+            <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[88px_1fr_1fr] lg:gap-10">
               {/* Thumbnails */}
-              <div className="order-2 flex flex-row gap-2 md:order-1 md:flex-col">
+              <div className="order-2 flex flex-row flex-wrap gap-2 lg:order-1 lg:flex-col lg:flex-nowrap">
                 {imgs.map((u, i) => (
                   <button
                     key={i}
                     onClick={() => setMainIdx(i)}
-                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-20 sm:w-20 ${
                       i === mainIdx
                         ? "border-foreground ring-2 ring-foreground/10"
                         : "border-border opacity-70 hover:opacity-100"
@@ -187,7 +187,7 @@ function ProductPage() {
               </div>
 
               {/* Main image */}
-              <div className="order-1 md:order-2">
+              <div className="order-1 lg:order-2">
                 <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted">
                   {imgs[mainIdx] ? (
                     <img
@@ -367,19 +367,19 @@ function ProductPage() {
                   </div>
                 )}
 
-                <div className="sticky bottom-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur-md">
-                  <div>
+                <div className="sticky bottom-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur-md sm:p-4">
+                  <div className="min-w-0">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">
                       {totalItens} pç{totalItens === 1 ? "" : "s"} · subtotal
                     </p>
-                    <p className="font-display text-xl font-bold tabular-nums">
+                    <p className="font-display text-lg font-bold tabular-nums sm:text-xl">
                       {brl(subtotal)}
                     </p>
                   </div>
                   <button
                     onClick={addAoCarrinho}
                     disabled={totalItens === 0}
-                    className="btn-shine inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="btn-shine inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
                   >
                     <ShoppingBag className="h-4 w-4" />
                     Adicionar

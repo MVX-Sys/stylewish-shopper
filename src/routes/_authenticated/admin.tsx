@@ -31,7 +31,7 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:gap-8">
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:gap-4 sm:px-4 md:gap-8">
           <Link to="/admin" className="flex items-center gap-2.5">
             <span className="grid h-9 w-9 place-items-center rounded-full bg-foreground text-background font-display font-semibold">
               A
@@ -85,7 +85,7 @@ function AdminLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8">
         <Outlet />
       </main>
     </div>

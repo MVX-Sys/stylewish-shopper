@@ -273,7 +273,7 @@ export function FilterSidebar({
 
       {/* Desktop sidebar */}
       <aside className="hidden md:block">
-        <div className="sticky top-40 space-y-1 rounded-xl border border-border bg-card p-5">
+        <div className="sticky top-24 space-y-1 rounded-xl border border-border bg-card p-4 lg:top-40 lg:p-5">
           <FilterContent
             categorias={categorias}
             filters={filters}

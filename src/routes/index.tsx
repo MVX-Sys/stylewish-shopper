@@ -111,7 +111,7 @@ function Home() {
         </div>
       </section>
 
-      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-8 md:grid-cols-[260px_1fr] md:py-10">
+      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 md:grid-cols-[240px_1fr] md:gap-8 md:py-10 lg:grid-cols-[260px_1fr]">
         <FilterSidebar
           categorias={categorias}
           filters={filters}
