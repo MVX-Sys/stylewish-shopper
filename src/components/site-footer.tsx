@@ -9,10 +9,12 @@ export function SiteFooter() {
           <span className="font-display text-2xl font-extrabold tracking-tight">
             acha&amp;busca
           </span>
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/80">
-            Atacado com atendimento próximo. Peças selecionadas, pedidos
-            finalizados diretamente pelo WhatsApp.
-          </p>
+          <div className="mt-4 max-w-xl space-y-1 text-sm leading-relaxed text-white/80">
+            <p>📦 FABRICAÇÃO PRÓPIA E PRIVAT LABEL</p>
+            <p>🇧🇷 ENVIAMOS PARA TODO O BRASIL</p>
+            <p>🛒 PEDIDO MÍNIMO - 10 PEÇAS</p>
+            <p>👨🏽‍💻 Orçamentos e pedidos no link 👇🏾</p>
+          </div>
         </div>
 
         <div className="mt-8">
