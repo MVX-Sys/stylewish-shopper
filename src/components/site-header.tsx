@@ -31,7 +31,7 @@ export function SiteHeader() {
           <img
             src={logoAsset.url}
             alt={BRAND}
-            className="h-11 w-11 shrink-0 object-contain"
+            className="h-16 w-16 shrink-0 object-contain"
           />
 
           <span className="hidden font-display text-lg font-extrabold tracking-tight text-white sm:inline">
