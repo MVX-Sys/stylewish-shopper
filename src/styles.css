@@ -34,6 +34,8 @@
   --color-ring-offset-background: var(--background);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-navy: var(--navy);
+  --color-navy-foreground: var(--navy-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
