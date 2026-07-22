@@ -21,7 +21,7 @@ export function ProductCard({ p }: { p: ProductListItem }) {
       params={{ id: p.id }}
       className="group block"
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-border transition-shadow duration-300 group-hover:shadow-lg">
         {img ? (
           <img
             src={img}
@@ -35,12 +35,12 @@ export function ProductCard({ p }: { p: ProductListItem }) {
 
         <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1.5">
           {p.novidade && (
-            <span className="rounded-full bg-background/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground shadow-sm backdrop-blur">
-              Novo
+            <span className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-navy-foreground shadow-sm">
+              Novidade
             </span>
           )}
           {p.promocao && (
-            <span className="rounded-full bg-brand px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-foreground shadow-sm">
+            <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
               Promo
             </span>
           )}
@@ -48,18 +48,18 @@ export function ProductCard({ p }: { p: ProductListItem }) {
 
         {esgotado && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
-            <span className="rounded-full bg-foreground px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-background">
+            <span className="rounded-full bg-destructive px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-destructive-foreground">
               Esgotado
             </span>
           </div>
         )}
       </div>
 
-      <div className="mt-3 space-y-1 px-0.5">
-        <h3 className="line-clamp-1 text-sm font-medium tracking-wide text-foreground">
+      <div className="mt-3 space-y-1 px-1">
+        <h3 className="line-clamp-1 text-sm font-semibold tracking-tight text-foreground">
           {p.nome}
         </h3>
-        <p className="text-sm font-semibold text-foreground">{brl(p.preco)}</p>
+        <p className="text-sm font-bold text-primary">{brl(p.preco)}</p>
       </div>
     </Link>
   );
@@ -68,7 +68,7 @@ export function ProductCard({ p }: { p: ProductListItem }) {
 export function ProductCardSkeleton() {
   return (
     <div>
-      <div className="skeleton aspect-[4/5] rounded-lg" />
+      <div className="skeleton aspect-[4/5] rounded-xl" />
       <div className="mt-3 space-y-2 px-0.5">
         <div className="skeleton h-4 w-3/4 rounded" />
         <div className="skeleton h-4 w-1/3 rounded" />
