@@ -51,27 +51,27 @@
   --card-foreground: oklch(0.2 0.01 60);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.01 60);
-  /* Primary = orange */
-  --primary: oklch(0.68 0.22 45);
-  --primary-foreground: oklch(1 0 0);
+  /* Primary = orange (#FF5500) */
+  --primary: #FF5500;
+  --primary-foreground: #FFFFFF;
   /* Secondary = soft warm neutral */
   --secondary: oklch(0.97 0.01 60);
   --secondary-foreground: oklch(0.2 0.01 60);
   --muted: oklch(0.97 0.006 60);
   --muted-foreground: oklch(0.5 0.02 60);
   --accent: oklch(0.96 0.04 45);
-  --accent-foreground: oklch(0.35 0.15 45);
+  --accent-foreground: #FF5500;
   /* Destructive tuned to orange family (no red borders) */
-  --destructive: oklch(0.68 0.22 45);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.92 0.01 60);
-  --input: oklch(0.92 0.01 60);
-  --ring: oklch(0.68 0.22 45);
-  --brand: oklch(0.68 0.22 45);
-  --brand-foreground: oklch(1 0 0);
+  --destructive: #FF5500;
+  --destructive-foreground: #FFFFFF;
+  --border: #D1D5DB;
+  --input: #D1D5DB;
+  --ring: #FF5500;
+  --brand: #FF5500;
+  --brand-foreground: #FFFFFF;
   /* "navy" token repurposed as neutral dark for surfaces that used it */
   --navy: oklch(0.2 0.01 60);
-  --navy-foreground: oklch(1 0 0);
+  --navy-foreground: #FFFFFF;
   --success: oklch(0.62 0.15 155);
   --warning: oklch(0.72 0.15 75);
 }
@@ -83,21 +83,21 @@
   --card-foreground: oklch(0.98 0.003 80);
   --popover: oklch(0.22 0.006 60);
   --popover-foreground: oklch(0.98 0.003 80);
-  --primary: oklch(0.72 0.22 45);
-  --primary-foreground: oklch(0.16 0.01 60);
+  --primary: #FF5500;
+  --primary-foreground: #FFFFFF;
   --secondary: oklch(0.28 0.008 60);
   --secondary-foreground: oklch(0.98 0.003 80);
   --muted: oklch(0.26 0.008 60);
   --muted-foreground: oklch(0.72 0.01 60);
   --accent: oklch(0.32 0.05 45);
-  --accent-foreground: oklch(0.98 0.003 80);
-  --destructive: oklch(0.72 0.22 45);
-  --destructive-foreground: oklch(0.16 0.01 60);
+  --accent-foreground: #FFFFFF;
+  --destructive: #FF5500;
+  --destructive-foreground: #FFFFFF;
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.72 0.22 45);
-  --brand: oklch(0.72 0.22 45);
-  --brand-foreground: oklch(0.16 0.01 60);
+  --ring: #FF5500;
+  --brand: #FF5500;
+  --brand-foreground: #FFFFFF;
   --navy: oklch(0.24 0.008 60);
   --navy-foreground: oklch(0.98 0.003 80);
   --success: oklch(0.7 0.15 155);
