@@ -187,7 +187,7 @@ function ProductPage() {
               </div>
 
               {/* Main image */}
-              <div className="order-1 md:order-2">
+              <div className="order-1 lg:order-2">
                 <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted">
                   {imgs[mainIdx] ? (
                     <img
