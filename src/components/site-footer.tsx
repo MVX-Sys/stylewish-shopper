@@ -1,5 +1,6 @@
 import { BRAND, WHATSAPP_DISPLAY, WHATSAPP_NUMBER } from "@/lib/config";
 import { MessageCircle, Instagram } from "lucide-react";
+import logoAsset from "@/assets/acha-busca-icon.png.asset.json";
 
 const MVX_INSTAGRAM = "https://www.instagram.com/mvx_sistemas/";
 const MVX_WHATSAPP_1 = { display: "(87) 99168-6116", link: "5587991686116" };
@@ -10,13 +11,20 @@ export function SiteFooter() {
     <footer className="mt-12 bg-primary text-primary-foreground sm:mt-16">
       <div className="mx-auto max-w-6xl px-6 py-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <span className="font-display text-lg font-extrabold tracking-tight">
-              acha&amp;busca
-            </span>
-            <p className="mt-0.5 text-xs text-white/80">
-              Fabricação própria · Envio para todo o Brasil · Mínimo 10 peças
-            </p>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <img
+              src={logoAsset.url}
+              alt=""
+              className="h-8 w-8 shrink-0 opacity-90"
+            />
+            <div className="min-w-0">
+              <span className="font-display text-lg font-extrabold tracking-tight">
+                acha&amp;busca
+              </span>
+              <p className="mt-0.5 text-xs text-white/80">
+                Fabricação própria · Envio para todo o Brasil · Mínimo 10 peças
+              </p>
+            </div>
           </div>
 
           <a
