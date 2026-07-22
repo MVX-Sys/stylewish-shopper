@@ -76,7 +76,7 @@ export function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-white/60 sm:flex-row">
           <p>© {new Date().getFullYear()} {BRAND}. Todos os direitos reservados.</p>
-          <p>Feito com cuidado no Brasil</p>
+          <p>FEITO PELA MVX SISTEMAS</p>
         </div>
       </div>
     </footer>
