@@ -4,8 +4,8 @@ import { MessageCircle, Instagram, Mail } from "lucide-react";
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-border bg-primary text-primary-foreground sm:mt-20">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 sm:gap-10 sm:py-14 lg:grid-cols-4">
-        <div className="sm:col-span-2 lg:col-span-1">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 sm:gap-10 sm:py-14">
+        <div>
           <div className="flex items-center gap-2.5">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground font-display text-lg font-bold">
               a&amp;b
@@ -20,27 +20,6 @@ export function SiteFooter() {
           </p>
         </div>
 
-        <div>
-          <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-white">
-            Institucional
-          </h4>
-          <ul className="space-y-2.5 text-sm text-white/70">
-            <li className="cursor-pointer transition-colors hover:text-primary">Sobre a marca</li>
-            <li className="cursor-pointer transition-colors hover:text-primary">Políticas de venda</li>
-            <li className="cursor-pointer transition-colors hover:text-primary">Privacidade</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-white">
-            Ajuda
-          </h4>
-          <ul className="space-y-2.5 text-sm text-white/70">
-            <li className="cursor-pointer transition-colors hover:text-primary">Como comprar</li>
-            <li className="cursor-pointer transition-colors hover:text-primary">Trocas e devoluções</li>
-            <li className="cursor-pointer transition-colors hover:text-primary">Guia de tamanhos</li>
-          </ul>
-        </div>
 
         <div>
           <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-white">
