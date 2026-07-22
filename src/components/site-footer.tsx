@@ -3,19 +3,19 @@ import { MessageCircle, Instagram, Mail } from "lucide-react";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-20 border-t border-border bg-card">
+    <footer className="mt-20 border-t border-border bg-navy text-navy-foreground">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
           <div className="flex items-center gap-2.5">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-foreground text-background font-display text-lg font-semibold">
-              A
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground font-display text-lg font-bold">
+              a&amp;b
             </div>
-            <span className="font-display text-lg font-semibold tracking-tight">
-              {BRAND}
+            <span className="font-display text-lg font-extrabold tracking-tight">
+              acha&amp;busca
             </span>
           </div>
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-            Moda urbana com atendimento próximo. Peças selecionadas, pedidos
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
+            Atacado com atendimento próximo. Peças selecionadas, pedidos
             finalizados diretamente pelo WhatsApp.
           </p>
         </div>
