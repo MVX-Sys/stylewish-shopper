@@ -26,11 +26,6 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-primary text-primary-foreground shadow-md">
-      <div className="border-b border-border bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-1.5 text-[11px] font-medium tracking-wider text-primary">
-          Frete e pedidos pelo WhatsApp · Atendimento personalizado
-        </div>
-      </div>
       <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 md:gap-8">
         <Link to="/" className="flex items-center gap-2.5">
           <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white">
