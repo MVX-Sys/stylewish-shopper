@@ -386,24 +386,8 @@ function ProductPage() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  {[
-                    { icon: MessageCircle, t: "Pedido via WhatsApp", s: "Atendimento direto" },
-                    { icon: Truck, t: "Entrega combinada", s: "Regiões atendidas" },
-                    { icon: ShieldCheck, t: "Troca facilitada", s: "Peças novas" },
-                  ].map(({ icon: Icon, t, s }) => (
-                    <div
-                      key={t}
-                      className="flex items-start gap-3 rounded-xl border border-border bg-card p-3"
-                    >
-                      <Icon className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-xs font-semibold">{t}</p>
-                        <p className="text-[11px] text-muted-foreground">{s}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+
+
               </div>
             </div>
           </>
