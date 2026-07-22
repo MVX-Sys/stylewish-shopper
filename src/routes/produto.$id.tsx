@@ -175,7 +175,7 @@ function ProductPage() {
                   <button
                     key={i}
                     onClick={() => setMainIdx(i)}
-                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-20 sm:w-20 ${
                       i === mainIdx
                         ? "border-foreground ring-2 ring-foreground/10"
                         : "border-border opacity-70 hover:opacity-100"
