@@ -128,11 +128,11 @@ export function SiteHeader() {
 
       {cats.length > 0 && (
         <nav className="border-t border-white/10 bg-primary">
-          <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 py-2 text-sm sm:px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-3 py-2.5 text-sm sm:gap-3 sm:px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Link
               to="/"
               search={{} as never}
-              className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition-colors ${
                 currentPath === "/" && !currentSearch?.cat
                   ? "bg-white text-primary"
                   : "text-white/85 hover:bg-white/15 hover:text-white"
@@ -147,7 +147,7 @@ export function SiteHeader() {
                   key={c.id}
                   to="/"
                   search={{ cat: c.slug } as never}
-                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                  className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition-colors ${
                     active
                       ? "bg-white text-primary"
                       : "text-white/85 hover:bg-white/15 hover:text-white"
