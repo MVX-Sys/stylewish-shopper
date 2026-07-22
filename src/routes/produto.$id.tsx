@@ -163,14 +163,14 @@ function ProductPage() {
           <>
             <Link
               to="/"
-              className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
+              className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground lg:hidden"
             >
               <ChevronLeft className="h-4 w-4" /> Continuar comprando
             </Link>
 
             <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[88px_1fr_1fr] lg:gap-10">
               {/* Thumbnails */}
-              <div className="order-2 flex flex-row gap-2 md:order-1 md:flex-col">
+              <div className="order-2 flex flex-row flex-wrap gap-2 lg:order-1 lg:flex-col lg:flex-nowrap">
                 {imgs.map((u, i) => (
                   <button
                     key={i}
