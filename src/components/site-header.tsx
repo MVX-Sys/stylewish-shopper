@@ -128,7 +128,10 @@ export function SiteHeader() {
 
       {cats.length > 0 && (
         <nav className="border-t border-white/10 bg-primary">
-          <div className="mx-auto flex max-w-7xl snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth px-3 py-2.5 text-sm sm:gap-8 sm:px-6 sm:py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div
+            className="mx-auto flex max-w-7xl gap-2 overflow-x-auto overscroll-x-contain scroll-smooth px-3 py-2.5 text-sm sm:gap-8 sm:px-6 sm:py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
+          >
             <Link
               to="/"
               search={{} as never}
