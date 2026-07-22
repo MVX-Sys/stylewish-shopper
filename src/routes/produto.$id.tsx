@@ -367,19 +367,19 @@ function ProductPage() {
                   </div>
                 )}
 
-                <div className="sticky bottom-4 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur-md">
-                  <div>
+                <div className="sticky bottom-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur-md sm:p-4">
+                  <div className="min-w-0">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">
                       {totalItens} pç{totalItens === 1 ? "" : "s"} · subtotal
                     </p>
-                    <p className="font-display text-xl font-bold tabular-nums">
+                    <p className="font-display text-lg font-bold tabular-nums sm:text-xl">
                       {brl(subtotal)}
                     </p>
                   </div>
                   <button
                     onClick={addAoCarrinho}
                     disabled={totalItens === 0}
-                    className="btn-shine inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="btn-shine inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
                   >
                     <ShoppingBag className="h-4 w-4" />
                     Adicionar
