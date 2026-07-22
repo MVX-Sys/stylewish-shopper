@@ -176,21 +176,63 @@ function FilterContent({
 
       <Section title="Preço">
         <div className="space-y-3 pt-1">
-          <input
-            type="range"
-            min={0}
-            max={500}
-            step={10}
-            value={filters.precoMax}
-            onChange={(e) => set("precoMax", Number(e.target.value))}
-            className="w-full accent-foreground"
-          />
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{brl(0)}</span>
-            <span className="font-semibold text-foreground">
-              até {brl(filters.precoMax)}
-            </span>
+          <div className="flex items-end gap-2">
+            <label className="flex-1">
+              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                De
+              </span>
+              <div className="flex items-center rounded-md border border-border bg-background px-2 focus-within:border-foreground">
+                <span className="text-xs text-muted-foreground">R$</span>
+                <input
+                  type="number"
+                  min={0}
+                  inputMode="decimal"
+                  value={filters.precoMin || ""}
+                  placeholder="0"
+                  onChange={(e) =>
+                    set("precoMin", Math.max(0, Number(e.target.value) || 0))
+                  }
+                  className="w-full bg-transparent px-1.5 py-1.5 text-sm outline-none"
+                />
+              </div>
+            </label>
+            <span className="pb-2 text-muted-foreground">—</span>
+            <label className="flex-1">
+              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Até
+              </span>
+              <div className="flex items-center rounded-md border border-border bg-background px-2 focus-within:border-foreground">
+                <span className="text-xs text-muted-foreground">R$</span>
+                <input
+                  type="number"
+                  min={0}
+                  inputMode="decimal"
+                  value={filters.precoMax || ""}
+                  placeholder="500"
+                  onChange={(e) =>
+                    set("precoMax", Math.max(0, Number(e.target.value) || 0))
+                  }
+                  className="w-full bg-transparent px-1.5 py-1.5 text-sm outline-none"
+                />
+              </div>
+            </label>
           </div>
+          {(filters.precoMin > 0 || filters.precoMax !== 500) && (
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="font-semibold text-foreground">
+                {brl(filters.precoMin)} — {brl(filters.precoMax || 0)}
+              </span>
+              <button
+                onClick={() => {
+                  set("precoMin", 0);
+                  set("precoMax", 500);
+                }}
+                className="underline-offset-4 hover:text-foreground hover:underline"
+              >
+                Redefinir
+              </button>
+            </div>
+          )}
         </div>
       </Section>
     </>
