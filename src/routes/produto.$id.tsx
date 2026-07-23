@@ -43,6 +43,49 @@ function ProductPage() {
   const [imgs, setImgs] = useState<string[]>([]);
   const [mainIdx, setMainIdx] = useState(0);
   const [qtys, setQtys] = useState<Record<string, number>>({});
+  const [restock, setRestock] = useState<{ cor: string; tam: string } | null>(null);
+  const [restockNome, setRestockNome] = useState("");
+  const [restockZap, setRestockZap] = useState("");
+  const [restockObs, setRestockObs] = useState("");
+  const [restockSending, setRestockSending] = useState(false);
+
+  const enviarSolicitacao = async () => {
+    if (!p || !restock) return;
+    const nome = restockNome.trim();
+    const zap = restockZap.trim();
+    if (nome.length < 2) return toast.error("Informe seu nome.");
+    const digitos = zap.replace(/\D/g, "");
+    if (digitos.length < 8) return toast.error("Informe um WhatsApp válido.");
+    try {
+      setRestockSending(true);
+      const { error } = await supabase.from("solicitacoes_reposicao").insert({
+        produto_id: p.id,
+        cor: restock.cor,
+        tamanho: restock.tam,
+        cliente_nome: nome,
+        cliente_whatsapp: digitos,
+        observacao: restockObs.trim() || null,
+      });
+      if (error) throw error;
+      const msg = `Olá! Meu nome é ${nome}. Gostaria de ser avisado(a) por WhatsApp quando o produto *${p.nome}* (cor ${restock.cor}, tamanho ${restock.tam}) da ${BRAND} for reposto.${
+        restockObs.trim() ? `\n\nObservação: ${restockObs.trim()}` : ""
+      }`;
+      window.open(
+        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+      toast.success("Solicitação registrada! Assim que houver reposição, avisaremos.");
+      setRestock(null);
+      setRestockNome("");
+      setRestockZap("");
+      setRestockObs("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível registrar.");
+    } finally {
+      setRestockSending(false);
+    }
+  };
 
   useEffect(() => {
     if (!p) return;
