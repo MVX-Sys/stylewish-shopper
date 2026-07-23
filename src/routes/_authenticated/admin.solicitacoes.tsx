@@ -271,6 +271,28 @@ function SolicitacoesPage() {
             <button
               type="button"
               onClick={() => {
+                const headers = ["Data", "Status", "Produto", "Cor", "Tamanho", "Cliente", "WhatsApp", "Observação"];
+                const rows = filtered.map((s) => [
+                  formatDate(s.criado_em),
+                  s.status,
+                  s.produtos?.nome ?? "—",
+                  s.cor,
+                  s.tamanho,
+                  s.cliente_nome,
+                  s.cliente_whatsapp,
+                  s.observacao ?? "",
+                ]);
+                downloadTableXLSX("reposicoes", "Reposições", headers, rows);
+              }}
+              disabled={filtered.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >
+              <Sheet className="h-3.5 w-3.5" />
+              XLSX
+            </button>
+            <button
+              type="button"
+              onClick={() => {
                 const cols = [
                   { label: "Data", width: 26 },
                   { label: "Status", width: 20 },
