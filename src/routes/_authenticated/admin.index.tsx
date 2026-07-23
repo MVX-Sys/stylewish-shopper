@@ -277,6 +277,22 @@ function AdminProductsList() {
               <button
                 type="button"
                 onClick={() =>
+                  downloadProductsXLSX(
+                    filtered.map((p) => ({
+                      ...p,
+                      categoriaNome: categorias.find((c) => c.id === p.categoria_id)?.nome,
+                    })),
+                  )
+                }
+                disabled={filtered.length === 0}
+                className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
+              >
+                <Sheet className="h-4 w-4" />
+                XLSX
+              </button>
+              <button
+                type="button"
+                onClick={() =>
                   downloadProductsPDF(
                     filtered.map((p) => ({
                       ...p,
