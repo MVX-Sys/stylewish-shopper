@@ -18,7 +18,7 @@ import {
   FileDown,
   FileSpreadsheet,
 } from "lucide-react";
-import { downloadTableCSV, downloadTablePDF } from "@/lib/pdf";
+import { downloadTableCSV, downloadTablePDF, downloadTableXLSX } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/solicitacoes")({
   component: SolicitacoesPage,
