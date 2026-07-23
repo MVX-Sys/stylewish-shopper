@@ -385,14 +385,7 @@ function ProductPage() {
                                     <td key={t} className="p-2 text-center">
                                       <button
                                         type="button"
-                                        onClick={() => {
-                                          const msg = `Olá! Gostaria de ser avisado(a) por WhatsApp quando o produto *${p.nome}* (cor ${c.nome}, tamanho ${t}) da ${BRAND} for reposto. Obrigado!`;
-                                          window.open(
-                                            `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
-                                            "_blank",
-                                            "noopener,noreferrer",
-                                          );
-                                        }}
+                                        onClick={() => setRestock({ cor: c.nome, tam: t })}
                                         title="Avise-me por WhatsApp quando repor"
                                         className="mx-auto inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:border-brand hover:text-brand"
                                       >
