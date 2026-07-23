@@ -41,11 +41,12 @@ function UsuariosPage() {
 
   const [q, setQ] = useState("");
   const [roleFilter, setRoleFilter] = useState<"todos" | "admin" | "user">("todos");
+  const [sort, setSort] = useState<"recentes" | "antigos" | "email-asc" | "email-desc" | "ultimo-acesso">("recentes");
 
   const filtered = useMemo(() => {
     const list = data ?? [];
     const term = q.trim().toLowerCase();
-    return list.filter((u) => {
+    const out = list.filter((u) => {
       if (roleFilter === "admin" && !u.roles.includes("admin")) return false;
       if (roleFilter === "user" && u.roles.includes("admin")) return false;
       if (!term) return true;
@@ -55,7 +56,18 @@ function UsuariosPage() {
         (u.phone ?? "").toLowerCase().includes(term)
       );
     });
-  }, [data, q, roleFilter]);
+    const sorted = [...out];
+    sorted.sort((a, b) => {
+      switch (sort) {
+        case "antigos": return (a.created_at ?? "").localeCompare(b.created_at ?? "");
+        case "email-asc": return (a.email ?? "").localeCompare(b.email ?? "");
+        case "email-desc": return (b.email ?? "").localeCompare(a.email ?? "");
+        case "ultimo-acesso": return (b.last_sign_in_at ?? "").localeCompare(a.last_sign_in_at ?? "");
+        default: return (b.created_at ?? "").localeCompare(a.created_at ?? "");
+      }
+    });
+    return sorted;
+  }, [data, q, roleFilter, sort]);
 
   const total = data?.length ?? 0;
   const admins = data?.filter((u) => u.roles.includes("admin")).length ?? 0;
