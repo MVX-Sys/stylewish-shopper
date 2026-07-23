@@ -30,8 +30,22 @@ function AdminProductsList() {
     queryKey: ["admin-produtos"],
     queryFn: listProdutos,
   });
+  const { data: categorias = [] } = useQuery({
+    queryKey: ["categorias"],
+    queryFn: listCategorias,
+  });
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [q, setQ] = useState("");
+  const [categoriaId, setCategoriaId] = useState<string>("todas");
+  const [marca, setMarca] = useState<string>("todas");
+  const [cor, setCor] = useState<string>("todas");
+  const [tamanho, setTamanho] = useState<string>("todos");
+  const [status, setStatus] = useState<StatusFilter>("todos");
+  const [destaque, setDestaque] = useState<DestaqueFilter>("todos");
+  const [precoMin, setPrecoMin] = useState<string>("");
+  const [precoMax, setPrecoMax] = useState<string>("");
+  const [sort, setSort] = useState<SortKey>("recentes");
+  const [showFilters, setShowFilters] = useState(true);
 
   useEffect(() => {
     produtos.forEach((p) => {
@@ -42,6 +56,24 @@ function AdminProductsList() {
         );
     });
   }, [produtos, thumbs]);
+
+  const marcas = useMemo(() => {
+    const s = new Set<string>();
+    produtos.forEach((p) => p.marca && s.add(p.marca));
+    return Array.from(s).sort();
+  }, [produtos]);
+
+  const cores = useMemo(() => {
+    const s = new Set<string>();
+    produtos.forEach((p) => p.variacoes.forEach((v) => v.nome_cor && s.add(v.nome_cor)));
+    return Array.from(s).sort();
+  }, [produtos]);
+
+  const tamanhos = useMemo(() => {
+    const s = new Set<string>();
+    produtos.forEach((p) => p.variacoes.forEach((v) => v.tamanho && s.add(v.tamanho)));
+    return Array.from(s).sort();
+  }, [produtos]);
 
   const stats = useMemo(() => {
     const total = produtos.length;
@@ -54,11 +86,69 @@ function AdminProductsList() {
     return { total, ativos, esgotados, estoque };
   }, [produtos]);
 
+  const activeCount =
+    (q ? 1 : 0) +
+    (categoriaId !== "todas" ? 1 : 0) +
+    (marca !== "todas" ? 1 : 0) +
+    (cor !== "todas" ? 1 : 0) +
+    (tamanho !== "todos" ? 1 : 0) +
+    (status !== "todos" ? 1 : 0) +
+    (destaque !== "todos" ? 1 : 0) +
+    (precoMin ? 1 : 0) +
+    (precoMax ? 1 : 0);
+
+  const resetFilters = () => {
+    setQ("");
+    setCategoriaId("todas");
+    setMarca("todas");
+    setCor("todas");
+    setTamanho("todos");
+    setStatus("todos");
+    setDestaque("todos");
+    setPrecoMin("");
+    setPrecoMax("");
+    setSort("recentes");
+  };
+
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
-    if (!query) return produtos;
-    return produtos.filter((p) => p.nome.toLowerCase().includes(query));
-  }, [produtos, q]);
+    const min = precoMin ? Number(precoMin) : null;
+    const max = precoMax ? Number(precoMax) : null;
+    const list = produtos.filter((p) => {
+      if (query && !p.nome.toLowerCase().includes(query) && !(p.marca ?? "").toLowerCase().includes(query)) return false;
+      if (categoriaId !== "todas" && p.categoria_id !== categoriaId) return false;
+      if (marca !== "todas" && p.marca !== marca) return false;
+      if (cor !== "todas" && !p.variacoes.some((v) => v.nome_cor === cor)) return false;
+      if (tamanho !== "todos" && !p.variacoes.some((v) => v.tamanho === tamanho)) return false;
+      if (min !== null && p.preco < min) return false;
+      if (max !== null && p.preco > max) return false;
+      const esg = isEsgotado(p);
+      if (status === "ativos" && (!p.ativo || esg)) return false;
+      if (status === "inativos" && p.ativo) return false;
+      if (status === "esgotados" && !esg) return false;
+      if (status === "em-estoque" && esg) return false;
+      if (destaque === "novidade" && !p.novidade) return false;
+      if (destaque === "promocao" && !p.promocao) return false;
+      return true;
+    });
+    const totalEstoque = (p: (typeof produtos)[number]) =>
+      p.variacoes.reduce((a, v) => a + v.quantidade_estoque, 0);
+    const sorted = [...list];
+    sorted.sort((a, b) => {
+      switch (sort) {
+        case "nome-asc": return a.nome.localeCompare(b.nome);
+        case "nome-desc": return b.nome.localeCompare(a.nome);
+        case "menor-preco": return a.preco - b.preco;
+        case "maior-preco": return b.preco - a.preco;
+        case "menor-estoque": return totalEstoque(a) - totalEstoque(b);
+        case "maior-estoque": return totalEstoque(b) - totalEstoque(a);
+        case "antigos": return 0; // already sorted desc; reverse below
+        default: return 0;
+      }
+    });
+    if (sort === "antigos") sorted.reverse();
+    return sorted;
+  }, [produtos, q, categoriaId, marca, cor, tamanho, status, destaque, precoMin, precoMax, sort]);
 
   const del = async (id: string) => {
     if (!confirm("Excluir este produto? Esta ação não pode ser desfeita.")) return;
