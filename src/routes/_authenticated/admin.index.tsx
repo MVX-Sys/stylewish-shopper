@@ -449,10 +449,22 @@ function AdminProductsList() {
                       <td className="p-3">
                         <div className="flex justify-end gap-1">
                           <Link
+                            to="/produto/$id"
+                            params={{ id: p.id }}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                            aria-label="Visualizar"
+                            title="Visualizar produto"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                          <Link
                             to="/admin/produtos/$id"
                             params={{ id: p.id }}
                             className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             aria-label="Editar"
+                            title="Editar"
                           >
                             <Pencil className="h-4 w-4" />
                           </Link>
