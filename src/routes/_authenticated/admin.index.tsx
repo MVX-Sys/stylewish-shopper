@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -449,10 +449,22 @@ function AdminProductsList() {
                       <td className="p-3">
                         <div className="flex justify-end gap-1">
                           <Link
+                            to="/produto/$id"
+                            params={{ id: p.id }}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                            aria-label="Visualizar"
+                            title="Visualizar produto"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                          <Link
                             to="/admin/produtos/$id"
                             params={{ id: p.id }}
                             className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             aria-label="Editar"
+                            title="Editar"
                           >
                             <Pencil className="h-4 w-4" />
                           </Link>
