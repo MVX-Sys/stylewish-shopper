@@ -396,3 +396,138 @@ export function downloadAuditPDF(rows: AuditLogExport[]) {
   const stamp = new Date().toISOString().slice(0, 10);
   doc.save(`auditoria-${slugify(BRAND)}-${stamp}.pdf`);
 }
+
+export type ProductExportRow = ProductListItem & { categoriaNome?: string };
+
+export function downloadProductsCSV(rows: ProductExportRow[]) {
+  const headers = [
+    "Nome",
+    "Marca",
+    "Categoria",
+    "Preço",
+    "Ativo",
+    "Novidade",
+    "Promoção",
+    "Estoque total",
+    "Variações",
+    "Descrição",
+  ];
+  const escape = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+  const lines = [headers.map(escape).join(";")];
+  for (const p of rows) {
+    const estoque = p.variacoes.reduce((a, v) => a + v.quantidade_estoque, 0);
+    const vars = p.variacoes
+      .map((v) => `${v.nome_cor}/${v.tamanho} (${v.quantidade_estoque})`)
+      .join(" | ");
+    lines.push(
+      [
+        p.nome,
+        p.marca ?? "",
+        p.categoriaNome ?? "",
+        p.preco.toFixed(2).replace(".", ","),
+        p.ativo ? "Sim" : "Não",
+        p.novidade ? "Sim" : "Não",
+        p.promocao ? "Sim" : "Não",
+        estoque,
+        vars,
+        (p.descricao ?? "").replace(/\s+/g, " ").trim(),
+      ]
+        .map(escape)
+        .join(";"),
+    );
+  }
+  const csv = "\ufeff" + lines.join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `produtos-${slugify(BRAND)}-${stamp}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function downloadProductsPDF(rows: ProductExportRow[]) {
+  const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+  header(doc, "Catálogo de produtos");
+
+  const w = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  let y = 30;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  doc.text(`${rows.length} produto(s)`, 14, y);
+  doc.setTextColor(...DARK);
+  y += 6;
+
+  const cols = [
+    { label: "Produto", x: 14, width: 70 },
+    { label: "Marca", x: 84, width: 32 },
+    { label: "Categoria", x: 116, width: 32 },
+    { label: "Preço", x: 148, width: 22 },
+    { label: "Estoque", x: 170, width: 20 },
+    { label: "Status", x: 190, width: w - 14 - 190 },
+  ];
+
+  const drawHead = () => {
+    doc.setFillColor(...ORANGE);
+    doc.rect(14, y, w - 28, 7, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    for (const c of cols) doc.text(c.label, c.x + 1, y + 5);
+    doc.setTextColor(...DARK);
+    doc.setFont("helvetica", "normal");
+    y += 7;
+  };
+  drawHead();
+
+  doc.setFontSize(8);
+  for (const p of rows) {
+    const estoque = p.variacoes.reduce((a, v) => a + v.quantidade_estoque, 0);
+    const statusLabel = !p.ativo
+      ? "Inativo"
+      : estoque <= 0
+      ? "Esgotado"
+      : p.promocao
+      ? "Promoção"
+      : p.novidade
+      ? "Novidade"
+      : "Ativo";
+    const cells = [
+      p.nome,
+      p.marca ?? "—",
+      p.categoriaNome ?? "—",
+      brl(p.preco),
+      String(estoque),
+      statusLabel,
+    ];
+    const wrapped = cells.map((v, i) => doc.splitTextToSize(String(v), cols[i].width - 2));
+    const rowH = Math.max(...wrapped.map((l) => l.length)) * 4 + 2;
+    if (y + rowH > h - 18) {
+      footer(doc);
+      doc.addPage();
+      header(doc, "Catálogo de produtos");
+      y = 30;
+      drawHead();
+      doc.setFontSize(8);
+    }
+    doc.setDrawColor(...LINE);
+    doc.line(14, y + rowH, w - 14, y + rowH);
+    for (let i = 0; i < cols.length; i++) {
+      doc.text(wrapped[i], cols[i].x + 1, y + 4);
+    }
+    y += rowH;
+  }
+
+  footer(doc);
+  const stamp = new Date().toISOString().slice(0, 10);
+  doc.save(`produtos-${slugify(BRAND)}-${stamp}.pdf`);
+}
