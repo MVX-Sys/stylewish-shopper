@@ -6,6 +6,7 @@ import { listCategorias, getProduto } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { Trash2, Plus, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { logAudit } from "@/lib/audit";
 
 type VarRow = {
   id?: string;
