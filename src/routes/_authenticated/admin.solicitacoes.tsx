@@ -88,6 +88,7 @@ function SolicitacoesPage() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"todas" | Status>("todas");
   const [produtoId, setProdutoId] = useState<string>("todos");
+  const [sort, setSort] = useState<"recentes" | "antigos" | "status" | "cliente-asc" | "cliente-desc">("recentes");
 
   const produtosOptions = useMemo(() => {
     const map = new Map<string, string>();
@@ -99,14 +100,26 @@ function SolicitacoesPage() {
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
-    return itens.filter((s) => {
+    const list = itens.filter((s) => {
       if (status !== "todas" && s.status !== status) return false;
       if (produtoId !== "todos" && s.produto_id !== produtoId) return false;
       if (!query) return true;
       const bag = `${s.cliente_nome} ${s.cliente_whatsapp} ${s.cor} ${s.tamanho} ${s.produtos?.nome ?? ""}`.toLowerCase();
       return bag.includes(query);
     });
-  }, [itens, q, status, produtoId]);
+    const statusOrder: Record<Status, number> = { pendente: 0, atendida: 1, cancelada: 2 };
+    const sorted = [...list];
+    sorted.sort((a, b) => {
+      switch (sort) {
+        case "antigos": return a.criado_em.localeCompare(b.criado_em);
+        case "status": return statusOrder[a.status] - statusOrder[b.status];
+        case "cliente-asc": return a.cliente_nome.localeCompare(b.cliente_nome);
+        case "cliente-desc": return b.cliente_nome.localeCompare(a.cliente_nome);
+        default: return b.criado_em.localeCompare(a.criado_em);
+      }
+    });
+    return sorted;
+  }, [itens, q, status, produtoId, sort]);
 
   const stats = useMemo(() => {
     const total = itens.length;
