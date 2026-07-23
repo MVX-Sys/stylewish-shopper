@@ -309,7 +309,7 @@ function CheckoutPage() {
 
           <p className="mt-6 text-xs text-muted-foreground">
             Os campos com <span className="text-foreground">*</span> são obrigatórios.
-            O pedido será redirecionado para o WhatsApp!
+            Ao finalizar, você será redirecionado ao WhatsApp para <span className="font-semibold text-foreground">conversar com um atendente e confirmar todos os detalhes do pedido</span> antes de qualquer pagamento.
           </p>
 
           <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
