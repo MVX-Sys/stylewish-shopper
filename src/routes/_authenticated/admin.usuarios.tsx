@@ -129,6 +129,27 @@ function UsuariosPage() {
         <button
           type="button"
           onClick={() => {
+            const headers = ["Email", "ID", "Telefone", "Cadastro", "Último acesso", "Status", "Perfis"];
+            const rows = filtered.map((u) => [
+              u.email ?? "",
+              u.id,
+              u.phone ?? "",
+              formatDate(u.created_at),
+              formatDate(u.last_sign_in_at),
+              u.email_confirmed_at ? "Confirmado" : "Pendente",
+              u.roles.length ? u.roles.join(", ") : "cliente",
+            ]);
+            downloadTableXLSX("usuarios", "Usuários", headers, rows);
+          }}
+          disabled={filtered.length === 0}
+          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
+        >
+          <Sheet className="h-4 w-4" />
+          XLSX
+        </button>
+        <button
+          type="button"
+          onClick={() => {
             const cols = [
               { label: "Email", width: 55 },
               { label: "Telefone", width: 28 },
