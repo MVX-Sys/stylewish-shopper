@@ -133,6 +133,18 @@ function CheckoutPage() {
           Preencha os campos e finalize o pedido pelo WhatsApp.
         </p>
 
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm">
+          <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+          <div>
+            <p className="font-semibold text-foreground">
+              Atenção: este pedido ainda não é uma compra confirmada.
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              Ao clicar em <span className="font-semibold text-foreground">Finalizar</span>, você será direcionado ao nosso WhatsApp para conversar com um atendente. Todos os detalhes — valores, formas de pagamento, frete e prazo de entrega — serão confirmados por lá antes de qualquer cobrança.
+            </p>
+          </div>
+        </div>
+
         <section className="mt-8 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7">
           {/* Valor mínimo */}
           <Field label="Valor mínimo para compra:">
