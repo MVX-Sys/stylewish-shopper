@@ -70,6 +70,14 @@ function AdminLayout() {
               <Bell className="h-4 w-4" />
               <span className="hidden sm:inline">Reposições</span>
             </Link>
+            <Link
+              to="/admin/auditoria"
+              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              activeProps={{ className: "!bg-foreground !text-background" }}
+            >
+              <History className="h-4 w-4" />
+              <span className="hidden sm:inline">Auditoria</span>
+            </Link>
           </nav>
 
           <div className="ml-auto flex items-center gap-1">
