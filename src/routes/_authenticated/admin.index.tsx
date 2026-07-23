@@ -2,15 +2,27 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { listProdutos, isEsgotado } from "@/lib/products";
+import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminProductsList,
 });
+
+type StatusFilter = "todos" | "ativos" | "inativos" | "esgotados" | "em-estoque";
+type DestaqueFilter = "todos" | "novidade" | "promocao";
+type SortKey =
+  | "recentes"
+  | "antigos"
+  | "nome-asc"
+  | "nome-desc"
+  | "menor-preco"
+  | "maior-preco"
+  | "menor-estoque"
+  | "maior-estoque";
 
 function AdminProductsList() {
   const qc = useQueryClient();
