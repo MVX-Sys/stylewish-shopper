@@ -259,54 +259,19 @@ function AdminProductsList() {
                   </span>
                 )}
               </button>
-              <button
-                type="button"
-                onClick={() =>
-                  downloadProductsCSV(
-                    filtered.map((p) => ({
-                      ...p,
-                      categoriaNome: categorias.find((c) => c.id === p.categoria_id)?.nome,
-                    })),
-                  )
-                }
+              <ExportMenu
                 disabled={filtered.length === 0}
-                className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
-              >
-                <FileSpreadsheet className="h-4 w-4" />
-                CSV
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  downloadProductsXLSX(
-                    filtered.map((p) => ({
-                      ...p,
-                      categoriaNome: categorias.find((c) => c.id === p.categoria_id)?.nome,
-                    })),
-                  )
-                }
-                disabled={filtered.length === 0}
-                className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
-              >
-                <Sheet className="h-4 w-4" />
-                XLSX
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  downloadProductsPDF(
-                    filtered.map((p) => ({
-                      ...p,
-                      categoriaNome: categorias.find((c) => c.id === p.categoria_id)?.nome,
-                    })),
-                  )
-                }
-                disabled={filtered.length === 0}
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-              >
-                <FileDown className="h-4 w-4" />
-                PDF
-              </button>
+                count={filtered.length}
+                onExport={(format) => {
+                  const rows = filtered.map((p) => ({
+                    ...p,
+                    categoriaNome: categorias.find((c) => c.id === p.categoria_id)?.nome,
+                  }));
+                  if (format === "csv") downloadProductsCSV(rows);
+                  else if (format === "xlsx") downloadProductsXLSX(rows);
+                  else downloadProductsPDF(rows);
+                }}
+              />
               <p className="hidden text-xs text-muted-foreground sm:block">
                 {filtered.length}/{produtos.length}
               </p>
