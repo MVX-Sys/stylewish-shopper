@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
-import { LogOut, Package, Plus, Loader2, ExternalLink, Bell } from "lucide-react";
+import { LogOut, Package, Plus, Loader2, ExternalLink, Bell, History } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
