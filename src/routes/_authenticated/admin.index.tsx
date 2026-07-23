@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
