@@ -345,7 +345,7 @@ function SolicitacoesPage() {
                   )}
                   {s.status !== "atendida" && (
                     <button
-                      onClick={() => updateStatus(s.id, "atendida")}
+                      onClick={() => updateStatus(s, "atendida")}
                       title="Marcar como atendida"
                       className="rounded-full border border-border p-2 text-muted-foreground hover:bg-success/10 hover:text-success"
                     >
@@ -354,7 +354,7 @@ function SolicitacoesPage() {
                   )}
                   {s.status !== "cancelada" && (
                     <button
-                      onClick={() => updateStatus(s.id, "cancelada")}
+                      onClick={() => updateStatus(s, "cancelada")}
                       title="Cancelar"
                       className="rounded-full border border-border p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
@@ -363,7 +363,7 @@ function SolicitacoesPage() {
                   )}
                   {s.status !== "pendente" && (
                     <button
-                      onClick={() => updateStatus(s.id, "pendente")}
+                      onClick={() => updateStatus(s, "pendente")}
                       title="Reabrir"
                       className="rounded-full border border-border p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
@@ -371,7 +371,7 @@ function SolicitacoesPage() {
                     </button>
                   )}
                   <button
-                    onClick={() => remove(s.id)}
+                    onClick={() => remove(s)}
                     title="Excluir"
                     className="rounded-full border border-border p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   >
