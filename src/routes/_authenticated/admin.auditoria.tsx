@@ -15,7 +15,10 @@ import {
   MessageCircle,
   LogIn,
   Activity,
+  FileDown,
+  FileSpreadsheet,
 } from "lucide-react";
+import { downloadAuditCSV, downloadAuditPDF } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/auditoria")({
   component: AuditoriaPage,
@@ -154,9 +157,29 @@ function AuditoriaPage() {
               </option>
             ))}
           </select>
-          <p className="ml-auto hidden text-xs text-muted-foreground sm:block">
-            {filtered.length}/{logs.length}
-          </p>
+          <div className="ml-auto flex items-center gap-2">
+            <p className="hidden text-xs text-muted-foreground sm:block">
+              {filtered.length}/{logs.length}
+            </p>
+            <button
+              type="button"
+              onClick={() => downloadAuditCSV(filtered)}
+              disabled={filtered.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadAuditPDF(filtered)}
+              disabled={filtered.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-2 text-xs font-medium text-brand-foreground hover:bg-brand/90 disabled:opacity-50"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+              PDF
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
