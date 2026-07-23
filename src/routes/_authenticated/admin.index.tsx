@@ -7,6 +7,7 @@ import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { logAudit } from "@/lib/audit";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminProductsList,
@@ -151,10 +152,18 @@ function AdminProductsList() {
   }, [produtos, q, categoriaId, marca, cor, tamanho, status, destaque, precoMin, precoMax, sort]);
 
   const del = async (id: string) => {
+    const alvo = produtos.find((p) => p.id === id);
     if (!confirm("Excluir este produto? Esta ação não pode ser desfeita.")) return;
     const { error } = await supabase.from("produtos").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Produto excluído.");
+    await logAudit({
+      acao: "excluir",
+      entidade: "produto",
+      entidade_id: id,
+      descricao: `Excluiu produto ${alvo?.nome ?? id}`,
+      detalhes: alvo ? { nome: alvo.nome, marca: alvo.marca, preco: alvo.preco } : undefined,
+    });
     qc.invalidateQueries({ queryKey: ["admin-produtos"] });
     qc.invalidateQueries({ queryKey: ["produtos"] });
   };

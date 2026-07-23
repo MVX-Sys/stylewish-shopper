@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
 import { toast } from "sonner";
+import { logAudit } from "@/lib/audit";
 import {
   Bell,
   Search,
@@ -112,21 +113,37 @@ function SolicitacoesPage() {
     return { total, pendentes, atendidas };
   }, [itens]);
 
-  const updateStatus = async (id: string, novo: Status) => {
+  const updateStatus = async (s: Solicitacao, novo: Status) => {
     const { error } = await supabase
       .from("solicitacoes_reposicao")
       .update({ status: novo })
-      .eq("id", id);
+      .eq("id", s.id);
     if (error) return toast.error(error.message);
     toast.success("Status atualizado.");
+    const acao =
+      novo === "atendida" ? "marcar_atendida" : novo === "cancelada" ? "cancelar" : "reabrir";
+    await logAudit({
+      acao,
+      entidade: "solicitacao_reposicao",
+      entidade_id: s.id,
+      descricao: `Status → ${novo} · ${s.produtos?.nome ?? "produto"} (${s.cor}/${s.tamanho})`,
+      detalhes: { cliente: s.cliente_nome, whatsapp: s.cliente_whatsapp, status_anterior: s.status },
+    });
     qc.invalidateQueries({ queryKey: ["admin-solicitacoes"] });
   };
 
-  const remove = async (id: string) => {
+  const remove = async (s: Solicitacao) => {
     if (!confirm("Excluir esta solicitação?")) return;
-    const { error } = await supabase.from("solicitacoes_reposicao").delete().eq("id", id);
+    const { error } = await supabase.from("solicitacoes_reposicao").delete().eq("id", s.id);
     if (error) return toast.error(error.message);
     toast.success("Solicitação excluída.");
+    await logAudit({
+      acao: "excluir",
+      entidade: "solicitacao_reposicao",
+      entidade_id: s.id,
+      descricao: `Excluída · ${s.produtos?.nome ?? "produto"} (${s.cor}/${s.tamanho})`,
+      detalhes: { cliente: s.cliente_nome, whatsapp: s.cliente_whatsapp },
+    });
     qc.invalidateQueries({ queryKey: ["admin-solicitacoes"] });
   };
 
@@ -139,6 +156,15 @@ function SolicitacoesPage() {
       "_blank",
       "noopener,noreferrer",
     );
+    void logAudit({
+      acao: reposta ? "avisar_reposicao" : "reenviar_whatsapp",
+      entidade: "solicitacao_reposicao",
+      entidade_id: s.id,
+      descricao: reposta
+        ? `Avisou reposição · ${s.produtos?.nome ?? "produto"} (${s.cor}/${s.tamanho})`
+        : `Reenviou WhatsApp · ${s.produtos?.nome ?? "produto"} (${s.cor}/${s.tamanho})`,
+      detalhes: { cliente: s.cliente_nome, whatsapp: s.cliente_whatsapp },
+    });
   };
 
   return (
@@ -319,7 +345,7 @@ function SolicitacoesPage() {
                   )}
                   {s.status !== "atendida" && (
                     <button
-                      onClick={() => updateStatus(s.id, "atendida")}
+                      onClick={() => updateStatus(s, "atendida")}
                       title="Marcar como atendida"
                       className="rounded-full border border-border p-2 text-muted-foreground hover:bg-success/10 hover:text-success"
                     >
@@ -328,7 +354,7 @@ function SolicitacoesPage() {
                   )}
                   {s.status !== "cancelada" && (
                     <button
-                      onClick={() => updateStatus(s.id, "cancelada")}
+                      onClick={() => updateStatus(s, "cancelada")}
                       title="Cancelar"
                       className="rounded-full border border-border p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
@@ -337,7 +363,7 @@ function SolicitacoesPage() {
                   )}
                   {s.status !== "pendente" && (
                     <button
-                      onClick={() => updateStatus(s.id, "pendente")}
+                      onClick={() => updateStatus(s, "pendente")}
                       title="Reabrir"
                       className="rounded-full border border-border p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
@@ -345,7 +371,7 @@ function SolicitacoesPage() {
                     </button>
                   )}
                   <button
-                    onClick={() => remove(s.id)}
+                    onClick={() => remove(s)}
                     title="Excluir"
                     className="rounded-full border border-border p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   >
