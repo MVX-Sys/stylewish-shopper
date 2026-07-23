@@ -136,6 +136,9 @@ export function CartDrawer() {
               <MessageCircle className="h-4 w-4" />
               Finalizar pedido
             </button>
+            <p className="mt-2 text-center text-[11px] leading-relaxed text-muted-foreground">
+              O pedido será finalizado e discutido pelo WhatsApp com um atendente.
+            </p>
             <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
               <button
                 onClick={() => setOpen(false)}
