@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Loader2, Search, Users, ShieldCheck, MailCheck, MailX } from "lucide-react";
+import { Loader2, Search, Users, ShieldCheck, MailCheck, MailX, FileDown, FileSpreadsheet } from "lucide-react";
 import { listAdminUsers } from "@/lib/admin-users.functions";
 import { BRAND } from "@/lib/config";
+import { downloadTableCSV, downloadTablePDF } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   head: () => ({
@@ -104,6 +105,54 @@ function UsuariosPage() {
           <option value="admin">Somente administradores</option>
           <option value="user">Somente clientes</option>
         </select>
+        <button
+          type="button"
+          onClick={() => {
+            const headers = ["Email", "ID", "Telefone", "Cadastro", "Último acesso", "Status", "Perfis"];
+            const rows = filtered.map((u) => [
+              u.email ?? "",
+              u.id,
+              u.phone ?? "",
+              formatDate(u.created_at),
+              formatDate(u.last_sign_in_at),
+              u.email_confirmed_at ? "Confirmado" : "Pendente",
+              u.roles.length ? u.roles.join(", ") : "cliente",
+            ]);
+            downloadTableCSV("usuarios", headers, rows);
+          }}
+          disabled={filtered.length === 0}
+          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
+        >
+          <FileSpreadsheet className="h-4 w-4" />
+          CSV
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const cols = [
+              { label: "Email", width: 55 },
+              { label: "Telefone", width: 28 },
+              { label: "Cadastro", width: 30 },
+              { label: "Último acesso", width: 30 },
+              { label: "Status", width: 22 },
+              { label: "Perfis", width: 25 },
+            ];
+            const rows = filtered.map((u) => [
+              u.email ?? "—",
+              u.phone ?? "—",
+              formatDate(u.created_at),
+              formatDate(u.last_sign_in_at),
+              u.email_confirmed_at ? "Confirmado" : "Pendente",
+              u.roles.length ? u.roles.join(", ") : "cliente",
+            ]);
+            downloadTablePDF("Usuários cadastrados", "usuarios", cols, rows);
+          }}
+          disabled={filtered.length === 0}
+          className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        >
+          <FileDown className="h-4 w-4" />
+          PDF
+        </button>
       </div>
 
       {isLoading ? (
