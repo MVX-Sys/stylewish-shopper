@@ -243,6 +243,13 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       }
 
       toast.success("Produto salvo!");
+      await logAudit({
+        acao: produtoId ? "editar" : "criar",
+        entidade: "produto",
+        entidade_id: pid,
+        descricao: `${produtoId ? "Editou" : "Criou"} produto ${nome}`,
+        detalhes: { nome, marca: marca || null, preco, ativo, variacoes: vars.length, imagens: imgs.length },
+      });
       qc.invalidateQueries({ queryKey: ["admin-produtos"] });
       qc.invalidateQueries({ queryKey: ["produtos"] });
       qc.invalidateQueries({ queryKey: ["admin-produto"] });
