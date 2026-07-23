@@ -477,6 +477,84 @@ function ProductPage() {
       </main>
       <SiteFooter />
       <CartDrawer />
+
+      {restock && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="w-full max-w-md rounded-t-2xl border border-border bg-card p-5 shadow-xl sm:rounded-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-brand">
+                  Notificação de reposição
+                </p>
+                <h2 className="mt-1 font-display text-lg font-semibold">
+                  Avise-me quando repor
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {p?.nome} · Cor <strong>{restock.cor}</strong> · Tam. <strong>{restock.tam}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setRestock(null)}
+                className="rounded-full p-1.5 text-muted-foreground hover:bg-accent"
+                aria-label="Fechar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Seu nome</label>
+                <input
+                  value={restockNome}
+                  onChange={(e) => setRestockNome(e.target.value)}
+                  maxLength={120}
+                  className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                  placeholder="Como podemos te chamar?"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">WhatsApp</label>
+                <input
+                  value={restockZap}
+                  onChange={(e) => setRestockZap(e.target.value)}
+                  inputMode="tel"
+                  maxLength={40}
+                  className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                  placeholder="(81) 99999-9999"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Observação (opcional)</label>
+                <textarea
+                  value={restockObs}
+                  onChange={(e) => setRestockObs(e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  className="mt-1 w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                  placeholder="Ex: quero 5 peças assim que chegar"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setRestock(null)}
+                className="flex-1 rounded-full border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={enviarSolicitacao}
+                disabled={restockSending}
+                className="flex-[2] rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50"
+              >
+                {restockSending ? "Enviando…" : "Enviar solicitação"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
