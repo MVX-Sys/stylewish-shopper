@@ -207,20 +207,151 @@ function AdminProductsList() {
 
       {/* Table */}
       <div className="rounded-xl border border-border bg-card">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar produto…"
-              className="w-full rounded-full border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-foreground"
-            />
+        <div className="flex flex-col gap-3 border-b border-border p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar por nome ou marca…"
+                className="w-full rounded-full border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-foreground"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="rounded-full border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="recentes">Mais recentes</option>
+                <option value="antigos">Mais antigos</option>
+                <option value="nome-asc">Nome (A–Z)</option>
+                <option value="nome-desc">Nome (Z–A)</option>
+                <option value="menor-preco">Menor preço</option>
+                <option value="maior-preco">Maior preço</option>
+                <option value="maior-estoque">Maior estoque</option>
+                <option value="menor-estoque">Menor estoque</option>
+              </select>
+              <button
+                onClick={() => setShowFilters((v) => !v)}
+                className="inline-flex items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filtros
+                {activeCount > 0 && (
+                  <span className="grid h-5 min-w-5 place-items-center rounded-full bg-foreground px-1.5 text-[10px] font-bold text-background">
+                    {activeCount}
+                  </span>
+                )}
+              </button>
+              <p className="hidden text-xs text-muted-foreground sm:block">
+                {filtered.length}/{produtos.length}
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {filtered.length} de {produtos.length}
-          </p>
+
+          {showFilters && (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+              <select
+                value={categoriaId}
+                onChange={(e) => setCategoriaId(e.target.value)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todas">Todas categorias</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </select>
+              <select
+                value={marca}
+                onChange={(e) => setMarca(e.target.value)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todas">Todas marcas</option>
+                {marcas.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+              <select
+                value={cor}
+                onChange={(e) => setCor(e.target.value)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todas">Todas cores</option>
+                {cores.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <select
+                value={tamanho}
+                onChange={(e) => setTamanho(e.target.value)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todos">Todos tamanhos</option>
+                {tamanhos.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as StatusFilter)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todos">Qualquer status</option>
+                <option value="ativos">Ativos</option>
+                <option value="inativos">Inativos</option>
+                <option value="em-estoque">Em estoque</option>
+                <option value="esgotados">Esgotados</option>
+              </select>
+              <select
+                value={destaque}
+                onChange={(e) => setDestaque(e.target.value as DestaqueFilter)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todos">Sem destaque</option>
+                <option value="novidade">Novidades</option>
+                <option value="promocao">Em promoção</option>
+              </select>
+              <div className="col-span-2 flex items-center gap-2 sm:col-span-3 lg:col-span-2">
+                <div className="flex flex-1 items-center rounded-lg border border-input bg-background px-2">
+                  <span className="text-xs text-muted-foreground">R$</span>
+                  <input
+                    type="number"
+                    min={0}
+                    inputMode="decimal"
+                    placeholder="Mín"
+                    value={precoMin}
+                    onChange={(e) => setPrecoMin(e.target.value)}
+                    className="w-full bg-transparent px-1.5 py-1.5 text-sm outline-none"
+                  />
+                </div>
+                <span className="text-muted-foreground">—</span>
+                <div className="flex flex-1 items-center rounded-lg border border-input bg-background px-2">
+                  <span className="text-xs text-muted-foreground">R$</span>
+                  <input
+                    type="number"
+                    min={0}
+                    inputMode="decimal"
+                    placeholder="Máx"
+                    value={precoMax}
+                    onChange={(e) => setPrecoMax(e.target.value)}
+                    className="w-full bg-transparent px-1.5 py-1.5 text-sm outline-none"
+                  />
+                </div>
+              </div>
+              {activeCount > 0 && (
+                <button
+                  onClick={resetFilters}
+                  className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground sm:col-span-3 lg:col-span-1"
+                >
+                  <X className="h-4 w-4" /> Limpar filtros
+                </button>
+              )}
+            </div>
+          )}
         </div>
+
 
         {isLoading ? (
           <div className="space-y-2 p-4">
