@@ -531,3 +531,91 @@ export function downloadProductsPDF(rows: ProductExportRow[]) {
   const stamp = new Date().toISOString().slice(0, 10);
   doc.save(`produtos-${slugify(BRAND)}-${stamp}.pdf`);
 }
+
+// ---- Generic tabular export ----
+
+export type TableColumn = { label: string; width: number };
+
+export function downloadTableCSV(filename: string, headers: string[], rows: (string | number | null | undefined)[][]) {
+  const escape = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+  const lines = [headers.map(escape).join(";")];
+  for (const r of rows) lines.push(r.map(escape).join(";"));
+  const csv = "\ufeff" + lines.join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `${slugify(filename)}-${slugify(BRAND)}-${stamp}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function downloadTablePDF(
+  title: string,
+  filename: string,
+  columns: TableColumn[],
+  rows: (string | number | null | undefined)[][],
+) {
+  const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+  header(doc, title);
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  let y = 30;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  doc.text(`${rows.length} registro(s)`, 14, y);
+  doc.setTextColor(...DARK);
+  y += 6;
+
+  const totalW = columns.reduce((a, c) => a + c.width, 0);
+  const scale = (pageW - 28) / totalW;
+  const cols = columns.map((c, i) => ({
+    label: c.label,
+    width: c.width * scale,
+    x: 14 + columns.slice(0, i).reduce((a, cc) => a + cc.width * scale, 0),
+  }));
+
+  const drawHead = () => {
+    doc.setFillColor(...ORANGE);
+    doc.rect(14, y, pageW - 28, 7, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    for (const c of cols) doc.text(c.label, c.x + 1, y + 5);
+    doc.setTextColor(...DARK);
+    doc.setFont("helvetica", "normal");
+    y += 7;
+  };
+  drawHead();
+
+  doc.setFontSize(8);
+  for (const r of rows) {
+    const wrapped = cols.map((c, i) => doc.splitTextToSize(String(r[i] ?? ""), c.width - 2));
+    const rowH = Math.max(...wrapped.map((l) => l.length)) * 4 + 2;
+    if (y + rowH > pageH - 18) {
+      footer(doc);
+      doc.addPage();
+      header(doc, title);
+      y = 30;
+      drawHead();
+      doc.setFontSize(8);
+    }
+    doc.setDrawColor(...LINE);
+    doc.line(14, y + rowH, pageW - 14, y + rowH);
+    for (let i = 0; i < cols.length; i++) doc.text(wrapped[i], cols[i].x + 1, y + 4);
+    y += rowH;
+  }
+
+  footer(doc);
+  const stamp = new Date().toISOString().slice(0, 10);
+  doc.save(`${slugify(filename)}-${slugify(BRAND)}-${stamp}.pdf`);
+}
