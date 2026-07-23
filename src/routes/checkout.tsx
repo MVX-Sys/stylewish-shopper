@@ -5,7 +5,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { useCart } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { BRAND, VALOR_MINIMO_COMPRA, WHATSAPP_NUMBER } from "@/lib/config";
-import { ChevronLeft, MessageCircle } from "lucide-react";
+import { ChevronLeft, MessageCircle, FileText } from "lucide-react";
+import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
