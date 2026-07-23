@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, FileDown, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
+import { downloadProductsCSV, downloadProductsPDF } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminProductsList,
@@ -256,6 +257,38 @@ function AdminProductsList() {
                     {activeCount}
                   </span>
                 )}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  downloadProductsCSV(
+                    filtered.map((p) => ({
+                      ...p,
+                      categoriaNome: categorias.find((c) => c.id === p.categoria_id)?.nome,
+                    })),
+                  )
+                }
+                disabled={filtered.length === 0}
+                className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                CSV
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  downloadProductsPDF(
+                    filtered.map((p) => ({
+                      ...p,
+                      categoriaNome: categorias.find((c) => c.id === p.categoria_id)?.nome,
+                    })),
+                  )
+                }
+                disabled={filtered.length === 0}
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              >
+                <FileDown className="h-4 w-4" />
+                PDF
               </button>
               <p className="hidden text-xs text-muted-foreground sm:block">
                 {filtered.length}/{produtos.length}
