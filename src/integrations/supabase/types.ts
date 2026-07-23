@@ -120,6 +120,53 @@ export type Database = {
           },
         ]
       }
+      solicitacoes_reposicao: {
+        Row: {
+          atualizado_em: string
+          cliente_nome: string
+          cliente_whatsapp: string
+          cor: string
+          criado_em: string
+          id: string
+          observacao: string | null
+          produto_id: string
+          status: string
+          tamanho: string
+        }
+        Insert: {
+          atualizado_em?: string
+          cliente_nome: string
+          cliente_whatsapp: string
+          cor: string
+          criado_em?: string
+          id?: string
+          observacao?: string | null
+          produto_id: string
+          status?: string
+          tamanho: string
+        }
+        Update: {
+          atualizado_em?: string
+          cliente_nome?: string
+          cliente_whatsapp?: string
+          cor?: string
+          criado_em?: string
+          id?: string
+          observacao?: string | null
+          produto_id?: string
+          status?: string
+          tamanho?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitacoes_reposicao_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

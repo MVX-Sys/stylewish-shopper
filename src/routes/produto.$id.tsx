@@ -8,9 +8,10 @@ import { getProduto, isEsgotado } from "@/lib/products";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
-import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell } from "lucide-react";
+import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X } from "lucide-react";
 import { downloadProductPDF } from "@/lib/pdf";
 import { WHATSAPP_NUMBER, BRAND } from "@/lib/config";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/produto/$id")({
@@ -42,6 +43,49 @@ function ProductPage() {
   const [imgs, setImgs] = useState<string[]>([]);
   const [mainIdx, setMainIdx] = useState(0);
   const [qtys, setQtys] = useState<Record<string, number>>({});
+  const [restock, setRestock] = useState<{ cor: string; tam: string } | null>(null);
+  const [restockNome, setRestockNome] = useState("");
+  const [restockZap, setRestockZap] = useState("");
+  const [restockObs, setRestockObs] = useState("");
+  const [restockSending, setRestockSending] = useState(false);
+
+  const enviarSolicitacao = async () => {
+    if (!p || !restock) return;
+    const nome = restockNome.trim();
+    const zap = restockZap.trim();
+    if (nome.length < 2) return toast.error("Informe seu nome.");
+    const digitos = zap.replace(/\D/g, "");
+    if (digitos.length < 8) return toast.error("Informe um WhatsApp válido.");
+    try {
+      setRestockSending(true);
+      const { error } = await supabase.from("solicitacoes_reposicao").insert({
+        produto_id: p.id,
+        cor: restock.cor,
+        tamanho: restock.tam,
+        cliente_nome: nome,
+        cliente_whatsapp: digitos,
+        observacao: restockObs.trim() || null,
+      });
+      if (error) throw error;
+      const msg = `Olá! Meu nome é ${nome}. Gostaria de ser avisado(a) por WhatsApp quando o produto *${p.nome}* (cor ${restock.cor}, tamanho ${restock.tam}) da ${BRAND} for reposto.${
+        restockObs.trim() ? `\n\nObservação: ${restockObs.trim()}` : ""
+      }`;
+      window.open(
+        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+      toast.success("Solicitação registrada! Assim que houver reposição, avisaremos.");
+      setRestock(null);
+      setRestockNome("");
+      setRestockZap("");
+      setRestockObs("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível registrar.");
+    } finally {
+      setRestockSending(false);
+    }
+  };
 
   useEffect(() => {
     if (!p) return;
@@ -341,14 +385,7 @@ function ProductPage() {
                                     <td key={t} className="p-2 text-center">
                                       <button
                                         type="button"
-                                        onClick={() => {
-                                          const msg = `Olá! Gostaria de ser avisado(a) por WhatsApp quando o produto *${p.nome}* (cor ${c.nome}, tamanho ${t}) da ${BRAND} for reposto. Obrigado!`;
-                                          window.open(
-                                            `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
-                                            "_blank",
-                                            "noopener,noreferrer",
-                                          );
-                                        }}
+                                        onClick={() => setRestock({ cor: c.nome, tam: t })}
                                         title="Avise-me por WhatsApp quando repor"
                                         className="mx-auto inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:border-brand hover:text-brand"
                                       >
@@ -440,6 +477,84 @@ function ProductPage() {
       </main>
       <SiteFooter />
       <CartDrawer />
+
+      {restock && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="w-full max-w-md rounded-t-2xl border border-border bg-card p-5 shadow-xl sm:rounded-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-brand">
+                  Notificação de reposição
+                </p>
+                <h2 className="mt-1 font-display text-lg font-semibold">
+                  Avise-me quando repor
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {p?.nome} · Cor <strong>{restock.cor}</strong> · Tam. <strong>{restock.tam}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setRestock(null)}
+                className="rounded-full p-1.5 text-muted-foreground hover:bg-accent"
+                aria-label="Fechar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Seu nome</label>
+                <input
+                  value={restockNome}
+                  onChange={(e) => setRestockNome(e.target.value)}
+                  maxLength={120}
+                  className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                  placeholder="Como podemos te chamar?"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">WhatsApp</label>
+                <input
+                  value={restockZap}
+                  onChange={(e) => setRestockZap(e.target.value)}
+                  inputMode="tel"
+                  maxLength={40}
+                  className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                  placeholder="(81) 99999-9999"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Observação (opcional)</label>
+                <textarea
+                  value={restockObs}
+                  onChange={(e) => setRestockObs(e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  className="mt-1 w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+                  placeholder="Ex: quero 5 peças assim que chegar"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setRestock(null)}
+                className="flex-1 rounded-full border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={enviarSolicitacao}
+                disabled={restockSending}
+                className="flex-[2] rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50"
+              >
+                {restockSending ? "Enviando…" : "Enviar solicitação"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
