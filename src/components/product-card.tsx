@@ -63,6 +63,11 @@ export function ProductCard({ p }: { p: ProductListItem }) {
           {brl(p.preco)}
         </p>
       </div>
+    </Link>
+  );
+}
+
+
 
 
 export function ProductCardSkeleton() {
