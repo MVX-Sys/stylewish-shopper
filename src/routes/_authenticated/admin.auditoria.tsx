@@ -160,24 +160,25 @@ function AuditoriaPage() {
             <p className="hidden text-xs text-muted-foreground sm:block">
               {filtered.length}/{logs.length}
             </p>
-            <button
-              type="button"
-              onClick={() => downloadAuditCSV(filtered)}
+            <ExportMenu
+              count={filtered.length}
               disabled={filtered.length === 0}
-              className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
-            >
-              <FileSpreadsheet className="h-3.5 w-3.5" />
-              CSV
-            </button>
-            <button
-              type="button"
-              onClick={() => downloadAuditPDF(filtered)}
-              disabled={filtered.length === 0}
-              className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-2 text-xs font-medium text-brand-foreground hover:bg-brand/90 disabled:opacity-50"
-            >
-              <FileDown className="h-3.5 w-3.5" />
-              PDF
-            </button>
+              onExport={(format) => {
+                if (format === "csv") return downloadAuditCSV(filtered);
+                if (format === "pdf") return downloadAuditPDF(filtered);
+                const headers = ["Data/Hora", "Usuário", "Ação", "Entidade", "ID Entidade", "Descrição", "Detalhes"];
+                const rows = filtered.map((r) => [
+                  new Date(r.criado_em).toLocaleString("pt-BR"),
+                  r.user_email ?? r.user_id,
+                  ACAO_META[r.acao]?.label ?? r.acao,
+                  r.entidade,
+                  r.entidade_id ?? "",
+                  r.descricao ?? "",
+                  r.detalhes ? JSON.stringify(r.detalhes) : "",
+                ]);
+                downloadTableXLSX("auditoria", "Auditoria", headers, rows);
+              }}
+            />
           </div>
         </div>
 
