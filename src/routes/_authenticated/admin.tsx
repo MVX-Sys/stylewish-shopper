@@ -79,6 +79,14 @@ function AdminLayout() {
               <span className="hidden sm:inline">Usuários</span>
             </Link>
             <Link
+              to="/admin/backup"
+              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              activeProps={{ className: "!bg-foreground !text-background" }}
+            >
+              <Database className="h-4 w-4" />
+              <span className="hidden sm:inline">Backup</span>
+            </Link>
+            <Link
               to="/admin/auditoria"
               className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               activeProps={{ className: "!bg-foreground !text-background" }}
