@@ -306,10 +306,11 @@ export function FilterSidebar({
             />
             <button
               onClick={() => setMobileOpen(false)}
-              className="mt-4 w-full rounded-full bg-foreground py-3 text-sm font-semibold text-background"
+              className="mt-4 w-full rounded-full bg-primary py-3 text-sm font-bold uppercase tracking-wider text-primary-foreground"
             >
               Ver resultados
             </button>
+
           </div>
         </div>
       )}

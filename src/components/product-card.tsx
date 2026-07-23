@@ -55,15 +55,20 @@ export function ProductCard({ p }: { p: ProductListItem }) {
         )}
       </div>
 
-      <div className="mt-3 space-y-1 px-1">
-        <h3 className="line-clamp-1 text-sm font-semibold tracking-tight text-foreground">
+      <div className="mt-3.5 space-y-1 px-0.5">
+        <h3 className="line-clamp-1 text-[13px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-sm">
           {p.nome}
         </h3>
-        <p className="text-sm font-bold text-primary">{brl(p.preco)}</p>
+        <p className="font-display text-base font-extrabold tabular-nums text-foreground">
+          {brl(p.preco)}
+        </p>
       </div>
     </Link>
   );
 }
+
+
+
 
 export function ProductCardSkeleton() {
   return (

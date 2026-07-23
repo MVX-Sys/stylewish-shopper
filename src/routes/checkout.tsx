@@ -284,17 +284,27 @@ function CheckoutPage() {
           )}
 
           <Field label="Forma de Pagamento:" required className="mt-4">
-            <select
-              value={formaPagamento}
-              onChange={(e) => setFormaPagamento(e.target.value as FormaPagamento)}
-              className="input"
-            >
-              <option value="PIX">PIX</option>
-              <option value="DINHEIRO">DINHEIRO</option>
-              <option value="CARTÃO DE CRÉDITO">CARTÃO DE CRÉDITO</option>
-              <option value="CARTÃO DE DÉBITO">CARTÃO DE DÉBITO</option>
-            </select>
+            <div className="flex flex-wrap gap-2">
+              {(["PIX", "DINHEIRO", "CARTÃO DE CRÉDITO", "CARTÃO DE DÉBITO"] as FormaPagamento[]).map((op) => {
+                const active = formaPagamento === op;
+                return (
+                  <button
+                    key={op}
+                    type="button"
+                    onClick={() => setFormaPagamento(op)}
+                    className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background hover:border-primary/50 hover:bg-accent"
+                    }`}
+                  >
+                    {op}
+                  </button>
+                );
+              })}
+            </div>
           </Field>
+
 
           <Field label="Observações:" className="mt-4">
             <textarea

@@ -309,28 +309,33 @@ function ProductPage() {
               </div>
 
               {/* Details */}
-              <div className="order-3 space-y-6">
+              <div className="order-3 space-y-7">
                 <div>
                   {p.marca && (
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
                       {p.marca}
                     </p>
                   )}
-                  <h1 className="mt-1 font-display text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+                  <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-[32px]">
                     {p.nome}
                   </h1>
-                  <p className="mt-4 font-display text-3xl font-bold tabular-nums">
-                    {brl(p.preco)}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <div className="mt-5 flex items-baseline gap-3">
+                    <p className="font-display text-3xl font-extrabold tabular-nums text-foreground md:text-4xl">
+                      {brl(p.preco)}
+                    </p>
+                    <span className="text-xs text-muted-foreground">/ peça</span>
+                  </div>
+                  <p className="mt-1.5 text-xs text-muted-foreground">
                     ou em até 3x sem juros no combinado
                   </p>
                   {p.descricao && (
-                    <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+                    <p className="mt-6 border-l-2 border-primary/40 pl-4 text-sm leading-relaxed text-muted-foreground">
                       {p.descricao}
                     </p>
                   )}
                 </div>
+
+
 
                 {matriz.cores.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">

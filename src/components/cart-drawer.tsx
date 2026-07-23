@@ -131,11 +131,12 @@ export function CartDrawer() {
             </div>
             <button
               onClick={finalizar}
-              className="btn-shine flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-4 py-3.5 text-sm font-semibold text-background shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+              className="btn-shine flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-sm transition-all hover:opacity-95 active:scale-[0.98]"
             >
               <MessageCircle className="h-4 w-4" />
-              Finalizar pedido
+              Finalizar pelo WhatsApp
             </button>
+
             <p className="mt-2 text-center text-[11px] leading-relaxed text-muted-foreground">
               O pedido será finalizado e discutido pelo WhatsApp com um atendente.
             </p>

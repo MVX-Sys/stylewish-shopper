@@ -92,38 +92,76 @@ function Home() {
     ? `${filtered.length} peça${filtered.length === 1 ? "" : "s"} encontrada${filtered.length === 1 ? "" : "s"}`
     : "Peças selecionadas para o dia a dia";
 
+  const activeChips: Array<{ key: string; label: string; onClear: () => void }> = [];
+  if (activeSlug && catBySlugName[activeSlug])
+    activeChips.push({
+      key: "cat",
+      label: catBySlugName[activeSlug],
+      onClear: () => setFilters({ ...filters, categoriaSlug: null }),
+    });
+  if (filters.novidades)
+    activeChips.push({ key: "nov", label: "Novidades", onClear: () => setFilters({ ...filters, novidades: false }) });
+  if (filters.promocao)
+    activeChips.push({ key: "promo", label: "Em promoção", onClear: () => setFilters({ ...filters, promocao: false }) });
+  if (filters.precoMax < 500 || filters.precoMin > 0)
+    activeChips.push({
+      key: "preco",
+      label: `Até ${filtered.length && ""}R$ ${filters.precoMax}`,
+      onClear: () => setFilters({ ...filters, precoMin: 0, precoMax: 500 }),
+    });
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
       {/* Hero band */}
       <section className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-10 md:py-14">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
+            <span className="h-px w-6 bg-primary" />
             {q ? "Busca" : activeSlug ? "Categoria" : "Nova temporada"}
-          </p>
-          <h1 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight md:text-5xl">
+          </div>
+          <h1 className="mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
             {heading}
           </h1>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground md:text-base">
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
             {subheading}
           </p>
         </div>
       </section>
 
-      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-6 md:grid-cols-[240px_1fr] md:gap-8 md:py-10 lg:grid-cols-[260px_1fr]">
+      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[240px_1fr] md:gap-10 md:py-12 lg:grid-cols-[260px_1fr]">
         <FilterSidebar
           categorias={categorias}
           filters={filters}
           onChange={setFilters}
         />
         <section>
-          <div className="mb-5 flex items-center justify-between">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
               {isLoading
                 ? "Carregando…"
-                : `${filtered.length} produto${filtered.length === 1 ? "" : "s"}`}
+                : (
+                    <>
+                      <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
+                      produto{filtered.length === 1 ? "" : "s"}
+                    </>
+                  )}
             </p>
+            {activeChips.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {activeChips.map((c) => (
+                  <button
+                    key={c.key}
+                    onClick={c.onClear}
+                    className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+                  >
+                    {c.label}
+                    <span className="text-muted-foreground group-hover:text-primary">×</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {isLoading ? (
@@ -133,25 +171,25 @@ function Home() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 py-20 text-center">
-              <div className="grid h-14 w-14 place-items-center rounded-full bg-muted">
-                <PackageSearch className="h-6 w-6 text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-24 text-center">
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10">
+                <PackageSearch className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="mt-4 font-display text-lg font-semibold">
+              <h3 className="mt-5 font-display text-lg font-bold">
                 Nenhum produto encontrado
               </h3>
-              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
                 Tente ajustar os filtros ou buscar por outro termo.
               </p>
               <button
                 onClick={() => setFilters(defaultFilters)}
-                className="mt-5 rounded-full border border-border px-5 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                className="mt-6 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
               >
                 Limpar filtros
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
               {filtered.map((p, idx) => (
                 <div
                   key={p.id}
@@ -170,3 +208,4 @@ function Home() {
     </div>
   );
 }
+
