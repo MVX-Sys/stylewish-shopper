@@ -300,7 +300,38 @@ function CheckoutPage() {
             O pedido será redirecionado para o WhatsApp!
           </p>
 
-          <div className="mt-4 flex justify-stretch sm:justify-end">
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                if (items.length === 0) {
+                  toast.error("Seu carrinho está vazio.");
+                  return;
+                }
+                try {
+                  downloadOrderPDF({
+                    items,
+                    total,
+                    formaEnvio,
+                    formaEntrega: formaEnvio === "ENTREGA" ? formaEntrega : undefined,
+                    formaPagamento,
+                    endereco:
+                      formaEnvio === "ENTREGA"
+                        ? { cep, logradouro, numero, complemento, bairro, cidade, estado, referencia }
+                        : undefined,
+                    observacoes,
+                  });
+                  toast.success("PDF do pedido baixado!");
+                } catch {
+                  toast.error("Não foi possível gerar o PDF.");
+                }
+              }}
+              disabled={items.length === 0}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-6 py-3 text-sm font-semibold transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+            >
+              <FileText className="h-4 w-4" />
+              Baixar PDF
+            </button>
             <button
               type="button"
               onClick={finalizar}
