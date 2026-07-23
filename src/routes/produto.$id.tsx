@@ -8,7 +8,8 @@ import { getProduto, isEsgotado } from "@/lib/products";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
-import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images } from "lucide-react";
+import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText } from "lucide-react";
+import { downloadProductPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/produto/$id")({
