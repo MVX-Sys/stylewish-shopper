@@ -53,21 +53,6 @@ function AuthPage() {
     }
   };
 
-  const claimAdmin = async () => {
-    if (!session) return;
-    setLoading(true);
-    const { error } = await supabase
-      .from("user_roles")
-      .insert({ user_id: session.user.id, role: "admin" });
-    setLoading(false);
-    if (error) {
-      toast.error("Não foi possível reivindicar admin (já existe um).");
-      return;
-    }
-    await refreshRole();
-    toast.success("Você agora é administrador!");
-    nav({ to: "/admin" });
-  };
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -130,23 +115,12 @@ function AuthPage() {
                   <div className="flex items-start gap-3">
                     <ShieldCheck className="mt-0.5 h-5 w-5 text-brand" />
                     <div>
-                      <p className="text-sm font-semibold">Reivindicar admin</p>
+                      <p className="text-sm font-semibold">Acesso administrativo</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Se você é o primeiro usuário da loja, pode se tornar administrador agora.
+                        Sua conta não tem permissão de administrador. Entre em contato com o responsável pela loja para receber acesso.
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={claimAdmin}
-                    disabled={loading}
-                    className="mt-4 w-full rounded-full border border-foreground py-2.5 text-sm font-semibold transition-colors hover:bg-foreground hover:text-background disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <Loader2 className="mx-auto h-4 w-4 animate-spin" />
-                    ) : (
-                      "Reivindicar admin (primeiro usuário)"
-                    )}
-                  </button>
                 </div>
               )}
               <button
