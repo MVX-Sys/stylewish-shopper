@@ -38,7 +38,7 @@ export async function logAudit(input: {
       entidade: input.entidade,
       entidade_id: input.entidade_id ?? null,
       descricao: input.descricao ?? null,
-      detalhes: input.detalhes ?? null,
+      detalhes: (input.detalhes ?? null) as never,
     });
   } catch {
     // Auditoria não deve quebrar a UX
