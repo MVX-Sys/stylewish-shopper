@@ -2,15 +2,27 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { listProdutos, isEsgotado } from "@/lib/products";
+import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminProductsList,
 });
+
+type StatusFilter = "todos" | "ativos" | "inativos" | "esgotados" | "em-estoque";
+type DestaqueFilter = "todos" | "novidade" | "promocao";
+type SortKey =
+  | "recentes"
+  | "antigos"
+  | "nome-asc"
+  | "nome-desc"
+  | "menor-preco"
+  | "maior-preco"
+  | "menor-estoque"
+  | "maior-estoque";
 
 function AdminProductsList() {
   const qc = useQueryClient();
@@ -18,8 +30,22 @@ function AdminProductsList() {
     queryKey: ["admin-produtos"],
     queryFn: listProdutos,
   });
+  const { data: categorias = [] } = useQuery({
+    queryKey: ["categorias"],
+    queryFn: listCategorias,
+  });
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [q, setQ] = useState("");
+  const [categoriaId, setCategoriaId] = useState<string>("todas");
+  const [marca, setMarca] = useState<string>("todas");
+  const [cor, setCor] = useState<string>("todas");
+  const [tamanho, setTamanho] = useState<string>("todos");
+  const [status, setStatus] = useState<StatusFilter>("todos");
+  const [destaque, setDestaque] = useState<DestaqueFilter>("todos");
+  const [precoMin, setPrecoMin] = useState<string>("");
+  const [precoMax, setPrecoMax] = useState<string>("");
+  const [sort, setSort] = useState<SortKey>("recentes");
+  const [showFilters, setShowFilters] = useState(true);
 
   useEffect(() => {
     produtos.forEach((p) => {
@@ -30,6 +56,24 @@ function AdminProductsList() {
         );
     });
   }, [produtos, thumbs]);
+
+  const marcas = useMemo(() => {
+    const s = new Set<string>();
+    produtos.forEach((p) => p.marca && s.add(p.marca));
+    return Array.from(s).sort();
+  }, [produtos]);
+
+  const cores = useMemo(() => {
+    const s = new Set<string>();
+    produtos.forEach((p) => p.variacoes.forEach((v) => v.nome_cor && s.add(v.nome_cor)));
+    return Array.from(s).sort();
+  }, [produtos]);
+
+  const tamanhos = useMemo(() => {
+    const s = new Set<string>();
+    produtos.forEach((p) => p.variacoes.forEach((v) => v.tamanho && s.add(v.tamanho)));
+    return Array.from(s).sort();
+  }, [produtos]);
 
   const stats = useMemo(() => {
     const total = produtos.length;
@@ -42,11 +86,69 @@ function AdminProductsList() {
     return { total, ativos, esgotados, estoque };
   }, [produtos]);
 
+  const activeCount =
+    (q ? 1 : 0) +
+    (categoriaId !== "todas" ? 1 : 0) +
+    (marca !== "todas" ? 1 : 0) +
+    (cor !== "todas" ? 1 : 0) +
+    (tamanho !== "todos" ? 1 : 0) +
+    (status !== "todos" ? 1 : 0) +
+    (destaque !== "todos" ? 1 : 0) +
+    (precoMin ? 1 : 0) +
+    (precoMax ? 1 : 0);
+
+  const resetFilters = () => {
+    setQ("");
+    setCategoriaId("todas");
+    setMarca("todas");
+    setCor("todas");
+    setTamanho("todos");
+    setStatus("todos");
+    setDestaque("todos");
+    setPrecoMin("");
+    setPrecoMax("");
+    setSort("recentes");
+  };
+
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
-    if (!query) return produtos;
-    return produtos.filter((p) => p.nome.toLowerCase().includes(query));
-  }, [produtos, q]);
+    const min = precoMin ? Number(precoMin) : null;
+    const max = precoMax ? Number(precoMax) : null;
+    const list = produtos.filter((p) => {
+      if (query && !p.nome.toLowerCase().includes(query) && !(p.marca ?? "").toLowerCase().includes(query)) return false;
+      if (categoriaId !== "todas" && p.categoria_id !== categoriaId) return false;
+      if (marca !== "todas" && p.marca !== marca) return false;
+      if (cor !== "todas" && !p.variacoes.some((v) => v.nome_cor === cor)) return false;
+      if (tamanho !== "todos" && !p.variacoes.some((v) => v.tamanho === tamanho)) return false;
+      if (min !== null && p.preco < min) return false;
+      if (max !== null && p.preco > max) return false;
+      const esg = isEsgotado(p);
+      if (status === "ativos" && (!p.ativo || esg)) return false;
+      if (status === "inativos" && p.ativo) return false;
+      if (status === "esgotados" && !esg) return false;
+      if (status === "em-estoque" && esg) return false;
+      if (destaque === "novidade" && !p.novidade) return false;
+      if (destaque === "promocao" && !p.promocao) return false;
+      return true;
+    });
+    const totalEstoque = (p: (typeof produtos)[number]) =>
+      p.variacoes.reduce((a, v) => a + v.quantidade_estoque, 0);
+    const sorted = [...list];
+    sorted.sort((a, b) => {
+      switch (sort) {
+        case "nome-asc": return a.nome.localeCompare(b.nome);
+        case "nome-desc": return b.nome.localeCompare(a.nome);
+        case "menor-preco": return a.preco - b.preco;
+        case "maior-preco": return b.preco - a.preco;
+        case "menor-estoque": return totalEstoque(a) - totalEstoque(b);
+        case "maior-estoque": return totalEstoque(b) - totalEstoque(a);
+        case "antigos": return 0; // already sorted desc; reverse below
+        default: return 0;
+      }
+    });
+    if (sort === "antigos") sorted.reverse();
+    return sorted;
+  }, [produtos, q, categoriaId, marca, cor, tamanho, status, destaque, precoMin, precoMax, sort]);
 
   const del = async (id: string) => {
     if (!confirm("Excluir este produto? Esta ação não pode ser desfeita.")) return;
@@ -105,20 +207,151 @@ function AdminProductsList() {
 
       {/* Table */}
       <div className="rounded-xl border border-border bg-card">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar produto…"
-              className="w-full rounded-full border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-foreground"
-            />
+        <div className="flex flex-col gap-3 border-b border-border p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar por nome ou marca…"
+                className="w-full rounded-full border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-foreground"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="rounded-full border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="recentes">Mais recentes</option>
+                <option value="antigos">Mais antigos</option>
+                <option value="nome-asc">Nome (A–Z)</option>
+                <option value="nome-desc">Nome (Z–A)</option>
+                <option value="menor-preco">Menor preço</option>
+                <option value="maior-preco">Maior preço</option>
+                <option value="maior-estoque">Maior estoque</option>
+                <option value="menor-estoque">Menor estoque</option>
+              </select>
+              <button
+                onClick={() => setShowFilters((v) => !v)}
+                className="inline-flex items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filtros
+                {activeCount > 0 && (
+                  <span className="grid h-5 min-w-5 place-items-center rounded-full bg-foreground px-1.5 text-[10px] font-bold text-background">
+                    {activeCount}
+                  </span>
+                )}
+              </button>
+              <p className="hidden text-xs text-muted-foreground sm:block">
+                {filtered.length}/{produtos.length}
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {filtered.length} de {produtos.length}
-          </p>
+
+          {showFilters && (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+              <select
+                value={categoriaId}
+                onChange={(e) => setCategoriaId(e.target.value)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todas">Todas categorias</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </select>
+              <select
+                value={marca}
+                onChange={(e) => setMarca(e.target.value)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todas">Todas marcas</option>
+                {marcas.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+              <select
+                value={cor}
+                onChange={(e) => setCor(e.target.value)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todas">Todas cores</option>
+                {cores.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <select
+                value={tamanho}
+                onChange={(e) => setTamanho(e.target.value)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todos">Todos tamanhos</option>
+                {tamanhos.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as StatusFilter)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todos">Qualquer status</option>
+                <option value="ativos">Ativos</option>
+                <option value="inativos">Inativos</option>
+                <option value="em-estoque">Em estoque</option>
+                <option value="esgotados">Esgotados</option>
+              </select>
+              <select
+                value={destaque}
+                onChange={(e) => setDestaque(e.target.value as DestaqueFilter)}
+                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              >
+                <option value="todos">Sem destaque</option>
+                <option value="novidade">Novidades</option>
+                <option value="promocao">Em promoção</option>
+              </select>
+              <div className="col-span-2 flex items-center gap-2 sm:col-span-3 lg:col-span-2">
+                <div className="flex flex-1 items-center rounded-lg border border-input bg-background px-2">
+                  <span className="text-xs text-muted-foreground">R$</span>
+                  <input
+                    type="number"
+                    min={0}
+                    inputMode="decimal"
+                    placeholder="Mín"
+                    value={precoMin}
+                    onChange={(e) => setPrecoMin(e.target.value)}
+                    className="w-full bg-transparent px-1.5 py-1.5 text-sm outline-none"
+                  />
+                </div>
+                <span className="text-muted-foreground">—</span>
+                <div className="flex flex-1 items-center rounded-lg border border-input bg-background px-2">
+                  <span className="text-xs text-muted-foreground">R$</span>
+                  <input
+                    type="number"
+                    min={0}
+                    inputMode="decimal"
+                    placeholder="Máx"
+                    value={precoMax}
+                    onChange={(e) => setPrecoMax(e.target.value)}
+                    className="w-full bg-transparent px-1.5 py-1.5 text-sm outline-none"
+                  />
+                </div>
+              </div>
+              {activeCount > 0 && (
+                <button
+                  onClick={resetFilters}
+                  className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground sm:col-span-3 lg:col-span-1"
+                >
+                  <X className="h-4 w-4" /> Limpar filtros
+                </button>
+              )}
+            </div>
+          )}
         </div>
+
 
         {isLoading ? (
           <div className="space-y-2 p-4">
