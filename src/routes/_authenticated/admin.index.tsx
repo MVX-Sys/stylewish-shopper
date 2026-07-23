@@ -181,9 +181,12 @@ function AdminProductsList() {
         </div>
         <Link
           to="/admin/produtos/novo"
-          className="btn-shine inline-flex items-center gap-2 self-start rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90 sm:self-end"
+          className="btn-shine group inline-flex items-center gap-2.5 self-start rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground shadow-lg shadow-primary/25 ring-2 ring-primary/20 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30 sm:self-end"
         >
-          <Plus className="h-4 w-4" /> Novo produto
+          <span className="grid h-6 w-6 place-items-center rounded-full bg-primary-foreground/20">
+            <Plus className="h-4 w-4" />
+          </span>
+          Adicionar novo produto
         </Link>
       </div>
 
