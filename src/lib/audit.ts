@@ -10,6 +10,8 @@ export type AuditAcao =
   | "reenviar_whatsapp"
   | "avisar_reposicao"
   | "login"
+  | "backup_export"
+  | "backup_import"
   | "outro";
 
 export type AuditEntidade =
