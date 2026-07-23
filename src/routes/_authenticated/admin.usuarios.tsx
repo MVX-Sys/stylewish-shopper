@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Loader2, Search, Users, ShieldCheck, MailCheck, MailX, FileDown, FileSpreadsheet } from "lucide-react";
+import { Loader2, Search, Users, ShieldCheck, MailCheck, MailX, FileDown, FileSpreadsheet, Sheet } from "lucide-react";
 import { listAdminUsers } from "@/lib/admin-users.functions";
 import { BRAND } from "@/lib/config";
-import { downloadTableCSV, downloadTablePDF } from "@/lib/pdf";
+import { downloadTableCSV, downloadTablePDF, downloadTableXLSX } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   head: () => ({
