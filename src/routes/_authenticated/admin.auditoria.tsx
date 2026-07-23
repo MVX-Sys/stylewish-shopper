@@ -15,10 +15,9 @@ import {
   MessageCircle,
   LogIn,
   Activity,
-  FileDown,
-  FileSpreadsheet,
 } from "lucide-react";
-import { downloadAuditCSV, downloadAuditPDF } from "@/lib/pdf";
+import { downloadAuditCSV, downloadAuditPDF, downloadTableXLSX } from "@/lib/pdf";
+import { ExportMenu } from "@/components/export-menu";
 
 export const Route = createFileRoute("/_authenticated/admin/auditoria")({
   component: AuditoriaPage,
