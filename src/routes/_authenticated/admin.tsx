@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
-import { LogOut, Package, Plus, Loader2, ExternalLink, Bell, History } from "lucide-react";
+import { LogOut, Package, Plus, Loader2, ExternalLink, Bell, History, Users } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -69,6 +69,14 @@ function AdminLayout() {
             >
               <Bell className="h-4 w-4" />
               <span className="hidden sm:inline">Reposições</span>
+            </Link>
+            <Link
+              to="/admin/usuarios"
+              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              activeProps={{ className: "!bg-foreground !text-background" }}
+            >
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Usuários</span>
             </Link>
             <Link
               to="/admin/auditoria"
