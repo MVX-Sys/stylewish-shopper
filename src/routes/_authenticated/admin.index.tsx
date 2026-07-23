@@ -7,6 +7,7 @@ import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { logAudit } from "@/lib/audit";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminProductsList,
