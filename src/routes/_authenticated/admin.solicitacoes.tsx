@@ -15,7 +15,10 @@ import {
   RotateCcw,
   ExternalLink,
   Package,
+  FileDown,
+  FileSpreadsheet,
 } from "lucide-react";
+import { downloadTableCSV, downloadTablePDF } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/solicitacoes")({
   component: SolicitacoesPage,
