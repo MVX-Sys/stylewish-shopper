@@ -274,3 +274,125 @@ export function downloadOrderPDF(order: OrderPDFPayload) {
   const stamp = new Date().toISOString().slice(0, 10);
   doc.save(`pedido-${BRAND.toLowerCase()}-${stamp}.pdf`);
 }
+
+export type AuditLogExport = {
+  criado_em: string;
+  user_email: string | null;
+  user_id: string;
+  acao: string;
+  entidade: string;
+  entidade_id: string | null;
+  descricao: string | null;
+  detalhes: Record<string, unknown> | null;
+};
+
+function formatDateBR(iso: string) {
+  try {
+    return new Date(iso).toLocaleString("pt-BR");
+  } catch {
+    return iso;
+  }
+}
+
+export function downloadAuditCSV(rows: AuditLogExport[]) {
+  const headers = ["Data/Hora", "Usuário", "Ação", "Entidade", "ID Entidade", "Descrição", "Detalhes"];
+  const escape = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+  const lines = [headers.map(escape).join(";")];
+  for (const r of rows) {
+    lines.push(
+      [
+        formatDateBR(r.criado_em),
+        r.user_email ?? r.user_id,
+        r.acao,
+        r.entidade,
+        r.entidade_id ?? "",
+        r.descricao ?? "",
+        r.detalhes ? JSON.stringify(r.detalhes) : "",
+      ]
+        .map(escape)
+        .join(";"),
+    );
+  }
+  const csv = "\ufeff" + lines.join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `auditoria-${slugify(BRAND)}-${stamp}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function downloadAuditPDF(rows: AuditLogExport[]) {
+  const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+  header(doc, "Histórico de auditoria");
+
+  const w = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  let y = 30;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  doc.text(`${rows.length} registro(s)`, 14, y);
+  doc.setTextColor(...DARK);
+  y += 6;
+
+  const cols = [
+    { label: "Data/Hora", x: 14, width: 32 },
+    { label: "Usuário", x: 46, width: 55 },
+    { label: "Ação", x: 101, width: 32 },
+    { label: "Entidade", x: 133, width: 26 },
+    { label: "Descrição", x: 159, width: w - 14 - 159 },
+  ];
+
+  const drawHead = () => {
+    doc.setFillColor(...ORANGE);
+    doc.rect(14, y, w - 28, 7, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    for (const c of cols) doc.text(c.label, c.x + 1, y + 5);
+    doc.setTextColor(...DARK);
+    doc.setFont("helvetica", "normal");
+    y += 7;
+  };
+  drawHead();
+
+  doc.setFontSize(8);
+  for (const r of rows) {
+    const cells = [
+      formatDateBR(r.criado_em),
+      r.user_email ?? r.user_id.slice(0, 12),
+      r.acao,
+      r.entidade,
+      r.descricao ?? "",
+    ];
+    const wrapped = cells.map((v, i) => doc.splitTextToSize(String(v), cols[i].width - 2));
+    const rowH = Math.max(...wrapped.map((l) => l.length)) * 4 + 2;
+    if (y + rowH > h - 18) {
+      footer(doc);
+      doc.addPage();
+      header(doc, "Histórico de auditoria");
+      y = 30;
+      drawHead();
+      doc.setFontSize(8);
+    }
+    doc.setDrawColor(...LINE);
+    doc.line(14, y + rowH, w - 14, y + rowH);
+    for (let i = 0; i < cols.length; i++) {
+      doc.text(wrapped[i], cols[i].x + 1, y + 4);
+    }
+    y += rowH;
+  }
+
+  footer(doc);
+  const stamp = new Date().toISOString().slice(0, 10);
+  doc.save(`auditoria-${slugify(BRAND)}-${stamp}.pdf`);
+}
