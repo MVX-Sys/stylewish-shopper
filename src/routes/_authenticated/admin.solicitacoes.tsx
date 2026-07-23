@@ -253,13 +253,25 @@ function SolicitacoesPage() {
               </option>
             ))}
           </select>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as typeof sort)}
+            className="rounded-full border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+          >
+            <option value="recentes">Mais recentes</option>
+            <option value="antigos">Mais antigos</option>
+            <option value="status">Por status</option>
+            <option value="cliente-asc">Cliente (A–Z)</option>
+            <option value="cliente-desc">Cliente (Z–A)</option>
+          </select>
           <div className="ml-auto flex items-center gap-2">
             <p className="hidden text-xs text-muted-foreground sm:block">
               {filtered.length}/{itens.length}
             </p>
-            <button
-              type="button"
-              onClick={() => {
+            <ExportMenu
+              disabled={filtered.length === 0}
+              count={filtered.length}
+              onExport={(format) => {
                 const headers = ["Data", "Status", "Produto", "Cor", "Tamanho", "Cliente", "WhatsApp", "Observação"];
                 const rows = filtered.map((s) => [
                   formatDate(s.criado_em),
@@ -271,67 +283,23 @@ function SolicitacoesPage() {
                   s.cliente_whatsapp,
                   s.observacao ?? "",
                 ]);
-                downloadTableCSV("reposicoes", headers, rows);
+                if (format === "csv") downloadTableCSV("reposicoes", headers, rows);
+                else if (format === "xlsx") downloadTableXLSX("reposicoes", "Reposições", headers, rows);
+                else {
+                  const cols = [
+                    { label: "Data", width: 26 },
+                    { label: "Status", width: 20 },
+                    { label: "Produto", width: 55 },
+                    { label: "Cor", width: 22 },
+                    { label: "Tam.", width: 14 },
+                    { label: "Cliente", width: 40 },
+                    { label: "WhatsApp", width: 30 },
+                    { label: "Obs.", width: 45 },
+                  ];
+                  downloadTablePDF("Solicitações de reposição", "reposicoes", cols, rows);
+                }
               }}
-              disabled={filtered.length === 0}
-              className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
-            >
-              <FileSpreadsheet className="h-3.5 w-3.5" />
-              CSV
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const headers = ["Data", "Status", "Produto", "Cor", "Tamanho", "Cliente", "WhatsApp", "Observação"];
-                const rows = filtered.map((s) => [
-                  formatDate(s.criado_em),
-                  s.status,
-                  s.produtos?.nome ?? "—",
-                  s.cor,
-                  s.tamanho,
-                  s.cliente_nome,
-                  s.cliente_whatsapp,
-                  s.observacao ?? "",
-                ]);
-                downloadTableXLSX("reposicoes", "Reposições", headers, rows);
-              }}
-              disabled={filtered.length === 0}
-              className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
-            >
-              <Sheet className="h-3.5 w-3.5" />
-              XLSX
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const cols = [
-                  { label: "Data", width: 26 },
-                  { label: "Status", width: 20 },
-                  { label: "Produto", width: 55 },
-                  { label: "Cor", width: 22 },
-                  { label: "Tam.", width: 14 },
-                  { label: "Cliente", width: 40 },
-                  { label: "WhatsApp", width: 30 },
-                  { label: "Obs.", width: 45 },
-                ];
-                const rows = filtered.map((s) => [
-                  formatDate(s.criado_em),
-                  s.status,
-                  s.produtos?.nome ?? "—",
-                  s.cor,
-                  s.tamanho,
-                  s.cliente_nome,
-                  s.cliente_whatsapp,
-                  s.observacao ?? "",
-                ]);
-                downloadTablePDF("Solicitações de reposição", "reposicoes", cols, rows);
-              }}
-              disabled={filtered.length === 0}
-              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              <FileDown className="h-3.5 w-3.5" />
-              PDF
-            </button>
+            />
           </div>
         </div>
 
