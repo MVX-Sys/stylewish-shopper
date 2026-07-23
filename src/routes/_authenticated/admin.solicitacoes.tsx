@@ -17,8 +17,9 @@ import {
   Package,
   FileDown,
   FileSpreadsheet,
+  Sheet,
 } from "lucide-react";
-import { downloadTableCSV, downloadTablePDF } from "@/lib/pdf";
+import { downloadTableCSV, downloadTablePDF, downloadTableXLSX } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/solicitacoes")({
   component: SolicitacoesPage,
@@ -266,6 +267,28 @@ function SolicitacoesPage() {
             >
               <FileSpreadsheet className="h-3.5 w-3.5" />
               CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const headers = ["Data", "Status", "Produto", "Cor", "Tamanho", "Cliente", "WhatsApp", "Observação"];
+                const rows = filtered.map((s) => [
+                  formatDate(s.criado_em),
+                  s.status,
+                  s.produtos?.nome ?? "—",
+                  s.cor,
+                  s.tamanho,
+                  s.cliente_nome,
+                  s.cliente_whatsapp,
+                  s.observacao ?? "",
+                ]);
+                downloadTableXLSX("reposicoes", "Reposições", headers, rows);
+              }}
+              disabled={filtered.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >
+              <Sheet className="h-3.5 w-3.5" />
+              XLSX
             </button>
             <button
               type="button"

@@ -5,10 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, FileDown, FileSpreadsheet } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, FileDown, FileSpreadsheet, Sheet } from "lucide-react";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
-import { downloadProductsCSV, downloadProductsPDF } from "@/lib/pdf";
+import { downloadProductsCSV, downloadProductsPDF, downloadProductsXLSX } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminProductsList,
@@ -273,6 +273,22 @@ function AdminProductsList() {
               >
                 <FileSpreadsheet className="h-4 w-4" />
                 CSV
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  downloadProductsXLSX(
+                    filtered.map((p) => ({
+                      ...p,
+                      categoriaNome: categorias.find((c) => c.id === p.categoria_id)?.nome,
+                    })),
+                  )
+                }
+                disabled={filtered.length === 0}
+                className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
+              >
+                <Sheet className="h-4 w-4" />
+                XLSX
               </button>
               <button
                 type="button"

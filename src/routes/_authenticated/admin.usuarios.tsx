@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Loader2, Search, Users, ShieldCheck, MailCheck, MailX, FileDown, FileSpreadsheet } from "lucide-react";
+import { Loader2, Search, Users, ShieldCheck, MailCheck, MailX, FileDown, FileSpreadsheet, Sheet } from "lucide-react";
 import { listAdminUsers } from "@/lib/admin-users.functions";
 import { BRAND } from "@/lib/config";
-import { downloadTableCSV, downloadTablePDF } from "@/lib/pdf";
+import { downloadTableCSV, downloadTablePDF, downloadTableXLSX } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   head: () => ({
@@ -125,6 +125,27 @@ function UsuariosPage() {
         >
           <FileSpreadsheet className="h-4 w-4" />
           CSV
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const headers = ["Email", "ID", "Telefone", "Cadastro", "Último acesso", "Status", "Perfis"];
+            const rows = filtered.map((u) => [
+              u.email ?? "",
+              u.id,
+              u.phone ?? "",
+              formatDate(u.created_at),
+              formatDate(u.last_sign_in_at),
+              u.email_confirmed_at ? "Confirmado" : "Pendente",
+              u.roles.length ? u.roles.join(", ") : "cliente",
+            ]);
+            downloadTableXLSX("usuarios", "Usuários", headers, rows);
+          }}
+          disabled={filtered.length === 0}
+          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
+        >
+          <Sheet className="h-4 w-4" />
+          XLSX
         </button>
         <button
           type="button"

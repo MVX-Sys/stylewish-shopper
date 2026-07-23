@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx";
 import { brl } from "./format";
 import { BRAND } from "./config";
 import type { ProductListItem } from "./products";
@@ -618,4 +619,59 @@ export function downloadTablePDF(
   footer(doc);
   const stamp = new Date().toISOString().slice(0, 10);
   doc.save(`${slugify(filename)}-${slugify(BRAND)}-${stamp}.pdf`);
+}
+
+export function downloadTableXLSX(
+  filename: string,
+  sheetName: string,
+  headers: string[],
+  rows: (string | number | null | undefined)[][],
+) {
+  const aoa: (string | number)[][] = [headers, ...rows.map((r) => r.map((v) => (v == null ? "" : v)))];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"] = headers.map((h, i) => {
+    const maxLen = Math.max(
+      h.length,
+      ...rows.map((r) => String(r[i] ?? "").length),
+    );
+    return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31) || "Dados");
+  const stamp = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `${slugify(filename)}-${slugify(BRAND)}-${stamp}.xlsx`);
+}
+
+export function downloadProductsXLSX(rows: ProductExportRow[]) {
+  const headers = [
+    "Nome",
+    "Marca",
+    "Categoria",
+    "Preço",
+    "Ativo",
+    "Novidade",
+    "Promoção",
+    "Estoque total",
+    "Variações",
+    "Descrição",
+  ];
+  const data = rows.map((p) => {
+    const estoque = p.variacoes.reduce((a, v) => a + v.quantidade_estoque, 0);
+    const vars = p.variacoes
+      .map((v) => `${v.nome_cor}/${v.tamanho} (${v.quantidade_estoque})`)
+      .join(" | ");
+    return [
+      p.nome,
+      p.marca ?? "",
+      p.categoriaNome ?? "",
+      p.preco,
+      p.ativo ? "Sim" : "Não",
+      p.novidade ? "Sim" : "Não",
+      p.promocao ? "Sim" : "Não",
+      estoque,
+      vars,
+      (p.descricao ?? "").replace(/\s+/g, " ").trim(),
+    ] as (string | number)[];
+  });
+  downloadTableXLSX("produtos", "Produtos", headers, data);
 }
