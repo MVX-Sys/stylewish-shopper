@@ -118,9 +118,21 @@ function UsuariosPage() {
           <option value="admin">Somente administradores</option>
           <option value="user">Somente clientes</option>
         </select>
-        <button
-          type="button"
-          onClick={() => {
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as typeof sort)}
+          className="input sm:w-56"
+        >
+          <option value="recentes">Mais recentes</option>
+          <option value="antigos">Mais antigos</option>
+          <option value="ultimo-acesso">Último acesso</option>
+          <option value="email-asc">Email (A–Z)</option>
+          <option value="email-desc">Email (Z–A)</option>
+        </select>
+        <ExportMenu
+          disabled={filtered.length === 0}
+          count={filtered.length}
+          onExport={(format) => {
             const headers = ["Email", "ID", "Telefone", "Cadastro", "Último acesso", "Status", "Perfis"];
             const rows = filtered.map((u) => [
               u.email ?? "",
@@ -131,62 +143,29 @@ function UsuariosPage() {
               u.email_confirmed_at ? "Confirmado" : "Pendente",
               u.roles.length ? u.roles.join(", ") : "cliente",
             ]);
-            downloadTableCSV("usuarios", headers, rows);
+            if (format === "csv") downloadTableCSV("usuarios", headers, rows);
+            else if (format === "xlsx") downloadTableXLSX("usuarios", "Usuários", headers, rows);
+            else {
+              const cols = [
+                { label: "Email", width: 55 },
+                { label: "Telefone", width: 28 },
+                { label: "Cadastro", width: 30 },
+                { label: "Último acesso", width: 30 },
+                { label: "Status", width: 22 },
+                { label: "Perfis", width: 25 },
+              ];
+              const pdfRows = filtered.map((u) => [
+                u.email ?? "—",
+                u.phone ?? "—",
+                formatDate(u.created_at),
+                formatDate(u.last_sign_in_at),
+                u.email_confirmed_at ? "Confirmado" : "Pendente",
+                u.roles.length ? u.roles.join(", ") : "cliente",
+              ]);
+              downloadTablePDF("Usuários cadastrados", "usuarios", cols, pdfRows);
+            }
           }}
-          disabled={filtered.length === 0}
-          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
-        >
-          <FileSpreadsheet className="h-4 w-4" />
-          CSV
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const headers = ["Email", "ID", "Telefone", "Cadastro", "Último acesso", "Status", "Perfis"];
-            const rows = filtered.map((u) => [
-              u.email ?? "",
-              u.id,
-              u.phone ?? "",
-              formatDate(u.created_at),
-              formatDate(u.last_sign_in_at),
-              u.email_confirmed_at ? "Confirmado" : "Pendente",
-              u.roles.length ? u.roles.join(", ") : "cliente",
-            ]);
-            downloadTableXLSX("usuarios", "Usuários", headers, rows);
-          }}
-          disabled={filtered.length === 0}
-          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
-        >
-          <Sheet className="h-4 w-4" />
-          XLSX
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const cols = [
-              { label: "Email", width: 55 },
-              { label: "Telefone", width: 28 },
-              { label: "Cadastro", width: 30 },
-              { label: "Último acesso", width: 30 },
-              { label: "Status", width: 22 },
-              { label: "Perfis", width: 25 },
-            ];
-            const rows = filtered.map((u) => [
-              u.email ?? "—",
-              u.phone ?? "—",
-              formatDate(u.created_at),
-              formatDate(u.last_sign_in_at),
-              u.email_confirmed_at ? "Confirmado" : "Pendente",
-              u.roles.length ? u.roles.join(", ") : "cliente",
-            ]);
-            downloadTablePDF("Usuários cadastrados", "usuarios", cols, rows);
-          }}
-          disabled={filtered.length === 0}
-          className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-        >
-          <FileDown className="h-4 w-4" />
-          PDF
-        </button>
+        />
       </div>
 
       {isLoading ? (
