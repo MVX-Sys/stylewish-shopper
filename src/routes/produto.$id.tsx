@@ -8,7 +8,8 @@ import { getProduto, isEsgotado } from "@/lib/products";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
-import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images } from "lucide-react";
+import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText } from "lucide-react";
+import { downloadProductPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/produto/$id")({
@@ -243,6 +244,21 @@ function ProductPage() {
                         Baixar todas ({imgs.length})
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        try {
+                          downloadProductPDF(p);
+                          toast.success("PDF do produto baixado!");
+                        } catch {
+                          toast.error("Não foi possível gerar o PDF.");
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-medium transition-colors hover:bg-accent"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      Baixar PDF
+                    </button>
                   </div>
                 )}
               </div>
