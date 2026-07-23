@@ -17,7 +17,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { session, isAdmin, refreshRole } = useAuth();
+  const { session, isAdmin } = useAuth();
   const nav = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
