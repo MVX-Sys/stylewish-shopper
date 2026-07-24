@@ -51,6 +51,9 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   const [imgs, setImgs] = useState<ImgRow[]>([]);
   const [vars, setVars] = useState<VarRow[]>([]);
   const [saving, setSaving] = useState(false);
+  const [addingCor, setAddingCor] = useState(false);
+  const [novaCorNome, setNovaCorNome] = useState("");
+  const [novaCorHex, setNovaCorHex] = useState("#000000");
 
   useEffect(() => {
     if (!existing) return;
