@@ -122,17 +122,30 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
     new Map(vars.map((v) => [v.nome_cor, v.hex_cor])).entries(),
   ).map(([nome, hex]) => ({ nome, hex }));
 
-  const addCor = () => {
-    const nome = prompt("Nome da cor (ex: Preto)");
-    if (!nome) return;
-    const hex = prompt("Cor em hex (ex: #000000)", "#000000") ?? "#000000";
-    TAMANHOS_PADRAO.forEach((t) =>
-      setVars((prev) => [
-        ...prev,
-        { nome_cor: nome, hex_cor: hex, tamanho: t, quantidade_estoque: 0 },
-      ]),
-    );
+  const confirmAddCor = () => {
+    const nome = novaCorNome.trim();
+    if (!nome) {
+      toast.error("Informe o nome da cor.");
+      return;
+    }
+    if (cores.some((c) => c.nome.toLowerCase() === nome.toLowerCase())) {
+      toast.error("Essa cor já foi adicionada.");
+      return;
+    }
+    setVars((prev) => [
+      ...prev,
+      ...TAMANHOS_PADRAO.map((t) => ({
+        nome_cor: nome,
+        hex_cor: novaCorHex,
+        tamanho: t,
+        quantidade_estoque: 0,
+      })),
+    ]);
+    setNovaCorNome("");
+    setNovaCorHex("#000000");
+    setAddingCor(false);
   };
+
 
   const removeCor = (nome: string) =>
     setVars((prev) => prev.filter((v) => v.nome_cor !== nome));
