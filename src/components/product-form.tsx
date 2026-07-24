@@ -347,15 +347,77 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
 
           <Card title="Variações · Cores × Tamanhos × Estoque"
             action={
-              <button
-                type="button"
-                onClick={addCor}
-                className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
-              >
-                <Plus className="h-3 w-3" /> Adicionar cor
-              </button>
+              !addingCor && (
+                <button
+                  type="button"
+                  onClick={() => setAddingCor(true)}
+                  className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                >
+                  <Plus className="h-3 w-3" /> Adicionar cor
+                </button>
+              )
             }
           >
+            {addingCor && (
+              <div className="rounded-xl border border-border bg-muted/30 p-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
+                  <div>
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Nome da cor
+                    </span>
+                    <input
+                      autoFocus
+                      value={novaCorNome}
+                      onChange={(e) => setNovaCorNome(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          confirmAddCor();
+                        }
+                      }}
+                      placeholder="Ex: Preto"
+                      className="input w-full"
+                    />
+                  </div>
+                  <div>
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Cor
+                    </span>
+                    <label className="flex h-10 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input">
+                      <input
+                        type="color"
+                        value={novaCorHex}
+                        onChange={(e) => setNovaCorHex(e.target.value)}
+                        className="h-14 w-20 cursor-pointer border-0 bg-transparent p-0"
+                      />
+                    </label>
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={confirmAddCor}
+                      className="h-10 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAddingCor(false);
+                        setNovaCorNome("");
+                        setNovaCorHex("#000000");
+                      }}
+                      className="h-10 rounded-full border border-border px-4 text-xs font-medium hover:bg-accent"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {cores.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
                 Nenhuma cor cadastrada. Adicione ao menos uma cor para gerenciar estoque.
