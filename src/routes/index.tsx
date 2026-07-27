@@ -122,21 +122,21 @@ function Home() {
         {!q && !activeSlug && heading === "Coleção" && (
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 top-0 -z-0 flex w-full items-center justify-end pr-0 opacity-20 md:w-3/4 md:opacity-25 lg:opacity-30"
+            className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center opacity-20 md:justify-end md:opacity-25 lg:opacity-30"
           >
             <img
               src={birkenDubai.url}
               alt=""
-              className="h-72 w-72 translate-x-10 translate-y-2 rounded-full object-cover shadow-xl md:h-[26rem] md:w-[26rem] md:translate-x-14 lg:h-[34rem] lg:w-[34rem]"
+              className="h-96 w-96 translate-x-6 translate-y-4 rounded-full object-cover shadow-xl md:h-[36rem] md:w-[36rem] md:translate-x-12 lg:h-[48rem] lg:w-[48rem]"
             />
             <img
               src={birkenPremium.url}
               alt=""
-              className="h-60 w-60 -translate-x-12 translate-y-20 rounded-full object-cover shadow-xl md:h-80 md:w-80 md:translate-y-24 lg:h-[28rem] lg:w-[28rem]"
+              className="h-80 w-80 -translate-x-20 translate-y-32 rounded-full object-cover shadow-xl md:h-[32rem] md:w-[32rem] md:-translate-x-28 md:translate-y-36 lg:h-[42rem] lg:w-[42rem]"
             />
           </span>
         )}
-        <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-12">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
           <div className="relative flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
             <span className="h-px w-6 bg-primary" />
             {q ? "Busca" : activeSlug ? "Categoria" : "Nova temporada"}
