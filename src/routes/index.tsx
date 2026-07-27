@@ -118,34 +118,31 @@ function Home() {
 
       {/* Hero band */}
       <section className="relative overflow-hidden border-b border-border bg-card">
+        {/* Decorative images behind the hero area */}
+        {!q && !activeSlug && heading === "Coleção" && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 top-0 -z-0 flex w-full items-center justify-end pr-0 opacity-15 md:w-2/3 md:opacity-20 lg:opacity-25"
+          >
+            <img
+              src={birkenDubai.url}
+              alt=""
+              className="h-56 w-56 translate-x-12 translate-y-4 rounded-full object-cover shadow-xl md:h-80 md:w-80 md:translate-x-16 lg:h-96 lg:w-96"
+            />
+            <img
+              src={birkenPremium.url}
+              alt=""
+              className="h-48 w-48 -translate-x-8 translate-y-16 rounded-full object-cover shadow-xl md:h-64 md:w-64 md:translate-y-20 lg:h-80 lg:w-80"
+            />
+          </span>
+        )}
         <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-12">
           <div className="relative flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
             <span className="h-px w-6 bg-primary" />
             {q ? "Busca" : activeSlug ? "Categoria" : "Nova temporada"}
           </div>
           <h1 className="relative mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
-            {heading === "Coleção" ? (
-              <span className="relative inline-block">
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 -z-0 flex items-center justify-center gap-2 opacity-20 md:opacity-25"
-                >
-                  <img
-                    src={birkenDubai.url}
-                    alt=""
-                    className="h-24 w-24 rounded-full object-cover shadow-lg md:h-40 md:w-40"
-                  />
-                  <img
-                    src={birkenPremium.url}
-                    alt=""
-                    className="h-24 w-24 rounded-full object-cover shadow-lg md:h-40 md:w-40"
-                  />
-                </span>
-                <span className="relative">{heading}</span>
-              </span>
-            ) : (
-              heading
-            )}
+            {heading}
           </h1>
           <p className="relative mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
             {subheading}
