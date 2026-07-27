@@ -9,6 +9,8 @@ import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter
 import { listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
 import { PackageSearch } from "lucide-react";
+import birkenDubai from "@/assets/birken_dubai.jpg.asset.json";
+import birkenPremium from "@/assets/birken_premium.jpg.asset.json";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
@@ -115,20 +117,42 @@ function Home() {
       <SiteHeader />
 
       {/* Hero band */}
-      <section className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
+      <section className="relative overflow-hidden border-b border-border bg-card">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-12">
+          <div className="relative flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
             <span className="h-px w-6 bg-primary" />
             {q ? "Busca" : activeSlug ? "Categoria" : "Nova temporada"}
           </div>
-          <h1 className="mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
-            {heading}
+          <h1 className="relative mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
+            {heading === "Coleção" ? (
+              <span className="relative inline-block">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 -z-0 flex items-center justify-center gap-2 opacity-20 md:opacity-25"
+                >
+                  <img
+                    src={birkenDubai.url}
+                    alt=""
+                    className="h-24 w-24 rounded-full object-cover shadow-lg md:h-40 md:w-40"
+                  />
+                  <img
+                    src={birkenPremium.url}
+                    alt=""
+                    className="h-24 w-24 rounded-full object-cover shadow-lg md:h-40 md:w-40"
+                  />
+                </span>
+                <span className="relative">{heading}</span>
+              </span>
+            ) : (
+              heading
+            )}
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
+          <p className="relative mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
             {subheading}
           </p>
         </div>
       </section>
+
 
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[240px_1fr] md:gap-10 md:py-12 lg:grid-cols-[260px_1fr]">
         <FilterSidebar
