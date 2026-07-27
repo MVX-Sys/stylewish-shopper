@@ -122,17 +122,17 @@ function Home() {
         {!q && !activeSlug && heading === "Coleção" && (
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 top-0 -z-0 flex w-full items-center justify-end pr-0 opacity-15 md:w-2/3 md:opacity-20 lg:opacity-25"
+            className="pointer-events-none absolute inset-y-0 right-0 top-0 -z-0 flex w-full items-center justify-end pr-0 opacity-20 md:w-3/4 md:opacity-25 lg:opacity-30"
           >
             <img
               src={birkenDubai.url}
               alt=""
-              className="h-56 w-56 translate-x-12 translate-y-4 rounded-full object-cover shadow-xl md:h-80 md:w-80 md:translate-x-16 lg:h-96 lg:w-96"
+              className="h-72 w-72 translate-x-10 translate-y-2 rounded-full object-cover shadow-xl md:h-[26rem] md:w-[26rem] md:translate-x-14 lg:h-[34rem] lg:w-[34rem]"
             />
             <img
               src={birkenPremium.url}
               alt=""
-              className="h-48 w-48 -translate-x-8 translate-y-16 rounded-full object-cover shadow-xl md:h-64 md:w-64 md:translate-y-20 lg:h-80 lg:w-80"
+              className="h-60 w-60 -translate-x-12 translate-y-20 rounded-full object-cover shadow-xl md:h-80 md:w-80 md:translate-y-24 lg:h-[28rem] lg:w-[28rem]"
             />
           </span>
         )}
