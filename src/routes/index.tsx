@@ -9,6 +9,8 @@ import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter
 import { listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
 import { PackageSearch } from "lucide-react";
+import birkenDubai from "@/assets/birken_dubai.jpg.asset.json";
+import birkenPremium from "@/assets/birken_premium.jpg.asset.json";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
