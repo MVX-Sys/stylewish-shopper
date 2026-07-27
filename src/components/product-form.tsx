@@ -510,7 +510,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
               <input
                 type="file"
                 multiple
-                accept="image/*"
+                accept="image/*,.heic,.heif,image/heic,image/heif"
                 onChange={(e) => onPickFiles(e.target.files)}
                 className="hidden"
               />
