@@ -307,8 +307,7 @@ function LandingView({
                 </h2>
               </div>
               <Link
-                to="/"
-                search={{} as never}
+                to="/colecao"
                 className="hidden items-center gap-1 text-sm font-semibold text-primary hover:underline sm:inline-flex"
               >
                 Ver todas <ChevronRight className="h-4 w-4" />
@@ -330,8 +329,7 @@ function LandingView({
             Selecionados para você
           </h2>
           <Link
-            to="/"
-            search={{} as never}
+            to="/colecao"
             className="hidden items-center gap-1 text-sm font-semibold text-primary hover:underline sm:inline-flex"
           >
             Ver catálogo <ChevronRight className="h-4 w-4" />
