@@ -41,9 +41,14 @@ export function ProductCard({ p }: { p: ProductListItem }) {
             </span>
           )}
           {promo.ativa && (
-            <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
-              -{promo.percentual}%
-            </span>
+            <>
+              <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+                Promoção
+              </span>
+              <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+                -{promo.percentual}%
+              </span>
+            </>
           )}
         </div>
 
