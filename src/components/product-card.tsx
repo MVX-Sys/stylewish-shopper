@@ -2,11 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { brl } from "@/lib/format";
 import { getImageUrl } from "@/lib/storage";
-import { isEsgotado, type ProductListItem } from "@/lib/products";
+import { getPromoInfo, isEsgotado, type ProductListItem } from "@/lib/products";
 
 export function ProductCard({ p }: { p: ProductListItem }) {
   const [img, setImg] = useState<string>("");
   const esgotado = isEsgotado(p);
+  const promo = getPromoInfo(p);
   const principal =
     p.imagens.find((i) => i.principal) ??
     [...p.imagens].sort((a, b) => a.ordem - b.ordem)[0];
@@ -39,9 +40,9 @@ export function ProductCard({ p }: { p: ProductListItem }) {
               Novidade
             </span>
           )}
-          {p.promocao && (
+          {promo.ativa && (
             <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
-              Promo
+              -{promo.percentual}%
             </span>
           )}
         </div>
@@ -59,9 +60,20 @@ export function ProductCard({ p }: { p: ProductListItem }) {
         <h3 className="line-clamp-1 text-[13px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-sm">
           {p.nome}
         </h3>
-        <p className="font-display text-base font-extrabold tabular-nums text-foreground">
-          {brl(p.preco)}
-        </p>
+        {promo.ativa ? (
+          <div className="flex items-baseline gap-2">
+            <p className="font-display text-base font-extrabold tabular-nums text-primary">
+              {brl(promo.precoFinal)}
+            </p>
+            <p className="text-xs font-medium tabular-nums text-muted-foreground line-through">
+              {brl(promo.precoOriginal)}
+            </p>
+          </div>
+        ) : (
+          <p className="font-display text-base font-extrabold tabular-nums text-foreground">
+            {brl(p.preco)}
+          </p>
+        )}
       </div>
     </Link>
   );

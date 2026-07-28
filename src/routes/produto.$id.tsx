@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { getProduto, isEsgotado } from "@/lib/products";
+import { getProduto, getPromoInfo, isEsgotado } from "@/lib/products";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
@@ -116,10 +116,13 @@ function ProductPage() {
   const setQ = (k: string, q: number) =>
     setQtys((prev) => ({ ...prev, [k]: Math.max(0, q) }));
 
+  const promo = useMemo(() => (p ? getPromoInfo(p) : null), [p]);
+  const precoEfetivo = promo?.ativa ? promo.precoFinal : p?.preco ?? 0;
+
   const subtotal = useMemo(() => {
     if (!p) return 0;
-    return Object.entries(qtys).reduce((s, [, q]) => s + q * p.preco, 0);
-  }, [qtys, p]);
+    return Object.entries(qtys).reduce((s, [, q]) => s + q * precoEfetivo, 0);
+  }, [qtys, p, precoEfetivo]);
 
   const totalItens = Object.values(qtys).reduce((s, q) => s + q, 0);
 
@@ -140,7 +143,7 @@ function ProductPage() {
           cor,
           hexCor: v.hex_cor,
           tamanho: tam,
-          preco: p.preco,
+          preco: precoEfetivo,
         },
         q,
       );
@@ -251,9 +254,9 @@ function ProductPage() {
                         Novidade
                       </span>
                     )}
-                    {p.promocao && (
+                    {promo?.ativa && (
                       <span className="rounded-full bg-brand px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-foreground shadow-sm">
-                        Promoção
+                        -{promo.percentual}% OFF
                       </span>
                     )}
                   </div>
@@ -314,15 +317,46 @@ function ProductPage() {
                   <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-[32px]">
                     {p.nome}
                   </h1>
-                  <div className="mt-5 flex items-baseline gap-3">
-                    <p className="font-display text-3xl font-extrabold tabular-nums text-foreground md:text-4xl">
-                      {brl(p.preco)}
-                    </p>
-                    <span className="text-xs text-muted-foreground">/ peça</span>
-                  </div>
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    ou em até 3x sem juros no combinado
-                  </p>
+                  {promo?.ativa ? (
+                    <div className="mt-5 space-y-1.5">
+                      <div className="flex items-baseline gap-3">
+                        <p className="font-display text-3xl font-extrabold tabular-nums text-primary md:text-4xl">
+                          {brl(promo.precoFinal)}
+                        </p>
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                          -{promo.percentual}%
+                        </span>
+                        <span className="text-xs text-muted-foreground">/ peça</span>
+                      </div>
+                      <p className="text-sm font-medium tabular-nums text-muted-foreground line-through">
+                        De {brl(promo.precoOriginal)}
+                      </p>
+                      {promo.validoAte && (
+                        <p className="text-[11px] font-medium uppercase tracking-wider text-primary">
+                          Promoção válida até{" "}
+                          {promo.validoAte.toLocaleString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mt-5 flex items-baseline gap-3">
+                        <p className="font-display text-3xl font-extrabold tabular-nums text-foreground md:text-4xl">
+                          {brl(p.preco)}
+                        </p>
+                        <span className="text-xs text-muted-foreground">/ peça</span>
+                      </div>
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        ou em até 3x sem juros no combinado
+                      </p>
+                    </>
+                  )}
                   {p.descricao && (
                     <p className="mt-6 border-l-2 border-primary/40 pl-4 text-sm leading-relaxed text-muted-foreground">
                       {p.descricao}

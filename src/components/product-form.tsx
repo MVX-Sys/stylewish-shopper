@@ -47,6 +47,8 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   
   const [novidade, setNovidade] = useState(false);
   const [promocao, setPromocao] = useState(false);
+  const [precoPromocional, setPrecoPromocional] = useState<string>("");
+  const [promocaoAte, setPromocaoAte] = useState<string>("");
   const [ativo, setAtivo] = useState(true);
   const [imgs, setImgs] = useState<ImgRow[]>([]);
   const [vars, setVars] = useState<VarRow[]>([]);
@@ -64,6 +66,19 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
     
     setNovidade(existing.novidade);
     setPromocao(existing.promocao);
+    setPrecoPromocional(
+      existing.preco_promocional != null ? String(existing.preco_promocional) : "",
+    );
+    // Converte ISO -> "YYYY-MM-DDTHH:mm" no horário local para <input type="datetime-local">
+    if (existing.promocao_ate) {
+      const d = new Date(existing.promocao_ate);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setPromocaoAte(
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      );
+    } else {
+      setPromocaoAte("");
+    }
     setAtivo(existing.ativo);
     setVars(
       existing.variacoes.map((v) => ({
@@ -197,6 +212,34 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       toast.error("Nome, preço e categoria são obrigatórios.");
       return;
     }
+    let precoPromoNum: number | null = null;
+    let promoAteIso: string | null = null;
+    if (promocao) {
+      const parsed = precoPromocional.trim() === "" ? NaN : Number(precoPromocional);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        toast.error("Informe um preço promocional válido.");
+        return;
+      }
+      if (parsed >= preco) {
+        toast.error("O preço promocional deve ser menor que o preço original.");
+        return;
+      }
+      if (!promocaoAte.trim()) {
+        toast.error("Informe a data de validade da promoção.");
+        return;
+      }
+      const dt = new Date(promocaoAte);
+      if (Number.isNaN(dt.getTime())) {
+        toast.error("Data da promoção inválida.");
+        return;
+      }
+      if (dt.getTime() <= Date.now()) {
+        toast.error("A data da promoção deve ser no futuro.");
+        return;
+      }
+      precoPromoNum = parsed;
+      promoAteIso = dt.toISOString();
+    }
     setSaving(true);
     try {
       let pid = produtoId;
@@ -208,6 +251,8 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         marca: null,
         novidade,
         promocao,
+        preco_promocional: precoPromoNum,
+        promocao_ate: promoAteIso,
         ativo,
       };
       if (pid) {
@@ -562,6 +607,45 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                 </label>
               ))}
             </div>
+            {promocao && (
+              <div className="mt-3 space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                  Detalhes da promoção
+                </p>
+                <Field label="Preço promocional *">
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                      R$
+                    </span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={precoPromocional}
+                      onChange={(e) => setPrecoPromocional(e.target.value)}
+                      placeholder="0,00"
+                      className="input pl-9"
+                    />
+                  </div>
+                  {precoPromocional && Number(precoPromocional) >= 0 && Number(precoPromocional) < preco && preco > 0 && (
+                    <p className="mt-1.5 text-xs font-medium text-primary">
+                      Desconto de {Math.round(((preco - Number(precoPromocional)) / preco) * 100)}%
+                    </p>
+                  )}
+                </Field>
+                <Field label="Válida até *">
+                  <input
+                    type="datetime-local"
+                    value={promocaoAte}
+                    onChange={(e) => setPromocaoAte(e.target.value)}
+                    className="input"
+                  />
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    A hora é opcional; se omitida, considera-se 00:00.
+                  </p>
+                </Field>
+              </div>
+            )}
           </Card>
         </div>
       </div>
