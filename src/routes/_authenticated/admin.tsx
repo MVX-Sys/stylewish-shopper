@@ -3,21 +3,39 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
+import { canAccess, hasAdminPanelAccess, type PermissionKey } from "@/lib/permissions";
 import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
+type NavItem = {
+  to: string;
+  label: string;
+  icon: React.ReactNode;
+  perm: PermissionKey;
+  exact?: boolean;
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { to: "/admin", label: "Produtos", icon: <Package className="h-4 w-4" />, perm: "produtos.manage", exact: true },
+  { to: "/admin/solicitacoes", label: "Reposições", icon: <Bell className="h-4 w-4" />, perm: "solicitacoes.manage" },
+  { to: "/admin/usuarios", label: "Usuários", icon: <Users className="h-4 w-4" />, perm: "usuarios.manage" },
+  { to: "/admin/backup", label: "Backup", icon: <Database className="h-4 w-4" />, perm: "backup.manage" },
+  { to: "/admin/auditoria", label: "Auditoria", icon: <History className="h-4 w-4" />, perm: "auditoria.view" },
+];
+
 function AdminLayout() {
-  const { isAdmin, loading, session } = useAuth();
+  const { roleKind, permissions, loading, session } = useAuth();
   const nav = useNavigate();
+  const allowed = hasAdminPanelAccess(roleKind, permissions);
 
   useEffect(() => {
-    if (!loading && session && !isAdmin) nav({ to: "/auth" });
-  }, [isAdmin, loading, session, nav]);
+    if (!loading && session && !allowed) nav({ to: "/" });
+  }, [allowed, loading, session, nav]);
 
-  if (loading || !isAdmin) {
+  if (loading || !allowed) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -27,6 +45,8 @@ function AdminLayout() {
       </div>
     );
   }
+
+  const visibleNav = NAV_ITEMS.filter((n) => canAccess(roleKind, permissions, n.perm));
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -39,53 +59,24 @@ function AdminLayout() {
             <div className="hidden leading-tight sm:block">
               <p className="font-display text-sm font-semibold">{BRAND}</p>
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Painel admin
+                {roleKind === "admin" ? "Painel admin" : "Painel funcionário"}
               </p>
             </div>
           </Link>
 
           <nav className="flex gap-1 text-sm">
-            <Link
-              to="/admin"
-              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "!bg-foreground !text-background" }}
-              activeOptions={{ exact: true }}
-            >
-              <Package className="h-4 w-4" />
-              <span className="hidden sm:inline">Produtos</span>
-            </Link>
-            <Link
-              to="/admin/solicitacoes"
-              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "!bg-foreground !text-background" }}
-            >
-              <Bell className="h-4 w-4" />
-              <span className="hidden sm:inline">Reposições</span>
-            </Link>
-            <Link
-              to="/admin/usuarios"
-              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "!bg-foreground !text-background" }}
-            >
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Usuários</span>
-            </Link>
-            <Link
-              to="/admin/backup"
-              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "!bg-foreground !text-background" }}
-            >
-              <Database className="h-4 w-4" />
-              <span className="hidden sm:inline">Backup</span>
-            </Link>
-            <Link
-              to="/admin/auditoria"
-              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "!bg-foreground !text-background" }}
-            >
-              <History className="h-4 w-4" />
-              <span className="hidden sm:inline">Auditoria</span>
-            </Link>
+            {visibleNav.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                activeProps={{ className: "!bg-foreground !text-background" }}
+                activeOptions={item.exact ? { exact: true } : undefined}
+              >
+                {item.icon}
+                <span className="hidden sm:inline">{item.label}</span>
+              </Link>
+            ))}
           </nav>
 
           <div className="ml-auto flex items-center gap-1">
