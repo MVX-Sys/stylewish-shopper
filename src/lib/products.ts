@@ -11,6 +11,8 @@ export type Produto = {
   marca: string | null;
   novidade: boolean;
   promocao: boolean;
+  preco_promocional: number | null;
+  promocao_ate: string | null;
   ativo: boolean;
 };
 
@@ -68,3 +70,36 @@ export function isEsgotado(p: { variacoes: VariacaoProduto[] }): boolean {
   if (!p.variacoes || p.variacoes.length === 0) return false;
   return p.variacoes.every((v) => v.quantidade_estoque <= 0);
 }
+
+export type PromoInfo = {
+  ativa: boolean;
+  precoOriginal: number;
+  precoFinal: number;
+  percentual: number; // integer 0-100
+  validoAte: Date | null;
+};
+
+export function getPromoInfo(p: Pick<Produto, "preco" | "promocao" | "preco_promocional" | "promocao_ate">): PromoInfo {
+  const ate = p.promocao_ate ? new Date(p.promocao_ate) : null;
+  const dentroDoPrazo = !ate || ate.getTime() > Date.now();
+  const promoPreco = typeof p.preco_promocional === "number" ? p.preco_promocional : null;
+  const ativa =
+    !!p.promocao &&
+    dentroDoPrazo &&
+    promoPreco !== null &&
+    promoPreco >= 0 &&
+    promoPreco < p.preco;
+  const precoFinal = ativa && promoPreco !== null ? promoPreco : p.preco;
+  const percentual =
+    ativa && p.preco > 0 && promoPreco !== null
+      ? Math.round(((p.preco - promoPreco) / p.preco) * 100)
+      : 0;
+  return {
+    ativa,
+    precoOriginal: p.preco,
+    precoFinal,
+    percentual,
+    validoAte: ate,
+  };
+}
+
