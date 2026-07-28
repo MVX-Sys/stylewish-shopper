@@ -75,7 +75,7 @@ export function SiteHeader() {
               >
                 <User className="h-4 w-4" />
                 <span className="hidden md:inline">
-                  {isAdmin ? "Painel" : "Minha conta"}
+                  {isAdmin ? "Login" : "Minha conta"}
                 </span>
               </Link>
               <button
