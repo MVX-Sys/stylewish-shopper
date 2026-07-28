@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
@@ -8,9 +8,7 @@ import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
 import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
-import { Flame, PackageSearch, Clock, ArrowRight, Sparkles, Tag, Zap } from "lucide-react";
-import { brl } from "@/lib/format";
-import { getImageUrl } from "@/lib/storage";
+import { PackageSearch } from "lucide-react";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
@@ -121,111 +119,9 @@ function Home() {
     [produtos],
   );
 
-  const proximoFim = useMemo(() => {
-    const datas = promocoes
-      .map((p) => getPromoInfo(p).validoAte?.getTime() ?? Infinity)
-      .filter((t) => Number.isFinite(t));
-    if (datas.length === 0) return null;
-    return new Date(Math.min(...datas));
-  }, [promocoes]);
-
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!proximoFim) return;
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, [proximoFim]);
-
-  const countdown = useMemo(() => {
-    if (!proximoFim) return null;
-    const diff = Math.max(0, proximoFim.getTime() - now);
-    const h = Math.floor(diff / 3_600_000);
-    const m = Math.floor((diff % 3_600_000) / 60_000);
-    const s = Math.floor((diff % 60_000) / 1000);
-    return { h, m, s };
-  }, [proximoFim, now]);
-
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-
-      {/* Promoções do dia — hero de ofertas relâmpago */}
-      {promocoes.length > 0 && (
-        <section className="relative overflow-hidden bg-gradient-to-br from-primary/50 via-primary/40 to-[#e04a00]/50">
-          {/* Camada base branca por baixo para dar leveza */}
-          <div className="pointer-events-none absolute inset-0 bg-background/60" />
-
-          {/* Decorativos de fundo */}
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
-            <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-black/5 blur-3xl" />
-            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
-          </div>
-
-          <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-12">
-            {/* Cabeçalho */}
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div className="space-y-3">
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-primary-foreground backdrop-blur-sm">
-                  <Zap className="h-3 w-3 fill-current" />
-                  Ofertas relâmpago
-                </div>
-                <div>
-                  <h1 className="font-display text-3xl font-black leading-none tracking-tight text-primary-foreground md:text-4xl lg:text-5xl">
-                    Promoções do dia
-                  </h1>
-                  <p className="mt-2 max-w-md text-sm text-primary-foreground/85 md:text-base">
-                    Selecionadas a dedo, com desconto real. Aproveite antes que acabe.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-end gap-3">
-                {countdown && (
-                  <div className="flex items-center gap-2.5 rounded-2xl border border-primary-foreground/25 bg-primary-foreground/15 px-4 py-2.5 text-primary-foreground shadow-lg backdrop-blur-md">
-                    <Clock className="h-4 w-4 animate-pulse" />
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/70">Termina em</span>
-                      <div className="flex items-center gap-1 font-mono text-lg font-bold tabular-nums leading-none">
-                        <span className="rounded bg-primary-foreground/15 px-1.5 py-1">{String(countdown.h).padStart(2, "0")}</span>
-                        <span className="opacity-60">:</span>
-                        <span className="rounded bg-primary-foreground/15 px-1.5 py-1">{String(countdown.m).padStart(2, "0")}</span>
-                        <span className="opacity-60">:</span>
-                        <span className="rounded bg-primary-foreground/15 px-1.5 py-1">{String(countdown.s).padStart(2, "0")}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <Link
-                  to="/"
-                  search={{ promocao: "true" }}
-                  className="btn-shine group inline-flex items-center gap-2 rounded-full bg-primary-foreground px-5 py-2.5 text-sm font-bold text-primary shadow-premium transition-transform hover:scale-[1.03] active:scale-[0.98]"
-                >
-                  Ver todas as ofertas
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Grid de destaque: 1 hero + 3 laterais */}
-            <div className="mt-8 grid gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
-              {promocoes[0] && <FeaturedPromoCard produto={promocoes[0]} />}
-              <div className="grid grid-cols-2 gap-4 md:col-span-2 md:grid-cols-2 lg:col-span-3 lg:grid-cols-3">
-                {promocoes.slice(1, 7).map((p) => (
-                  <div key={p.id} className="group relative rounded-2xl bg-background p-2.5 shadow-premium ring-1 ring-black/5 transition-transform hover:-translate-y-1">
-                    <span className="absolute -top-2 -right-2 z-10 inline-flex items-center gap-0.5 rounded-full bg-navy px-2 py-1 text-[10px] font-black tabular-nums text-navy-foreground shadow-lg">
-                      -{getPromoInfo(p).percentual}%
-                    </span>
-                    <ProductCard p={p} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-
 
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[240px_1fr] md:gap-10 md:py-12 lg:grid-cols-[260px_1fr]">
         <FilterSidebar
@@ -234,6 +130,30 @@ function Home() {
           onChange={setFilters}
         />
         <section>
+          {/* Promoções do dia — faixa simples integrada */}
+          {promocoes.length > 0 && !filters.promocao && !q && !activeSlug && (
+            <div className="mb-10">
+              <div className="mb-5 flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="font-display text-2xl font-bold text-foreground">Promoções do dia</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Ofertas válidas por tempo limitado.</p>
+                </div>
+                <Link
+                  to="/"
+                  search={{ promocao: "true" }}
+                  className="text-sm font-semibold text-primary hover:underline"
+                >
+                  Ver todas
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {promocoes.slice(0, 4).map((p) => (
+                  <ProductCard key={p.id} p={p} />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
               {isLoading
@@ -306,71 +226,5 @@ function Home() {
   );
 }
 
-function FeaturedPromoCard({ produto }: { produto: ReturnType<typeof getPromoInfo> extends infer _ ? Parameters<typeof ProductCard>[0]["p"] : never }) {
-  const promo = getPromoInfo(produto);
-  const principal =
-    produto.imagens.find((i) => i.principal) ??
-    [...produto.imagens].sort((a, b) => a.ordem - b.ordem)[0];
-  const [img, setImg] = useState<string>("");
-  useEffect(() => {
-    if (principal) getImageUrl(principal.storage_path).then(setImg);
-  }, [principal]);
-
-  return (
-    <Link
-      to="/produto/$id"
-      params={{ id: produto.id }}
-      className="group relative flex flex-col overflow-hidden rounded-3xl bg-background shadow-premium ring-1 ring-black/5 transition-transform hover:-translate-y-1 md:col-span-1 lg:col-span-1"
-    >
-      <div className="relative aspect-[4/5] overflow-hidden bg-primary/10">
-        {img ? (
-          <img
-            src={img}
-            alt={produto.nome}
-            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.07]"
-          />
-        ) : (
-          <div className="skeleton h-full w-full" />
-        )}
-        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-navy px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-navy-foreground shadow-lg">
-            <Sparkles className="h-3 w-3" />
-            Destaque
-          </span>
-        </div>
-
-        <div className="absolute right-3 top-3">
-          <div className="flex flex-col items-center justify-center rounded-2xl bg-primary px-3 py-2 text-primary-foreground shadow-2xl ring-2 ring-primary-foreground/30">
-            <span className="text-[9px] font-bold uppercase tracking-wider leading-none opacity-90">Off</span>
-            <span className="font-display text-2xl font-black leading-none tabular-nums">
-              {promo.percentual}%
-            </span>
-          </div>
-        </div>
-
-        <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-          <h3 className="line-clamp-2 font-display text-base font-bold leading-tight md:text-lg">
-            {produto.nome}
-          </h3>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-display text-2xl font-black tabular-nums md:text-3xl">
-              {brl(promo.precoFinal)}
-            </span>
-            <span className="text-xs font-medium tabular-nums text-white/70 line-through">
-              {brl(promo.precoOriginal)}
-            </span>
-          </div>
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-primary shadow-md">
-            <Tag className="h-3.5 w-3.5" />
-            Aproveitar oferta
-            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 
