@@ -607,6 +607,45 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                 </label>
               ))}
             </div>
+            {promocao && (
+              <div className="mt-3 space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                  Detalhes da promoção
+                </p>
+                <Field label="Preço promocional *">
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                      R$
+                    </span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={precoPromocional}
+                      onChange={(e) => setPrecoPromocional(e.target.value)}
+                      placeholder="0,00"
+                      className="input pl-9"
+                    />
+                  </div>
+                  {precoPromocional && Number(precoPromocional) >= 0 && Number(precoPromocional) < preco && preco > 0 && (
+                    <p className="mt-1.5 text-xs font-medium text-primary">
+                      Desconto de {Math.round(((preco - Number(precoPromocional)) / preco) * 100)}%
+                    </p>
+                  )}
+                </Field>
+                <Field label="Válida até *">
+                  <input
+                    type="datetime-local"
+                    value={promocaoAte}
+                    onChange={(e) => setPromocaoAte(e.target.value)}
+                    className="input"
+                  />
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    A hora é opcional; se omitida, considera-se 00:00.
+                  </p>
+                </Field>
+              </div>
+            )}
           </Card>
         </div>
       </div>
