@@ -34,38 +34,47 @@ export function ProductCard({ p }: { p: ProductListItem }) {
           <div className="skeleton h-full w-full" />
         )}
 
-        <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1.5">
-          {p.novidade && (
-            <span className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-navy-foreground shadow-sm">
-              Novidade
+        <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+          {esgotado ? (
+            <span className="rounded-full bg-destructive px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-destructive-foreground shadow-sm">
+              Esgotado
             </span>
-          )}
-          {promo.ativa && (
+          ) : (
             <>
-              <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
-                Promoção
-              </span>
-              <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
-                -{promo.percentual}%
-              </span>
+              {p.novidade && (
+                <span className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-navy-foreground shadow-sm">
+                  Novidade
+                </span>
+              )}
+              {promo.ativa && (
+                <>
+                  <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+                    Promoção
+                  </span>
+                  <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+                    -{promo.percentual}%
+                  </span>
+                </>
+              )}
             </>
           )}
         </div>
 
         {esgotado && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
-            <span className="rounded-full bg-destructive px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-destructive-foreground">
+            <span className="rotate-[-8deg] rounded-md bg-destructive px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-destructive-foreground shadow-lg">
               Esgotado
             </span>
           </div>
         )}
+
       </div>
 
       <div className="mt-3.5 space-y-1 px-0.5">
-        <h3 className="line-clamp-1 text-[13px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-sm">
+        <h3 className={`line-clamp-1 text-[13px] font-semibold leading-snug tracking-tight transition-colors sm:text-sm ${esgotado ? "text-muted-foreground" : "text-foreground group-hover:text-primary"}`}>
           {p.nome}
         </h3>
-        {promo.ativa ? (
+        {promo.ativa && !esgotado ? (
           <div className="flex items-baseline gap-2">
             <p className="font-display text-base font-extrabold tabular-nums text-primary">
               {brl(promo.precoFinal)}
@@ -75,10 +84,11 @@ export function ProductCard({ p }: { p: ProductListItem }) {
             </p>
           </div>
         ) : (
-          <p className="font-display text-base font-extrabold tabular-nums text-foreground">
+          <p className={`font-display text-base font-extrabold tabular-nums ${esgotado ? "text-muted-foreground line-through" : "text-foreground"}`}>
             {brl(p.preco)}
           </p>
         )}
+
       </div>
     </Link>
   );
