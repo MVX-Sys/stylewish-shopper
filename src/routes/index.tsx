@@ -151,12 +151,12 @@ function Home() {
 
       {/* Promoções do dia — hero de ofertas relâmpago */}
       {promocoes.length > 0 && (
-        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-[#e04a00]">
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary/90 via-primary/80 to-[#e04a00]/90">
           {/* Decorativos de fundo */}
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-black/10 blur-3xl" />
-            <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+            <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/15 blur-3xl" />
+            <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-black/5 blur-3xl" />
+            <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
           </div>
 
           <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-12">
