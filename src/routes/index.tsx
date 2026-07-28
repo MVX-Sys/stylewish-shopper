@@ -8,7 +8,7 @@ import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
 import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
-import { Flame, PackageSearch, Sparkles } from "lucide-react";
+import { Flame, PackageSearch, Sparkles, Clock, ArrowRight } from "lucide-react";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
