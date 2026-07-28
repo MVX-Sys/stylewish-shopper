@@ -190,7 +190,7 @@ function Home() {
               {promocoes.map((p, idx) => (
                 <div
                   key={p.id}
-                  className="animate-fade-in-up"
+                  className="animate-fade-in-up rounded-2xl bg-background p-2.5 shadow-lg sm:p-3"
                   style={{ animationDelay: `${Math.min(idx * 40, 320)}ms` }}
                 >
                   <ProductCard p={p} />
