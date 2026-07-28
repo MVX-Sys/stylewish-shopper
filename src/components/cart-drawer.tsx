@@ -22,7 +22,7 @@ export function CartDrawer() {
         }`}
       />
       <aside
-        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-background shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-background shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

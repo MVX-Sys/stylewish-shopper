@@ -226,8 +226,8 @@ function Home() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 py-24 text-center">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10">
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card px-6 py-24 text-center shadow-soft">
+              <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10 ring-4 ring-primary/5">
                 <PackageSearch className="h-7 w-7 text-primary" />
               </div>
               <h3 className="mt-5 font-display text-lg font-bold">
@@ -238,7 +238,7 @@ function Home() {
               </p>
               <button
                 onClick={() => setFilters(defaultFilters)}
-                className="mt-6 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                className="btn-shine mt-6 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-premium transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 Limpar filtros
               </button>
