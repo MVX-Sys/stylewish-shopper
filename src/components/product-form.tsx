@@ -47,6 +47,8 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   
   const [novidade, setNovidade] = useState(false);
   const [promocao, setPromocao] = useState(false);
+  const [precoPromocional, setPrecoPromocional] = useState<string>("");
+  const [promocaoAte, setPromocaoAte] = useState<string>("");
   const [ativo, setAtivo] = useState(true);
   const [imgs, setImgs] = useState<ImgRow[]>([]);
   const [vars, setVars] = useState<VarRow[]>([]);
@@ -64,6 +66,19 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
     
     setNovidade(existing.novidade);
     setPromocao(existing.promocao);
+    setPrecoPromocional(
+      existing.preco_promocional != null ? String(existing.preco_promocional) : "",
+    );
+    // Converte ISO -> "YYYY-MM-DDTHH:mm" no horário local para <input type="datetime-local">
+    if (existing.promocao_ate) {
+      const d = new Date(existing.promocao_ate);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setPromocaoAte(
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      );
+    } else {
+      setPromocaoAte("");
+    }
     setAtivo(existing.ativo);
     setVars(
       existing.variacoes.map((v) => ({
