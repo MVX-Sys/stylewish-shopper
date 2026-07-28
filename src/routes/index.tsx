@@ -119,30 +119,6 @@ function Home() {
     [produtos],
   );
 
-  const proximoFim = useMemo(() => {
-    const datas = promocoes
-      .map((p) => getPromoInfo(p).validoAte?.getTime() ?? Infinity)
-      .filter((t) => Number.isFinite(t));
-    if (datas.length === 0) return null;
-    return new Date(Math.min(...datas));
-  }, [promocoes]);
-
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!proximoFim) return;
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, [proximoFim]);
-
-  const countdown = useMemo(() => {
-    if (!proximoFim) return null;
-    const diff = Math.max(0, proximoFim.getTime() - now);
-    const h = Math.floor(diff / 3_600_000);
-    const m = Math.floor((diff % 3_600_000) / 60_000);
-    const s = Math.floor((diff % 60_000) / 1000);
-    return { h, m, s };
-  }, [proximoFim, now]);
-
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
