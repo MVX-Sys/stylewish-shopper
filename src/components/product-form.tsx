@@ -212,6 +212,34 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       toast.error("Nome, preço e categoria são obrigatórios.");
       return;
     }
+    let precoPromoNum: number | null = null;
+    let promoAteIso: string | null = null;
+    if (promocao) {
+      const parsed = precoPromocional.trim() === "" ? NaN : Number(precoPromocional);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        toast.error("Informe um preço promocional válido.");
+        return;
+      }
+      if (parsed >= preco) {
+        toast.error("O preço promocional deve ser menor que o preço original.");
+        return;
+      }
+      if (!promocaoAte.trim()) {
+        toast.error("Informe a data de validade da promoção.");
+        return;
+      }
+      const dt = new Date(promocaoAte);
+      if (Number.isNaN(dt.getTime())) {
+        toast.error("Data da promoção inválida.");
+        return;
+      }
+      if (dt.getTime() <= Date.now()) {
+        toast.error("A data da promoção deve ser no futuro.");
+        return;
+      }
+      precoPromoNum = parsed;
+      promoAteIso = dt.toISOString();
+    }
     setSaving(true);
     try {
       let pid = produtoId;
@@ -223,6 +251,8 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         marca: null,
         novidade,
         promocao,
+        preco_promocional: precoPromoNum,
+        promocao_ate: promoAteIso,
         ativo,
       };
       if (pid) {
