@@ -149,47 +149,74 @@ function Home() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
-      {/* Promoções do dia — faixa com destaque de produtos */}
+      {/* Promoções do dia — hero de ofertas relâmpago */}
       {promocoes.length > 0 && (
-        <section className="bg-primary">
-          <div className="mx-auto max-w-7xl px-4 py-6 md:py-8">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/90">
-                  <Flame className="h-3 w-3" />
-                  Promoções do dia
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-[#e04a00]">
+          {/* Decorativos de fundo */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-black/10 blur-3xl" />
+            <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+          </div>
+
+          <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-12">
+            {/* Cabeçalho */}
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-primary-foreground backdrop-blur-sm">
+                  <Zap className="h-3 w-3 fill-current" />
+                  Ofertas relâmpago
                 </div>
-                <h1 className="font-display text-base font-semibold text-primary-foreground md:text-lg">
-                  Ofertas imperdíveis
-                </h1>
+                <div>
+                  <h1 className="font-display text-3xl font-black leading-none tracking-tight text-primary-foreground md:text-4xl lg:text-5xl">
+                    Promoções do dia
+                  </h1>
+                  <p className="mt-2 max-w-md text-sm text-primary-foreground/85 md:text-base">
+                    Selecionadas a dedo, com desconto real. Aproveite antes que acabe.
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end gap-3">
                 {countdown && (
-                  <div className="flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-primary-foreground">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span className="font-mono text-xs font-semibold tabular-nums">
-                      {String(countdown.h).padStart(2, "0")}:{String(countdown.m).padStart(2, "0")}:{String(countdown.s).padStart(2, "0")}
-                    </span>
+                  <div className="flex items-center gap-2.5 rounded-2xl border border-primary-foreground/25 bg-primary-foreground/15 px-4 py-2.5 text-primary-foreground shadow-lg backdrop-blur-md">
+                    <Clock className="h-4 w-4 animate-pulse" />
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/70">Termina em</span>
+                      <div className="flex items-center gap-1 font-mono text-lg font-bold tabular-nums leading-none">
+                        <span className="rounded bg-primary-foreground/15 px-1.5 py-1">{String(countdown.h).padStart(2, "0")}</span>
+                        <span className="opacity-60">:</span>
+                        <span className="rounded bg-primary-foreground/15 px-1.5 py-1">{String(countdown.m).padStart(2, "0")}</span>
+                        <span className="opacity-60">:</span>
+                        <span className="rounded bg-primary-foreground/15 px-1.5 py-1">{String(countdown.s).padStart(2, "0")}</span>
+                      </div>
+                    </div>
                   </div>
                 )}
                 <Link
                   to="/"
                   search={{ promocao: "true" }}
-                  className="group inline-flex items-center gap-1.5 rounded-full bg-primary-foreground px-3.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-white"
+                  className="btn-shine group inline-flex items-center gap-2 rounded-full bg-primary-foreground px-5 py-2.5 text-sm font-bold text-primary shadow-premium transition-transform hover:scale-[1.03] active:scale-[0.98]"
                 >
-                  Ver ofertas
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  Ver todas as ofertas
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
-              {promocoes.slice(0, 4).map((p) => (
-                <div key={p.id} className="rounded-2xl bg-background p-2 shadow-soft">
-                  <ProductCard p={p} />
-                </div>
-              ))}
+            {/* Grid de destaque: 1 hero + 3 laterais */}
+            <div className="mt-8 grid gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
+              {promocoes[0] && <FeaturedPromoCard produto={promocoes[0]} />}
+              <div className="grid grid-cols-2 gap-4 md:col-span-2 md:grid-cols-2 lg:col-span-3 lg:grid-cols-3">
+                {promocoes.slice(1, 7).map((p) => (
+                  <div key={p.id} className="group relative rounded-2xl bg-background p-2.5 shadow-premium ring-1 ring-black/5 transition-transform hover:-translate-y-1">
+                    <span className="absolute -top-2 -right-2 z-10 inline-flex items-center gap-0.5 rounded-full bg-navy px-2 py-1 text-[10px] font-black tabular-nums text-navy-foreground shadow-lg">
+                      -{getPromoInfo(p).percentual}%
+                    </span>
+                    <ProductCard p={p} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
