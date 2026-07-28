@@ -143,7 +143,9 @@ function ProductPage() {
           cor,
           hexCor: v.hex_cor,
           tamanho: tam,
-          preco: precoEfetivo,
+          preco: p.preco,
+          precoPromocional: promo?.ativa ? promo.precoFinal : null,
+          promocaoAte: promo?.ativa && promo.validoAte ? promo.validoAte.toISOString() : null,
         },
         q,
       );
