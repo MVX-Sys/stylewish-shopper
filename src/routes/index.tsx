@@ -147,37 +147,47 @@ function Home() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
-      {/* Promoções do dia — faixa compacta */}
+      {/* Promoções do dia — faixa com destaque de produtos */}
       {promocoes.length > 0 && (
         <section className="bg-primary">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3.5">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/90">
-                <Flame className="h-3 w-3" />
-                Promoções do dia
+          <div className="mx-auto max-w-7xl px-4 py-6 md:py-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/90">
+                  <Flame className="h-3 w-3" />
+                  Promoções do dia
+                </div>
+                <h1 className="font-display text-base font-semibold text-primary-foreground md:text-lg">
+                  Ofertas imperdíveis
+                </h1>
               </div>
-              <h1 className="font-display text-sm font-semibold text-primary-foreground md:text-base">
-                Ofertas imperdíveis
-              </h1>
+
+              <div className="flex items-center gap-3">
+                {countdown && (
+                  <div className="flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-primary-foreground">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span className="font-mono text-xs font-semibold tabular-nums">
+                      {String(countdown.h).padStart(2, "0")}:{String(countdown.m).padStart(2, "0")}:{String(countdown.s).padStart(2, "0")}
+                    </span>
+                  </div>
+                )}
+                <Link
+                  to="/"
+                  search={{ promocao: "true" }}
+                  className="group inline-flex items-center gap-1.5 rounded-full bg-primary-foreground px-3.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-white"
+                >
+                  Ver ofertas
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              {countdown && (
-                <div className="flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-primary-foreground">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span className="font-mono text-xs font-semibold tabular-nums">
-                    {String(countdown.h).padStart(2, "0")}:{String(countdown.m).padStart(2, "0")}:{String(countdown.s).padStart(2, "0")}
-                  </span>
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+              {promocoes.slice(0, 4).map((p) => (
+                <div key={p.id} className="rounded-2xl bg-background p-2 shadow-soft">
+                  <ProductCard p={p} />
                 </div>
-              )}
-              <Link
-                to="/"
-                search={{ promocao: "true" }}
-                className="group inline-flex items-center gap-1.5 rounded-full bg-primary-foreground px-3.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-white"
-              >
-                Ver ofertas
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+              ))}
             </div>
           </div>
         </section>
