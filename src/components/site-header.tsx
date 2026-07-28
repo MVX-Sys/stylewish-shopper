@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ShoppingBag, User, Search, LogOut } from "lucide-react";
+import { ShoppingBag, User, Search, LogOut, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { listCategorias } from "@/lib/products";
 import { useCart } from "@/lib/cart";
