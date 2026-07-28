@@ -267,7 +267,7 @@ function LandingView({
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <h2 className="font-display text-2xl font-extrabold tracking-tight text-primary sm:text-3xl">
-                Ofertas Relâmpago
+                Melhores Ofertas
               </h2>
               <Zap className="h-6 w-6 fill-primary text-primary" />
             </div>
