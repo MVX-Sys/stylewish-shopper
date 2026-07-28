@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { useCart } from "@/lib/cart";
+import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { BRAND, VALOR_MINIMO_COMPRA, WHATSAPP_NUMBER } from "@/lib/config";
 import { ChevronLeft, MessageCircle, FileText } from "lucide-react";
@@ -67,12 +67,13 @@ function CheckoutPage() {
       }
     }
 
-    const linhas = items.map(
-      (i) =>
-        `• ${i.quantidade}x ${i.nome} — Cor ${i.cor}, Tam ${i.tamanho} — ${brl(
-          i.preco * i.quantidade,
-        )}`,
-    );
+    const linhas = items.map((i) => {
+      const eff = itemPrecoEfetivo(i);
+      const promoTag = eff < i.preco ? ` (promo ${brl(eff)}, de ${brl(i.preco)})` : "";
+      return `• ${i.quantidade}x ${i.nome} — Cor ${i.cor}, Tam ${i.tamanho} — ${brl(
+        eff * i.quantidade,
+      )}${promoTag}`;
+    });
 
     const enderecoBloco =
       formaEnvio === "ENTREGA"

@@ -7,9 +7,21 @@ export type CartItem = {
   cor: string;
   hexCor: string;
   tamanho: string;
-  preco: number;
+  preco: number; // preço base (sem promoção)
+  precoPromocional?: number | null; // preço promocional definido, se houver
+  promocaoAte?: string | null; // ISO expiry
   quantidade: number;
 };
+
+export function itemPrecoEfetivo(i: Pick<CartItem, "preco" | "precoPromocional" | "promocaoAte">): number {
+  const promo = i.precoPromocional;
+  if (promo == null || promo < 0 || promo >= i.preco) return i.preco;
+  if (i.promocaoAte) {
+    const ate = new Date(i.promocaoAte).getTime();
+    if (!Number.isFinite(ate) || ate <= Date.now()) return i.preco;
+  }
+  return promo;
+}
 
 type CartCtx = {
   items: CartItem[];
@@ -30,6 +42,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [, setTick] = useState(0);
+
+  // Re-render periodicamente para expirar promoções em tempo real
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     try {
@@ -72,7 +91,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clear = () => setItems([]);
 
-  const total = items.reduce((s, i) => s + i.preco * i.quantidade, 0);
+  const total = items.reduce((s, i) => s + itemPrecoEfetivo(i) * i.quantidade, 0);
   const count = items.reduce((s, i) => s + i.quantidade, 0);
 
   return (
