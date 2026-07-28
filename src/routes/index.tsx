@@ -148,29 +148,29 @@ function Home() {
       <SiteHeader />
 
       {/* Promoções do dia */}
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-background">
+      <section className="relative overflow-hidden bg-primary">
         <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary-foreground/80">
                 <Flame className="h-4 w-4" />
                 Promoções do dia
               </div>
-              <h1 className="mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
-                Ofertas <span className="text-primary">imperdíveis</span>
+              <h1 className="mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-primary-foreground md:text-5xl">
+                Ofertas <span className="text-primary-foreground/90">imperdíveis</span>
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-primary-foreground/80 md:text-base">
                 {promocoes.length > 0
                   ? "Aproveite descontos válidos por tempo limitado — peça agora pelo WhatsApp."
                   : "Nenhuma promoção ativa no momento. Confira nossa coleção completa abaixo."}
               </p>
             </div>
             {countdown && (
-              <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-card px-4 py-2 text-sm shadow-sm">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm shadow-sm">
+                <span className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/70">
                   Termina em
                 </span>
-                <span className="font-mono text-base font-bold tabular-nums text-primary">
+                <span className="font-mono text-base font-bold tabular-nums text-primary-foreground">
                   {String(countdown.h).padStart(2, "0")}:
                   {String(countdown.m).padStart(2, "0")}:
                   {String(countdown.s).padStart(2, "0")}
@@ -198,16 +198,16 @@ function Home() {
               ))}
             </div>
           ) : (
-            <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 px-6 py-12 text-center">
-              <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/10">
-                <Sparkles className="h-6 w-6 text-primary" />
+            <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary-foreground/30 bg-primary-foreground/10 px-6 py-12 text-center">
+              <div className="grid h-14 w-14 place-items-center rounded-full bg-primary-foreground/20">
+                <Sparkles className="h-6 w-6 text-primary-foreground" />
               </div>
-              <p className="mt-4 max-w-sm text-sm text-muted-foreground">
+              <p className="mt-4 max-w-sm text-sm text-primary-foreground/80">
                 Fique de olho — novas ofertas chegam sempre.
               </p>
               <Link
                 to="/"
-                className="mt-5 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                className="mt-5 rounded-full bg-primary-foreground px-6 py-2.5 text-sm font-semibold text-primary transition-opacity hover:opacity-90"
               >
                 Ver coleção
               </Link>
