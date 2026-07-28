@@ -12,7 +12,7 @@ import logoAsset from "@/assets/acha-busca-icon.png.asset.json";
 
 export function SiteHeader() {
   const { count, setOpen } = useCart();
-  const { session, isAdmin } = useAuth();
+  const { session, isAdmin, roleKind } = useAuth();
   const { data: cats = [] } = useQuery({
     queryKey: ["categorias"],
     queryFn: listCategorias,
@@ -68,26 +68,38 @@ export function SiteHeader() {
 
         <div className="ml-auto flex shrink-0 items-center gap-0.5 text-sm sm:gap-2">
           {session ? (
-            <div className="hidden items-center gap-1 sm:flex">
-              <Link
-                to={isAdmin ? "/admin" : "/auth"}
-                className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15"
-              >
-                <User className="h-4 w-4" />
-                <span className="hidden md:inline">
-                  {isAdmin ? "Login" : "Minha conta"}
-                </span>
-              </Link>
+            roleKind !== "cliente" ? (
+              <div className="hidden items-center gap-1 sm:flex">
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15"
+                >
+                  <User className="h-4 w-4" />
+                  <span className="hidden md:inline">
+                    {isAdmin ? "Painel admin" : "Painel"}
+                  </span>
+                </Link>
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                  }}
+                  className="rounded-full p-2 text-white/80 hover:bg-white/15 hover:text-white"
+                  aria-label="Sair"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
               <button
                 onClick={async () => {
                   await supabase.auth.signOut();
                 }}
-                className="rounded-full p-2 text-white/80 hover:bg-white/15 hover:text-white"
-                aria-label="Sair"
+                className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15 sm:flex"
               >
                 <LogOut className="h-4 w-4" />
+                <span className="hidden md:inline">Sair</span>
               </button>
-            </div>
+            )
           ) : (
             <Link
               to="/auth"
@@ -160,13 +172,6 @@ export function SiteHeader() {
                 </Link>
               );
             })}
-            <Link
-              to="/"
-              className="group flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary shadow-sm ring-1 ring-white/80 transition-transform hover:scale-105 hover:bg-white/95 hover:shadow-md sm:px-5 sm:text-xs sm:tracking-[0.18em]"
-            >
-              <Sparkles className="h-3.5 w-3.5 fill-primary/20" />
-              Ver coleção completa
-            </Link>
           </div>
         </nav>
       )}
