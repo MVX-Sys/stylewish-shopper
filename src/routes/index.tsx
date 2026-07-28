@@ -8,7 +8,7 @@ import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
 import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
-import { Flame, PackageSearch, Sparkles } from "lucide-react";
+import { Flame, PackageSearch, Sparkles, Clock, ArrowRight } from "lucide-react";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
@@ -149,56 +149,70 @@ function Home() {
 
       {/* Promoções do dia */}
       <section className="relative overflow-hidden bg-primary">
-        <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary-foreground/80">
-                <Flame className="h-4 w-4" />
+        <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary-foreground/90">
+                <Flame className="h-3.5 w-3.5" />
                 Promoções do dia
               </div>
-              <h1 className="mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-primary-foreground md:text-5xl">
-                Ofertas <span className="text-primary-foreground/90">imperdíveis</span>
+              <h1 className="mt-4 font-display text-2xl font-bold leading-[1.1] tracking-tight text-primary-foreground md:text-4xl">
+                Ofertas imperdíveis
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-primary-foreground/80 md:text-base">
+              <p className="mt-2.5 max-w-lg text-sm leading-relaxed text-primary-foreground/75 md:text-base">
                 {promocoes.length > 0
-                  ? "Aproveite descontos válidos por tempo limitado — peça agora pelo WhatsApp."
+                  ? "Descontos por tempo limitado para sua primeira compra. Peça agora pelo WhatsApp."
                   : "Nenhuma promoção ativa no momento. Confira nossa coleção completa abaixo."}
               </p>
             </div>
+
             {countdown && (
-              <div className="flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm shadow-sm">
-                <span className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/70">
-                  Termina em
-                </span>
-                <span className="font-mono text-base font-bold tabular-nums text-primary-foreground">
-                  {String(countdown.h).padStart(2, "0")}:
-                  {String(countdown.m).padStart(2, "0")}:
-                  {String(countdown.s).padStart(2, "0")}
-                </span>
+              <div className="flex items-center gap-3 rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-3 backdrop-blur-sm">
+                <Clock className="h-5 w-5 text-primary-foreground/80" />
+                <div>
+                  <span className="block text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/70">
+                    Termina em
+                  </span>
+                  <span className="font-mono text-lg font-bold tabular-nums leading-none text-primary-foreground">
+                    {String(countdown.h).padStart(2, "0")}:{String(countdown.m).padStart(2, "0")}:{String(countdown.s).padStart(2, "0")}
+                  </span>
+                </div>
               </div>
             )}
           </div>
 
           {isLoading ? (
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
               ))}
             </div>
           ) : promocoes.length > 0 ? (
-            <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-6">
-              {promocoes.map((p, idx) => (
-                <div
-                  key={p.id}
-                  className="animate-fade-in-up rounded-2xl bg-background p-2.5 shadow-lg sm:p-3"
-                  style={{ animationDelay: `${Math.min(idx * 40, 320)}ms` }}
+            <div className="mt-10">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+                {promocoes.map((p, idx) => (
+                  <div
+                    key={p.id}
+                    className="animate-fade-in-up rounded-2xl bg-background p-2 shadow-md sm:p-2.5"
+                    style={{ animationDelay: `${Math.min(idx * 40, 320)}ms` }}
+                  >
+                    <ProductCard p={p} />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 flex justify-center">
+                <Link
+                  to="/"
+                  search={{ promocao: "true" }}
+                  className="group inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-foreground/20"
                 >
-                  <ProductCard p={p} />
-                </div>
-              ))}
+                  Ver todas as ofertas
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
             </div>
           ) : (
-            <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary-foreground/30 bg-primary-foreground/10 px-6 py-12 text-center">
+            <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary-foreground/25 bg-primary-foreground/10 px-6 py-14 text-center">
               <div className="grid h-14 w-14 place-items-center rounded-full bg-primary-foreground/20">
                 <Sparkles className="h-6 w-6 text-primary-foreground" />
               </div>
