@@ -160,6 +160,13 @@ export function SiteHeader() {
                 </Link>
               );
             })}
+            <Link
+              to="/"
+              className="group flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary shadow-sm ring-1 ring-white/80 transition-transform hover:scale-105 hover:bg-white/95 hover:shadow-md sm:px-5 sm:text-xs sm:tracking-[0.18em]"
+            >
+              <Sparkles className="h-3.5 w-3.5 fill-primary/20" />
+              Ver coleção completa
+            </Link>
           </div>
         </nav>
       )}
