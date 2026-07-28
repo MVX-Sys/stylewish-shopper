@@ -7,9 +7,21 @@ export type CartItem = {
   cor: string;
   hexCor: string;
   tamanho: string;
-  preco: number;
+  preco: number; // preço base (sem promoção)
+  precoPromocional?: number | null; // preço promocional definido, se houver
+  promocaoAte?: string | null; // ISO expiry
   quantidade: number;
 };
+
+export function itemPrecoEfetivo(i: Pick<CartItem, "preco" | "precoPromocional" | "promocaoAte">): number {
+  const promo = i.precoPromocional;
+  if (promo == null || promo < 0 || promo >= i.preco) return i.preco;
+  if (i.promocaoAte) {
+    const ate = new Date(i.promocaoAte).getTime();
+    if (!Number.isFinite(ate) || ate <= Date.now()) return i.preco;
+  }
+  return promo;
+}
 
 type CartCtx = {
   items: CartItem[];
