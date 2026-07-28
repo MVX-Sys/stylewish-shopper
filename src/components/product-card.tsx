@@ -22,7 +22,7 @@ export function ProductCard({ p }: { p: ProductListItem }) {
       params={{ id: p.id }}
       className="group block"
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-border transition-shadow duration-300 group-hover:shadow-lg">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-primary/50 shadow-md ring-1 ring-border transition-shadow duration-300 group-hover:shadow-lg">
         {img ? (
           <img
             src={img}
