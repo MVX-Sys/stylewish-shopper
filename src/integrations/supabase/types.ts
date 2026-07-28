@@ -120,7 +120,9 @@ export type Database = {
           nome: string
           novidade: boolean
           preco: number
+          preco_promocional: number | null
           promocao: boolean
+          promocao_ate: string | null
         }
         Insert: {
           ativo?: boolean
@@ -132,7 +134,9 @@ export type Database = {
           nome: string
           novidade?: boolean
           preco: number
+          preco_promocional?: number | null
           promocao?: boolean
+          promocao_ate?: string | null
         }
         Update: {
           ativo?: boolean
@@ -144,7 +148,9 @@ export type Database = {
           nome?: string
           novidade?: boolean
           preco?: number
+          preco_promocional?: number | null
           promocao?: boolean
+          promocao_ate?: string | null
         }
         Relationships: [
           {
