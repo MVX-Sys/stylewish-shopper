@@ -1,6 +1,6 @@
 import { X, Minus, Plus, MessageCircle, Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useCart } from "@/lib/cart";
+import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
 
 export function CartDrawer() {
@@ -109,7 +109,22 @@ export function CartDrawer() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-sm font-semibold tabular-nums">
-                    {brl(i.preco * i.quantidade)}
+                    {(() => {
+                      const eff = itemPrecoEfetivo(i);
+                      const promo = eff < i.preco;
+                      return (
+                        <div className="flex flex-col items-end">
+                          <span className={promo ? "text-primary" : undefined}>
+                            {brl(eff * i.quantidade)}
+                          </span>
+                          {promo && (
+                            <span className="text-[10px] font-medium text-muted-foreground line-through">
+                              {brl(i.preco * i.quantidade)}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </li>
               ))}
