@@ -52,13 +52,6 @@ export function downloadProductPDF(p: ProductListItem, categoriaNome?: string) {
   header(doc, "Ficha do produto");
 
   let y = 32;
-  if (p.marca) {
-    doc.setFontSize(10);
-    doc.setTextColor(...MUTED);
-    doc.text(p.marca.toUpperCase(), 14, y);
-    y += 5;
-    doc.setTextColor(...DARK);
-  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
@@ -403,7 +396,6 @@ export type ProductExportRow = ProductListItem & { categoriaNome?: string };
 export function downloadProductsCSV(rows: ProductExportRow[]) {
   const headers = [
     "Nome",
-    "Marca",
     "Categoria",
     "Preço",
     "Ativo",
@@ -426,7 +418,6 @@ export function downloadProductsCSV(rows: ProductExportRow[]) {
     lines.push(
       [
         p.nome,
-        p.marca ?? "",
         p.categoriaNome ?? "",
         p.preco.toFixed(2).replace(".", ","),
         p.ativo ? "Sim" : "Não",
@@ -469,9 +460,8 @@ export function downloadProductsPDF(rows: ProductExportRow[]) {
   y += 6;
 
   const cols = [
-    { label: "Produto", x: 14, width: 70 },
-    { label: "Marca", x: 84, width: 32 },
-    { label: "Categoria", x: 116, width: 32 },
+    { label: "Produto", x: 14, width: 86 },
+    { label: "Categoria", x: 100, width: 48 },
     { label: "Preço", x: 148, width: 22 },
     { label: "Estoque", x: 170, width: 20 },
     { label: "Status", x: 190, width: w - 14 - 190 },
@@ -504,7 +494,6 @@ export function downloadProductsPDF(rows: ProductExportRow[]) {
       : "Ativo";
     const cells = [
       p.nome,
-      p.marca ?? "—",
       p.categoriaNome ?? "—",
       brl(p.preco),
       String(estoque),
@@ -645,7 +634,6 @@ export function downloadTableXLSX(
 export function downloadProductsXLSX(rows: ProductExportRow[]) {
   const headers = [
     "Nome",
-    "Marca",
     "Categoria",
     "Preço",
     "Ativo",
@@ -662,7 +650,6 @@ export function downloadProductsXLSX(rows: ProductExportRow[]) {
       .join(" | ");
     return [
       p.nome,
-      p.marca ?? "",
       p.categoriaNome ?? "",
       p.preco,
       p.ativo ? "Sim" : "Não",
