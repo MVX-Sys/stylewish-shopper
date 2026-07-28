@@ -1,16 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
-import { listCategorias, listProdutos } from "@/lib/products";
+import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
-import { PackageSearch } from "lucide-react";
-import birkenDubai from "@/assets/birken_dubai.jpg.asset.json";
-import birkenPremium from "@/assets/birken_premium.jpg.asset.json";
+import { Flame, PackageSearch, Sparkles } from "lucide-react";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
@@ -112,43 +110,112 @@ function Home() {
       onClear: () => setFilters({ ...filters, precoMin: 0, precoMax: 500 }),
     });
 
+  const promocoes = useMemo(
+    () =>
+      produtos
+        .filter((p) => p.ativo && getPromoInfo(p).ativa)
+        .sort((a, b) => getPromoInfo(b).percentual - getPromoInfo(a).percentual)
+        .slice(0, 8),
+    [produtos],
+  );
+
+  const proximoFim = useMemo(() => {
+    const datas = promocoes
+      .map((p) => getPromoInfo(p).validoAte?.getTime() ?? Infinity)
+      .filter((t) => Number.isFinite(t));
+    if (datas.length === 0) return null;
+    return new Date(Math.min(...datas));
+  }, [promocoes]);
+
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!proximoFim) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [proximoFim]);
+
+  const countdown = useMemo(() => {
+    if (!proximoFim) return null;
+    const diff = Math.max(0, proximoFim.getTime() - now);
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    const s = Math.floor((diff % 60_000) / 1000);
+    return { h, m, s };
+  }, [proximoFim, now]);
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
-      {/* Hero band */}
-      <section className="relative overflow-hidden border-b border-border bg-card">
-        {/* Decorative images behind the hero area */}
-        {!q && !activeSlug && heading === "Coleção" && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 top-0 -z-0 flex w-full items-center justify-end pr-0 opacity-20 md:w-3/4 md:opacity-25 lg:opacity-30"
-          >
-            <img
-              src={birkenDubai.url}
-              alt=""
-              className="h-72 w-72 translate-x-10 translate-y-2 rounded-full object-cover shadow-xl md:h-[26rem] md:w-[26rem] md:translate-x-14 lg:h-[34rem] lg:w-[34rem]"
-            />
-            <img
-              src={birkenPremium.url}
-              alt=""
-              className="h-60 w-60 -translate-x-12 translate-y-20 rounded-full object-cover shadow-xl md:h-80 md:w-80 md:translate-y-24 lg:h-[28rem] lg:w-[28rem]"
-            />
-          </span>
-        )}
-        <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-12">
-          <div className="relative flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
-            <span className="h-px w-6 bg-primary" />
-            {q ? "Busca" : activeSlug ? "Categoria" : "Nova temporada"}
+      {/* Promoções do dia */}
+      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-background to-background">
+        <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
+                <Flame className="h-4 w-4" />
+                Promoções do dia
+              </div>
+              <h1 className="mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
+                Ofertas <span className="text-primary">imperdíveis</span>
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
+                {promocoes.length > 0
+                  ? "Aproveite descontos válidos por tempo limitado — peça agora pelo WhatsApp."
+                  : "Nenhuma promoção ativa no momento. Confira nossa coleção completa abaixo."}
+              </p>
+            </div>
+            {countdown && (
+              <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-card px-4 py-2 text-sm shadow-sm">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Termina em
+                </span>
+                <span className="font-mono text-base font-bold tabular-nums text-primary">
+                  {String(countdown.h).padStart(2, "0")}:
+                  {String(countdown.m).padStart(2, "0")}:
+                  {String(countdown.s).padStart(2, "0")}
+                </span>
+              </div>
+            )}
           </div>
-          <h1 className="relative mt-3 font-display text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
-            {heading}
-          </h1>
-          <p className="relative mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-            {subheading}
-          </p>
+
+          {isLoading ? (
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : promocoes.length > 0 ? (
+            <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-6">
+              {promocoes.map((p, idx) => (
+                <div
+                  key={p.id}
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${Math.min(idx * 40, 320)}ms` }}
+                >
+                  <ProductCard p={p} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 px-6 py-12 text-center">
+              <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/10">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <p className="mt-4 max-w-sm text-sm text-muted-foreground">
+                Fique de olho — novas ofertas chegam sempre.
+              </p>
+              <Link
+                to="/"
+                className="mt-5 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Ver coleção
+              </Link>
+            </div>
+          )}
         </div>
       </section>
+
 
 
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[240px_1fr] md:gap-10 md:py-12 lg:grid-cols-[260px_1fr]">
