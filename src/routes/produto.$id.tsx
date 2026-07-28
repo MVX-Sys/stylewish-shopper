@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { getProduto, isEsgotado } from "@/lib/products";
+import { getProduto, getPromoInfo, isEsgotado } from "@/lib/products";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
@@ -116,10 +116,13 @@ function ProductPage() {
   const setQ = (k: string, q: number) =>
     setQtys((prev) => ({ ...prev, [k]: Math.max(0, q) }));
 
+  const promo = useMemo(() => (p ? getPromoInfo(p) : null), [p]);
+  const precoEfetivo = promo?.ativa ? promo.precoFinal : p?.preco ?? 0;
+
   const subtotal = useMemo(() => {
     if (!p) return 0;
-    return Object.entries(qtys).reduce((s, [, q]) => s + q * p.preco, 0);
-  }, [qtys, p]);
+    return Object.entries(qtys).reduce((s, [, q]) => s + q * precoEfetivo, 0);
+  }, [qtys, p, precoEfetivo]);
 
   const totalItens = Object.values(qtys).reduce((s, q) => s + q, 0);
 
@@ -140,7 +143,7 @@ function ProductPage() {
           cor,
           hexCor: v.hex_cor,
           tamanho: tam,
-          preco: p.preco,
+          preco: precoEfetivo,
         },
         q,
       );
@@ -251,9 +254,9 @@ function ProductPage() {
                         Novidade
                       </span>
                     )}
-                    {p.promocao && (
+                    {promo?.ativa && (
                       <span className="rounded-full bg-brand px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-foreground shadow-sm">
-                        Promoção
+                        -{promo.percentual}% OFF
                       </span>
                     )}
                   </div>
