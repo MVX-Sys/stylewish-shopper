@@ -1,16 +1,29 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
-import { listCategorias, listProdutos } from "@/lib/products";
+import { listCategorias, listProdutos, getPromoInfo } from "@/lib/products";
 import { z } from "zod";
-import { PackageSearch } from "lucide-react";
-import birkenDubai from "@/assets/birken_dubai.jpg.asset.json";
-import birkenPremium from "@/assets/birken_premium.jpg.asset.json";
+import {
+  PackageSearch,
+  Shirt,
+  Footprints,
+  ShoppingBag,
+  Watch,
+  Sparkles,
+  Tag,
+  Zap,
+  Clock,
+  Truck,
+  ShieldCheck,
+  MessageCircle,
+  ChevronRight,
+  Package,
+} from "lucide-react";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
@@ -21,18 +34,54 @@ export const Route = createFileRoute("/")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "ACHAEBUSCA — Moda masculina urbana" },
+      { title: "ACHAEBUSCA — Atacado de moda e calçados" },
       {
         name: "description",
         content:
-          "Camisas, bermudas, calças e acessórios selecionados. Peça direto pelo WhatsApp.",
+          "Ofertas relâmpago, novidades e coleções completas em roupas e calçados. Peça direto pelo WhatsApp.",
       },
-      { property: "og:title", content: "ACHAEBUSCA — Catálogo" },
-      { property: "og:description", content: "Moda urbana, atendimento próximo, pedidos via WhatsApp." },
+      { property: "og:title", content: "ACHAEBUSCA — Atacado" },
+      {
+        property: "og:description",
+        content: "Ofertas relâmpago e coleções selecionadas. Atendimento pelo WhatsApp.",
+      },
     ],
   }),
   component: Home,
 });
+
+const categoryIcons: Record<string, typeof Shirt> = {
+  camisas: Shirt,
+  camisetas: Shirt,
+  bermudas: Shirt,
+  calcas: Shirt,
+  jaquetas: Shirt,
+  tenis: Footprints,
+  sandalias: Footprints,
+  sapatos: Footprints,
+  chinelos: Footprints,
+  botas: Footprints,
+  sapatenis: Footprints,
+  acessorios: Watch,
+  bolsas: ShoppingBag,
+};
+
+function iconFor(slug: string) {
+  return categoryIcons[slug] ?? Package;
+}
+
+function useCountdown(targetMs: number) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const diff = Math.max(0, targetMs - now);
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.floor((diff % 3_600_000) / 60_000);
+  const s = Math.floor((diff % 60_000) / 1000);
+  return { h, m, s };
+}
 
 function Home() {
   const { cat, q } = Route.useSearch();
@@ -44,6 +93,8 @@ function Home() {
     queryKey: ["produtos"],
     queryFn: listProdutos,
   });
+
+  const showLanding = !q && !cat;
 
   const [filters, setFilters] = useState<Filters>({
     ...defaultFilters,
@@ -84,6 +135,247 @@ function Home() {
     return list;
   }, [produtos, filters, cat, q, catBySlug]);
 
+  const activos = useMemo(() => produtos.filter((p) => p.ativo), [produtos]);
+  const emPromocao = useMemo(
+    () => activos.filter((p) => getPromoInfo(p).ativa).slice(0, 8),
+    [activos],
+  );
+  const novidades = useMemo(
+    () => activos.filter((p) => p.novidade).slice(0, 8),
+    [activos],
+  );
+  const destaques = useMemo(() => activos.slice(0, 10), [activos]);
+
+  // Countdown: end of today
+  const endOfDay = useMemo(() => {
+    const d = new Date();
+    d.setHours(23, 59, 59, 999);
+    return d.getTime();
+  }, []);
+  const { h, m, s } = useCountdown(endOfDay);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <SiteHeader />
+
+      {showLanding ? (
+        <LandingView
+          categorias={categorias}
+          emPromocao={emPromocao}
+          novidades={novidades}
+          destaques={destaques}
+          isLoading={isLoading}
+          countdown={{ h, m, s }}
+        />
+      ) : (
+        <CatalogView
+          categorias={categorias}
+          filtered={filtered}
+          filters={filters}
+          setFilters={setFilters}
+          isLoading={isLoading}
+          q={q}
+          cat={cat}
+          catBySlugName={catBySlugName}
+        />
+      )}
+
+      <SiteFooter />
+      <CartDrawer />
+    </div>
+  );
+}
+
+/* ---------------- Landing view ---------------- */
+
+function LandingView({
+  categorias,
+  emPromocao,
+  novidades,
+  destaques,
+  isLoading,
+  countdown,
+}: {
+  categorias: { id: string; nome: string; slug: string }[];
+  emPromocao: React.ComponentProps<typeof ProductCard>["p"][];
+  novidades: React.ComponentProps<typeof ProductCard>["p"][];
+  destaques: React.ComponentProps<typeof ProductCard>["p"][];
+  isLoading: boolean;
+  countdown: { h: number; m: number; s: number };
+}) {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+
+  return (
+    <>
+      {/* Category tiles */}
+      <section className="border-b border-border bg-card">
+        <div className="mx-auto max-w-7xl px-3 py-5 sm:px-4 sm:py-7">
+          <div
+            className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            {categorias.map((c) => {
+              const Icon = iconFor(c.slug);
+              return (
+                <Link
+                  key={c.id}
+                  to="/"
+                  search={{ cat: c.slug } as never}
+                  className="group flex w-20 shrink-0 flex-col items-center gap-2 sm:w-24"
+                >
+                  <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-md transition-transform group-hover:-translate-y-0.5 group-hover:shadow-lg sm:h-20 sm:w-20">
+                    <Icon className="h-7 w-7 sm:h-8 sm:w-8" strokeWidth={2} />
+                  </div>
+                  <span className="line-clamp-2 text-center text-[11px] font-semibold leading-tight text-foreground sm:text-xs">
+                    {c.nome}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Promo banner strip */}
+      <section className="bg-primary/5">
+        <div className="mx-auto grid max-w-7xl gap-3 px-3 py-5 sm:grid-cols-2 sm:gap-4 sm:px-4 lg:grid-cols-4">
+          {[
+            { icon: Truck, title: "Frete combinado", desc: "Fechamos tudo pelo WhatsApp" },
+            { icon: Tag, title: "Preço de atacado", desc: "Descontos por volume" },
+            { icon: ShieldCheck, title: "Produto conferido", desc: "Qualidade garantida" },
+            { icon: MessageCircle, title: "Atendimento direto", desc: "Fale com um consultor" },
+          ].map((b) => (
+            <div
+              key={b.title}
+              className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm"
+            >
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                <b.icon className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground">{b.title}</p>
+                <p className="truncate text-xs text-muted-foreground">{b.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Flash offers */}
+      {emPromocao.length > 0 && (
+        <section className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-2xl font-extrabold tracking-tight text-primary sm:text-3xl">
+                Ofertas Relâmpago
+              </h2>
+              <Zap className="h-6 w-6 fill-primary text-primary" />
+            </div>
+            <div className="flex items-center gap-2 text-xs font-semibold text-foreground sm:text-sm">
+              <Clock className="h-4 w-4 text-primary" />
+              <span className="hidden sm:inline">As ofertas se encerram em:</span>
+              <div className="flex items-center gap-1 font-display tabular-nums">
+                <span className="rounded-md border-2 border-primary bg-card px-2 py-1 text-primary">
+                  {pad(countdown.h)}H
+                </span>
+                <span className="rounded-md border-2 border-primary bg-card px-2 py-1 text-primary">
+                  {pad(countdown.m)}M
+                </span>
+                <span className="rounded-md border-2 border-primary bg-card px-2 py-1 text-primary">
+                  {pad(countdown.s)}S
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+            {emPromocao.map((p) => (
+              <ProductCard key={p.id} p={p} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Novidades */}
+      {novidades.length > 0 && (
+        <section className="bg-card">
+          <div className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h2 className="font-display text-2xl font-extrabold tracking-tight text-navy sm:text-3xl">
+                  Novidades da coleção
+                </h2>
+              </div>
+              <Link
+                to="/"
+                search={{} as never}
+                className="hidden items-center gap-1 text-sm font-semibold text-primary hover:underline sm:inline-flex"
+              >
+                Ver todas <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+              {novidades.map((p) => (
+                <ProductCard key={p.id} p={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Destaques */}
+      <section className="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-12">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2 className="font-display text-2xl font-extrabold tracking-tight text-navy sm:text-3xl">
+            Selecionados para você
+          </h2>
+          <Link
+            to="/"
+            search={{} as never}
+            className="hidden items-center gap-1 text-sm font-semibold text-primary hover:underline sm:inline-flex"
+          >
+            Ver catálogo <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {destaques.map((p) => (
+              <ProductCard key={p.id} p={p} />
+            ))}
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
+/* ---------------- Catalog view (previous behavior) ---------------- */
+
+function CatalogView({
+  categorias,
+  filtered,
+  filters,
+  setFilters,
+  isLoading,
+  q,
+  cat,
+  catBySlugName,
+}: {
+  categorias: { id: string; nome: string; slug: string; ordem: number }[];
+  filtered: React.ComponentProps<typeof ProductCard>["p"][];
+  filters: Filters;
+  setFilters: (f: Filters) => void;
+  isLoading: boolean;
+  q: string | undefined;
+  cat: string | undefined;
+  catBySlugName: Record<string, string>;
+}) {
   const activeSlug = cat ?? filters.categoriaSlug;
   const heading = q
     ? `Resultados para "${q}"`
@@ -105,37 +397,10 @@ function Home() {
     activeChips.push({ key: "nov", label: "Novidades", onClear: () => setFilters({ ...filters, novidades: false }) });
   if (filters.promocao)
     activeChips.push({ key: "promo", label: "Em promoção", onClear: () => setFilters({ ...filters, promocao: false }) });
-  if (filters.precoMax < 500 || filters.precoMin > 0)
-    activeChips.push({
-      key: "preco",
-      label: `Até ${filtered.length && ""}R$ ${filters.precoMax}`,
-      onClear: () => setFilters({ ...filters, precoMin: 0, precoMax: 500 }),
-    });
 
   return (
-    <div className="min-h-screen bg-background">
-      <SiteHeader />
-
-      {/* Hero band */}
+    <>
       <section className="relative overflow-hidden border-b border-border bg-card">
-        {/* Decorative images behind the hero area */}
-        {!q && !activeSlug && heading === "Coleção" && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 top-0 -z-0 flex w-full items-center justify-end pr-0 opacity-20 md:w-3/4 md:opacity-25 lg:opacity-30"
-          >
-            <img
-              src={birkenDubai.url}
-              alt=""
-              className="h-72 w-72 translate-x-10 translate-y-2 rounded-full object-cover shadow-xl md:h-[26rem] md:w-[26rem] md:translate-x-14 lg:h-[34rem] lg:w-[34rem]"
-            />
-            <img
-              src={birkenPremium.url}
-              alt=""
-              className="h-60 w-60 -translate-x-12 translate-y-20 rounded-full object-cover shadow-xl md:h-80 md:w-80 md:translate-y-24 lg:h-[28rem] lg:w-[28rem]"
-            />
-          </span>
-        )}
         <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-12">
           <div className="relative flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
             <span className="h-px w-6 bg-primary" />
@@ -150,24 +415,19 @@ function Home() {
         </div>
       </section>
 
-
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[240px_1fr] md:gap-10 md:py-12 lg:grid-cols-[260px_1fr]">
-        <FilterSidebar
-          categorias={categorias}
-          filters={filters}
-          onChange={setFilters}
-        />
+        <FilterSidebar categorias={categorias} filters={filters} onChange={setFilters} />
         <section>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              {isLoading
-                ? "Carregando…"
-                : (
-                    <>
-                      <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
-                      produto{filtered.length === 1 ? "" : "s"}
-                    </>
-                  )}
+              {isLoading ? (
+                "Carregando…"
+              ) : (
+                <>
+                  <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
+                  produto{filtered.length === 1 ? "" : "s"}
+                </>
+              )}
             </p>
             {activeChips.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5">
@@ -196,9 +456,7 @@ function Home() {
               <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10">
                 <PackageSearch className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="mt-5 font-display text-lg font-bold">
-                Nenhum produto encontrado
-              </h3>
+              <h3 className="mt-5 font-display text-lg font-bold">Nenhum produto encontrado</h3>
               <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
                 Tente ajustar os filtros ou buscar por outro termo.
               </p>
@@ -224,9 +482,6 @@ function Home() {
           )}
         </section>
       </main>
-      <SiteFooter />
-      <CartDrawer />
-    </div>
+    </>
   );
 }
-
