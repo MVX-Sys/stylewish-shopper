@@ -44,7 +44,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState<number>(0);
   const [categoriaId, setCategoriaId] = useState<string>("");
-  const [marca, setMarca] = useState("");
+  
   const [novidade, setNovidade] = useState(false);
   const [promocao, setPromocao] = useState(false);
   const [ativo, setAtivo] = useState(true);
@@ -61,7 +61,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
     setDescricao(existing.descricao ?? "");
     setPreco(existing.preco);
     setCategoriaId(existing.categoria_id ?? "");
-    setMarca(existing.marca ?? "");
+    
     setNovidade(existing.novidade);
     setPromocao(existing.promocao);
     setAtivo(existing.ativo);
@@ -205,7 +205,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         descricao: descricao || null,
         preco,
         categoria_id: categoriaId,
-        marca: marca || null,
+        marca: null,
         novidade,
         promocao,
         ativo,
@@ -287,7 +287,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         entidade: "produto",
         entidade_id: pid,
         descricao: `${produtoId ? "Editou" : "Criou"} produto ${nome}`,
-        detalhes: { nome, marca: marca || null, preco, ativo, variacoes: vars.length, imagens: imgs.length },
+        detalhes: { nome, preco, ativo, variacoes: vars.length, imagens: imgs.length },
       });
       qc.invalidateQueries({ queryKey: ["admin-produtos"] });
       qc.invalidateQueries({ queryKey: ["produtos"] });
@@ -341,14 +341,6 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                     className="input pl-9"
                   />
                 </div>
-              </Field>
-              <Field label="Marca">
-                <input
-                  value={marca}
-                  onChange={(e) => setMarca(e.target.value)}
-                  placeholder="Opcional"
-                  className="input"
-                />
               </Field>
             </div>
             <Field label="Categoria *">

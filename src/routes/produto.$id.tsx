@@ -311,11 +311,6 @@ function ProductPage() {
               {/* Details */}
               <div className="order-3 space-y-7">
                 <div>
-                  {p.marca && (
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
-                      {p.marca}
-                    </p>
-                  )}
                   <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-[32px]">
                     {p.nome}
                   </h1>
