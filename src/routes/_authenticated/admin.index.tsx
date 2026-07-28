@@ -40,7 +40,7 @@ function AdminProductsList() {
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
   const [q, setQ] = useState("");
   const [categoriaId, setCategoriaId] = useState<string>("todas");
-  const [marca, setMarca] = useState<string>("todas");
+  
   const [cor, setCor] = useState<string>("todas");
   const [tamanho, setTamanho] = useState<string>("todos");
   const [status, setStatus] = useState<StatusFilter>("todos");
@@ -60,11 +60,6 @@ function AdminProductsList() {
     });
   }, [produtos, thumbs]);
 
-  const marcas = useMemo(() => {
-    const s = new Set<string>();
-    produtos.forEach((p) => p.marca && s.add(p.marca));
-    return Array.from(s).sort();
-  }, [produtos]);
 
   const cores = useMemo(() => {
     const s = new Set<string>();
@@ -92,7 +87,7 @@ function AdminProductsList() {
   const activeCount =
     (q ? 1 : 0) +
     (categoriaId !== "todas" ? 1 : 0) +
-    (marca !== "todas" ? 1 : 0) +
+    
     (cor !== "todas" ? 1 : 0) +
     (tamanho !== "todos" ? 1 : 0) +
     (status !== "todos" ? 1 : 0) +
@@ -103,7 +98,7 @@ function AdminProductsList() {
   const resetFilters = () => {
     setQ("");
     setCategoriaId("todas");
-    setMarca("todas");
+    
     setCor("todas");
     setTamanho("todos");
     setStatus("todos");
@@ -118,9 +113,8 @@ function AdminProductsList() {
     const min = precoMin ? Number(precoMin) : null;
     const max = precoMax ? Number(precoMax) : null;
     const list = produtos.filter((p) => {
-      if (query && !p.nome.toLowerCase().includes(query) && !(p.marca ?? "").toLowerCase().includes(query)) return false;
+      if (query && !p.nome.toLowerCase().includes(query)) return false;
       if (categoriaId !== "todas" && p.categoria_id !== categoriaId) return false;
-      if (marca !== "todas" && p.marca !== marca) return false;
       if (cor !== "todas" && !p.variacoes.some((v) => v.nome_cor === cor)) return false;
       if (tamanho !== "todos" && !p.variacoes.some((v) => v.tamanho === tamanho)) return false;
       if (min !== null && p.preco < min) return false;
@@ -151,7 +145,7 @@ function AdminProductsList() {
     });
     if (sort === "antigos") sorted.reverse();
     return sorted;
-  }, [produtos, q, categoriaId, marca, cor, tamanho, status, destaque, precoMin, precoMax, sort]);
+  }, [produtos, q, categoriaId, cor, tamanho, status, destaque, precoMin, precoMax, sort]);
 
   const del = async (id: string) => {
     const alvo = produtos.find((p) => p.id === id);
@@ -164,7 +158,7 @@ function AdminProductsList() {
       entidade: "produto",
       entidade_id: id,
       descricao: `Excluiu produto ${alvo?.nome ?? id}`,
-      detalhes: alvo ? { nome: alvo.nome, marca: alvo.marca, preco: alvo.preco } : undefined,
+      detalhes: alvo ? { nome: alvo.nome, preco: alvo.preco } : undefined,
     });
     qc.invalidateQueries({ queryKey: ["admin-produtos"] });
     qc.invalidateQueries({ queryKey: ["produtos"] });
@@ -228,7 +222,7 @@ function AdminProductsList() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Buscar por nome ou marca…"
+                placeholder="Buscar por nome…"
                 className="w-full rounded-full border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-foreground"
               />
             </div>
@@ -288,16 +282,6 @@ function AdminProductsList() {
                 <option value="todas">Todas categorias</option>
                 {categorias.map((c) => (
                   <option key={c.id} value={c.id}>{c.nome}</option>
-                ))}
-              </select>
-              <select
-                value={marca}
-                onChange={(e) => setMarca(e.target.value)}
-                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
-              >
-                <option value="todas">Todas marcas</option>
-                {marcas.map((m) => (
-                  <option key={m} value={m}>{m}</option>
                 ))}
               </select>
               <select
@@ -445,11 +429,6 @@ function AdminProductsList() {
                           </div>
                           <div className="min-w-0">
                             <p className="truncate font-medium">{p.nome}</p>
-                            {p.marca && (
-                              <p className="truncate text-xs text-muted-foreground">
-                                {p.marca}
-                              </p>
-                            )}
                           </div>
                         </div>
                       </td>
