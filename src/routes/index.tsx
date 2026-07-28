@@ -1,16 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
-import { listCategorias, listProdutos } from "@/lib/products";
+import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
-import { PackageSearch } from "lucide-react";
-import birkenDubai from "@/assets/birken_dubai.jpg.asset.json";
-import birkenPremium from "@/assets/birken_premium.jpg.asset.json";
+import { Flame, PackageSearch, Sparkles } from "lucide-react";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
