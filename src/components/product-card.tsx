@@ -71,10 +71,10 @@ export function ProductCard({ p }: { p: ProductListItem }) {
       </div>
 
       <div className="mt-3.5 space-y-1 px-0.5">
-        <h3 className="line-clamp-1 text-[13px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-sm">
+        <h3 className={`line-clamp-1 text-[13px] font-semibold leading-snug tracking-tight transition-colors sm:text-sm ${esgotado ? "text-muted-foreground" : "text-foreground group-hover:text-primary"}`}>
           {p.nome}
         </h3>
-        {promo.ativa ? (
+        {promo.ativa && !esgotado ? (
           <div className="flex items-baseline gap-2">
             <p className="font-display text-base font-extrabold tabular-nums text-primary">
               {brl(promo.precoFinal)}
@@ -84,10 +84,11 @@ export function ProductCard({ p }: { p: ProductListItem }) {
             </p>
           </div>
         ) : (
-          <p className="font-display text-base font-extrabold tabular-nums text-foreground">
+          <p className={`font-display text-base font-extrabold tabular-nums ${esgotado ? "text-muted-foreground line-through" : "text-foreground"}`}>
             {brl(p.preco)}
           </p>
         )}
+
       </div>
     </Link>
   );
