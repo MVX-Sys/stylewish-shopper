@@ -20,54 +20,54 @@ export function ProductCard({ p }: { p: ProductListItem }) {
     <Link
       to="/produto/$id"
       params={{ id: p.id }}
-      className="group block"
+      className="group block focus:outline-none"
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-primary/50 shadow-md ring-1 ring-border transition-shadow duration-300 group-hover:shadow-lg">
+      <div className="card-hover relative aspect-[4/5] overflow-hidden rounded-2xl bg-primary/50 shadow-soft ring-1 ring-black/5">
         {img ? (
           <img
             src={img}
             alt={p.nome}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
           />
         ) : (
           <div className="skeleton h-full w-full" />
         )}
 
-        <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+        {/* Subtle bottom gradient for legibility of badges/prices over image */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+        <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-col gap-1.5">
           {esgotado ? (
-            <span className="rounded-full bg-destructive px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-destructive-foreground shadow-sm">
+            <span className="rounded-full bg-foreground/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-background shadow-sm backdrop-blur-sm">
               Esgotado
             </span>
           ) : (
             <>
               {p.novidade && (
-                <span className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-navy-foreground shadow-sm">
+                <span className="rounded-full bg-navy/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-navy-foreground shadow-sm backdrop-blur-sm">
                   Novidade
                 </span>
               )}
               {promo.ativa && (
-                <>
-                  <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
-                    Promoção
-                  </span>
-                  <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primary-foreground shadow-md shadow-primary/30">
+                  Promoção
+                  <span className="ml-0.5 rounded-full bg-primary-foreground/20 px-1.5 py-px text-[9px] font-bold tabular-nums">
                     -{promo.percentual}%
                   </span>
-                </>
+                </span>
               )}
             </>
           )}
         </div>
 
         {esgotado && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
-            <span className="rotate-[-8deg] rounded-md bg-destructive px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-destructive-foreground shadow-lg">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/55 backdrop-blur-[2px]">
+            <span className="rotate-[-8deg] rounded-md bg-foreground/95 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.24em] text-background shadow-lg">
               Esgotado
             </span>
           </div>
         )}
-
       </div>
 
       <div className="mt-3.5 space-y-1 px-0.5">
@@ -88,7 +88,6 @@ export function ProductCard({ p }: { p: ProductListItem }) {
             {brl(p.preco)}
           </p>
         )}
-
       </div>
     </Link>
   );
