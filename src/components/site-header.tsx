@@ -30,7 +30,7 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-primary text-primary-foreground shadow-md">
+    <header className="sticky top-0 z-40 border-b border-black/5 bg-primary text-primary-foreground shadow-[0_4px_20px_-8px_rgba(0,0,0,0.15)]">
       <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3 md:gap-8">
         <Link to="/" className="group flex min-w-0 items-center gap-2">
           <img
