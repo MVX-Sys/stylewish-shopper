@@ -125,6 +125,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   const [addingCor, setAddingCor] = useState(false);
   const [novaCorNome, setNovaCorNome] = useState("");
   const [novaCorHex, setNovaCorHex] = useState("#000000");
+  const [hexTouched, setHexTouched] = useState(false);
 
   useEffect(() => {
     if (!existing) return;
