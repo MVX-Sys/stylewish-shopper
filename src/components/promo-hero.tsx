@@ -50,7 +50,7 @@ function PromoCard({ p }: { p: ProductListItem }) {
       className="group relative flex w-[78vw] max-w-[320px] snap-start flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-black/[0.06] shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06),0_12px_32px_-16px_rgba(15,23,42,0.12)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_4px_12px_-2px_rgba(255,85,0,0.12),0_24px_48px_-20px_rgba(255,85,0,0.28)] hover:ring-primary/20 sm:w-auto sm:max-w-none"
     >
       {/* Image */}
-      <div className={`relative overflow-hidden bg-neutral-100 ${featured ? "aspect-[4/5]" : "aspect-square"}`}>
+      <div className="relative overflow-hidden aspect-[4/5] bg-neutral-100">
         {img ? (
           <img
             src={img}
@@ -254,7 +254,7 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
               className="animate-fade-in shrink-0 sm:shrink"
               style={{ animationDelay: `${i * 80}ms` }}
             >
-              <PromoCard p={p} featured={items.length < 4 && i === 0} />
+              <PromoCard p={p} />
             </div>
           ))}
           {/* trailing spacer so last card can snap fully on mobile */}
