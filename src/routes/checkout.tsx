@@ -4,10 +4,16 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
-import { BRAND, VALOR_MINIMO_COMPRA, WHATSAPP_NUMBER } from "@/lib/config";
-import { ChevronLeft, MessageCircle, FileText } from "lucide-react";
+import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
+import { ChevronLeft, MessageCircle, FileText, X } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
+import atendenteGustavo from "@/assets/atendente-gustavo.jpg.asset.json";
+
+type Atendente = { id: string; nome: string; whatsapp: string; foto: string; cargo?: string };
+const ATENDENTES: Atendente[] = [
+  { id: "gustavo", nome: "Gustavo", whatsapp: "5587991547820", foto: atendenteGustavo.url, cargo: "Vendedor" },
+];
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -44,6 +50,7 @@ function CheckoutPage() {
   );
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("PIX");
   const [observacoes, setObservacoes] = useState("");
+  const [showAtendentes, setShowAtendentes] = useState(false);
 
   const valorFinal = total;
   const minAtingido = useMemo(
@@ -66,55 +73,34 @@ function CheckoutPage() {
         return;
       }
     }
+    setShowAtendentes(true);
+  };
 
+  const enviarParaAtendente = (atendente: Atendente) => {
     const linhas = items.map((i) => {
-      const eff = itemPrecoEfetivo(i);
-      const promoTag = eff < i.preco ? ` (promo ${brl(eff)}, de ${brl(i.preco)})` : "";
-      return `• ${i.quantidade}x ${i.nome} — Cor ${i.cor}, Tam ${i.tamanho} — ${brl(
-        eff * i.quantidade,
-      )}${promoTag}`;
+      const variacao = `Cor ${i.cor}, Tam ${i.tamanho}`;
+      return `• ${i.quantidade}x ${i.nome} — ${variacao}`;
     });
 
-    const enderecoBloco =
-      formaEnvio === "ENTREGA"
-        ? [
-            "",
-            "*Endereço de entrega*",
-            `CEP: ${cep}`,
-            `Logradouro: ${logradouro}, ${numero}${complemento ? ` — ${complemento}` : ""}`,
-            `Bairro: ${bairro}`,
-            `Cidade/UF: ${cidade}/${estado}`,
-            referencia ? `Referência: ${referencia}` : null,
-            `Forma de entrega: ${formaEntrega}`,
-          ].filter(Boolean)
-        : ["", "*Retirada no local*"];
-
     const msg = [
-      `Olá, ${BRAND}! Gostaria de finalizar o pedido:`,
+      `Olá, ${atendente.nome}! Gostaria de fazer o seguinte pedido:`,
       "",
       "*Itens*",
       ...linhas,
-      "",
-      `Valor do pedido: ${brl(total)}`,
-      `Desconto: Não Aplicado`,
-      `Cupom: Não Aplicado`,
-      `*Valor Final: ${brl(valorFinal)}*`,
-      "",
-      `Forma de envio: ${formaEnvio}`,
-      ...enderecoBloco,
-      "",
-      `Forma de pagamento: ${formaPagamento}`,
-      observacoes ? `\nObservações: ${observacoes}` : "",
+      observacoes ? `\n*Observações*\n${observacoes}` : "",
     ]
       .filter(Boolean)
       .join("\n");
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${atendente.whatsapp}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
-    toast.success("Pedido enviado! Redirecionando ao WhatsApp…");
+    toast.success(`Redirecionando para o WhatsApp de ${atendente.nome}…`);
+    setShowAtendentes(false);
     clear();
     nav({ to: "/" });
   };
+
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -368,6 +354,67 @@ function CheckoutPage() {
         </section>
       </main>
       <SiteFooter />
+
+      {showAtendentes && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Escolha um atendente"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          onClick={() => setShowAtendentes(false)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-premium"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowAtendentes(false)}
+              aria-label="Fechar"
+              className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <h2 className="font-display text-xl font-semibold tracking-tight">
+              Escolha um atendente
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Toque na foto do atendente para continuar seu pedido pelo WhatsApp.
+              Todos os detalhes de pagamento, entrega e valores serão combinados diretamente com ele.
+            </p>
+
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {ATENDENTES.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => enviarParaAtendente(a)}
+                  className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-background p-4 text-center transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-soft"
+                >
+                  <div className="relative h-24 w-24 overflow-hidden rounded-full ring-2 ring-border transition-all group-hover:ring-primary">
+                    <img
+                      src={a.foto}
+                      alt={a.nome}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{a.nome}</p>
+                    {a.cargo && (
+                      <p className="text-xs text-muted-foreground">{a.cargo}</p>
+                    )}
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    Falar no WhatsApp
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
