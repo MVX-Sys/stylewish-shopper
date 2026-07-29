@@ -105,31 +105,35 @@ function PromoCard({ p }: { p: ProductListItem }) {
           </span>
         </div>
 
-        {economia > 0 && (
-          <p className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-            <TrendingUp className="h-3 w-3" />
-            Economize {brl(economia)}
-          </p>
-        )}
+        <div className="min-h-[1.25rem]">
+          {economia > 0 && (
+            <p className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+              <TrendingUp className="h-3 w-3" />
+              Economize {brl(economia)}
+            </p>
+          )}
+        </div>
 
-        {/* Stock bar */}
-        {stock > 0 && stock <= 20 && (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[10px] font-medium">
-              <span className="inline-flex items-center gap-1 text-orange-600">
-                <Flame className="h-2.5 w-2.5" />
-                Vendendo rápido
-              </span>
-              <span className="tabular-nums text-muted-foreground">{stock} rest.</span>
+        {/* Stock bar — reserva de espaço fixa para manter proporção */}
+        <div className="min-h-[2rem]">
+          {stock > 0 && stock <= 20 && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-[10px] font-medium">
+                <span className="inline-flex items-center gap-1 text-orange-600">
+                  <Flame className="h-2.5 w-2.5" />
+                  Vendendo rápido
+                </span>
+                <span className="tabular-nums text-muted-foreground">{stock} rest.</span>
+              </div>
+              <div className="h-1 overflow-hidden rounded-full bg-neutral-100">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all"
+                  style={{ width: `${100 - stockPct}%` }}
+                />
+              </div>
             </div>
-            <div className="h-1 overflow-hidden rounded-full bg-neutral-100">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all"
-                style={{ width: `${100 - stockPct}%` }}
-              />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* CTA */}
         <div className="mt-auto pt-1">
