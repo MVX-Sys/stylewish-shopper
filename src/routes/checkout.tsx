@@ -4,10 +4,16 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
-import { BRAND, VALOR_MINIMO_COMPRA, WHATSAPP_NUMBER } from "@/lib/config";
-import { ChevronLeft, MessageCircle, FileText } from "lucide-react";
+import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
+import { ChevronLeft, MessageCircle, FileText, X } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
+import atendenteGustavo from "@/assets/atendente-gustavo.jpg.asset.json";
+
+type Atendente = { id: string; nome: string; whatsapp: string; foto: string; cargo?: string };
+const ATENDENTES: Atendente[] = [
+  { id: "gustavo", nome: "Gustavo", whatsapp: "5587991547820", foto: atendenteGustavo.url, cargo: "Vendedor" },
+];
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
