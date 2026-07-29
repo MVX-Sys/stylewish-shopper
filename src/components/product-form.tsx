@@ -251,6 +251,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
     ]);
     setNovaCorNome("");
     setNovaCorHex("#000000");
+    setHexTouched(false);
     setAddingCor(false);
   };
 
