@@ -403,7 +403,15 @@ function ProductPage() {
                           {matriz.cores.map((c) => (
                             <tr key={c.nome} className="border-t border-border">
                               <td className="p-3">
-                                <span className="text-xs font-medium">{c.nome}</span>
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="h-4 w-4 shrink-0 rounded-full border border-border/80 shadow-sm"
+                                    style={{ backgroundColor: c.hex }}
+                                    title={`Cor ${c.nome}`}
+                                    aria-label={`Cor ${c.nome}`}
+                                  />
+                                  <span className="text-xs font-medium">{c.nome}</span>
+                                </div>
                               </td>
                               {matriz.tamanhos.map((t) => {
                                 const v = getVar(c.nome, t);
