@@ -16,7 +16,6 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 });
 
 type StatusFilter = "todos" | "ativos" | "inativos" | "esgotados" | "em-estoque";
-type DestaqueFilter = "todos" | "novidade" | "promocao";
 type SortKey =
   | "recentes"
   | "antigos"
@@ -44,7 +43,8 @@ function AdminProductsList() {
   const [cor, setCor] = useState<string>("todas");
   const [tamanho, setTamanho] = useState<string>("todos");
   const [status, setStatus] = useState<StatusFilter>("todos");
-  const [destaque, setDestaque] = useState<DestaqueFilter>("todos");
+  const [novidade, setNovidade] = useState<boolean>(false);
+  const [promocao, setPromocao] = useState<boolean>(false);
   const [precoMin, setPrecoMin] = useState<string>("");
   const [precoMax, setPrecoMax] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("recentes");
