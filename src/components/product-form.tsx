@@ -27,6 +27,75 @@ type ImgRow = {
 
 const TAMANHOS_PADRAO = ["P", "M", "G", "GG"];
 
+const CORES_CONHECIDAS: Record<string, string> = {
+  preto: "#000000",
+  branco: "#FFFFFF",
+  cinza: "#9CA3AF",
+  "cinza claro": "#D1D5DB",
+  "cinza escuro": "#4B5563",
+  vermelho: "#DC2626",
+  "vermelho escuro": "#7F1D1D",
+  bordô: "#7F1D1D",
+  bordo: "#7F1D1D",
+  vinho: "#5B1A1A",
+  rosa: "#F472B6",
+  "rosa claro": "#FBCFE8",
+  pink: "#EC4899",
+  laranja: "#FF5500",
+  "laranja claro": "#FDBA74",
+  amarelo: "#FACC15",
+  "amarelo claro": "#FEF08A",
+  mostarda: "#CA8A04",
+  verde: "#16A34A",
+  "verde claro": "#86EFAC",
+  "verde escuro": "#14532D",
+  "verde militar": "#4B5320",
+  "verde musgo": "#556B2F",
+  oliva: "#6B8E23",
+  azul: "#2563EB",
+  "azul claro": "#93C5FD",
+  "azul escuro": "#1E3A8A",
+  "azul marinho": "#0B1F4A",
+  marinho: "#0B1F4A",
+  turquesa: "#14B8A6",
+  ciano: "#06B6D4",
+  roxo: "#7C3AED",
+  lilás: "#C4B5FD",
+  lilas: "#C4B5FD",
+  violeta: "#8B5CF6",
+  marrom: "#78350F",
+  "marrom claro": "#B45309",
+  "marrom escuro": "#3F1F0A",
+  bege: "#E7D2B4",
+  nude: "#E9C9B0",
+  caramelo: "#B0651F",
+  chocolate: "#3F1B0B",
+  café: "#4B2E1D",
+  cafe: "#4B2E1D",
+  areia: "#DAC9A6",
+  creme: "#F5EFE0",
+  off_white: "#F5F1EA",
+  "off white": "#F5F1EA",
+  gelo: "#F1F5F9",
+  prata: "#C0C0C0",
+  dourado: "#D4AF37",
+  ouro: "#D4AF37",
+  cobre: "#B87333",
+  jeans: "#4B6A88",
+  denim: "#3B5A78",
+  grafite: "#374151",
+  chumbo: "#52525B",
+};
+
+function guessHexFromName(name: string): string | null {
+  const key = name.trim().toLowerCase();
+  if (!key) return null;
+  if (CORES_CONHECIDAS[key]) return CORES_CONHECIDAS[key];
+  // partial match: try to find a known color whose name appears in the input
+  const found = Object.keys(CORES_CONHECIDAS).find((k) => key === k || key.includes(k));
+  return found ? CORES_CONHECIDAS[found] : null;
+}
+
 export function ProductForm({ produtoId }: { produtoId?: string }) {
   const qc = useQueryClient();
   const nav = useNavigate();
@@ -56,6 +125,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   const [addingCor, setAddingCor] = useState(false);
   const [novaCorNome, setNovaCorNome] = useState("");
   const [novaCorHex, setNovaCorHex] = useState("#000000");
+  const [hexTouched, setHexTouched] = useState(false);
 
   useEffect(() => {
     if (!existing) return;
@@ -181,6 +251,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
     ]);
     setNovaCorNome("");
     setNovaCorHex("#000000");
+    setHexTouched(false);
     setAddingCor(false);
   };
 
@@ -428,7 +499,14 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                     <input
                       autoFocus
                       value={novaCorNome}
-                      onChange={(e) => setNovaCorNome(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNovaCorNome(val);
+                        if (!hexTouched) {
+                          const guess = guessHexFromName(val);
+                          if (guess) setNovaCorHex(guess);
+                        }
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -443,12 +521,19 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                     <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Cor
                     </span>
-                    <label className="flex h-10 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input">
+                    <label
+                      className="flex h-10 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input transition-colors"
+                      style={{ backgroundColor: novaCorHex }}
+                      title={novaCorHex}
+                    >
                       <input
                         type="color"
                         value={novaCorHex}
-                        onChange={(e) => setNovaCorHex(e.target.value)}
-                        className="h-14 w-20 cursor-pointer border-0 bg-transparent p-0"
+                        onChange={(e) => {
+                          setNovaCorHex(e.target.value);
+                          setHexTouched(true);
+                        }}
+                        className="h-14 w-20 cursor-pointer border-0 bg-transparent p-0 opacity-0"
                       />
                     </label>
                   </div>
@@ -468,6 +553,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                         setAddingCor(false);
                         setNovaCorNome("");
                         setNovaCorHex("#000000");
+                        setHexTouched(false);
                       }}
                       className="h-10 rounded-full border border-border px-4 text-xs font-medium hover:bg-accent"
                     >
