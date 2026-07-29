@@ -8,11 +8,11 @@ import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
 import { ChevronLeft, MessageCircle, FileText, X } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
-import atendenteGustavo from "@/assets/atendente-gustavo.jpg.asset.json";
+import atendenteGustavo from "@/assets/atendente-gustavo.jpg";
 
 type Atendente = { id: string; nome: string; whatsapp: string; foto: string; cargo?: string };
 const ATENDENTES: Atendente[] = [
-  { id: "gustavo", nome: "Gustavo", whatsapp: "5587991547820", foto: atendenteGustavo.url, cargo: "Vendedor" },
+  { id: "gustavo", nome: "Gustavo", whatsapp: "5587991547820", foto: atendenteGustavo, cargo: "Vendedor" },
 ];
 
 export const Route = createFileRoute("/checkout")({

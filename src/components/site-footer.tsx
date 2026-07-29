@@ -1,6 +1,6 @@
 import { BRAND, WHATSAPP_DISPLAY, WHATSAPP_NUMBER } from "@/lib/config";
 import { MessageCircle, Instagram } from "lucide-react";
-import logoAsset from "@/assets/acha-busca-icon.png.asset.json";
+import logoUrl from "@/assets/acha-busca-icon.png";
 
 const MVX_INSTAGRAM = "https://www.instagram.com/mvx_sistemas/";
 const MVX_WHATSAPP_1 = { display: "(87) 99168-6116", link: "5587991686116" };
@@ -13,7 +13,7 @@ export function SiteFooter() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-2.5">
             <img
-              src={logoAsset.url}
+              src={logoUrl}
               alt=""
               className="h-8 w-8 shrink-0 opacity-90"
             />
