@@ -79,14 +79,36 @@ function CheckoutPage() {
   const enviarParaAtendente = (atendente: Atendente) => {
     const linhas = items.map((i) => {
       const variacao = `Cor ${i.cor}, Tam ${i.tamanho}`;
-      return `• ${i.quantidade}x ${i.nome} — ${variacao}`;
+      const preco = itemPrecoEfetivo(i);
+      return `• ${i.quantidade}x ${i.nome} — ${variacao} — ${brl(preco)} (subtotal ${brl(preco * i.quantidade)})`;
     });
+
+    const enderecoLinhas =
+      formaEnvio === "ENTREGA"
+        ? [
+            "",
+            "*Endereço de entrega*",
+            `CEP: ${cep || "-"}`,
+            `Logradouro: ${logradouro || "-"}, Nº ${numero || "-"}${complemento ? ` — ${complemento}` : ""}`,
+            `Bairro: ${bairro || "-"}`,
+            `Cidade/UF: ${cidade || "-"}/${estado || "-"}`,
+            referencia ? `Referência: ${referencia}` : "",
+            `Forma de entrega: ${formaEntrega}`,
+          ].filter(Boolean)
+        : ["", "*Entrega*", "Retirada no local"];
 
     const msg = [
       `Olá, ${atendente.nome}! Gostaria de fazer o seguinte pedido:`,
       "",
       "*Itens*",
       ...linhas,
+      "",
+      `*Total do pedido:* ${brl(valorFinal)}`,
+      "",
+      `*Forma de envio:* ${formaEnvio === "ENTREGA" ? "Entrega" : "Retirada no local"}`,
+      ...enderecoLinhas,
+      "",
+      `*Forma de pagamento:* ${formaPagamento}`,
       observacoes ? `\n*Observações*\n${observacoes}` : "",
     ]
       .filter(Boolean)
@@ -99,6 +121,7 @@ function CheckoutPage() {
     clear();
     nav({ to: "/" });
   };
+
 
 
 
