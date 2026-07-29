@@ -498,7 +498,14 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                     <input
                       autoFocus
                       value={novaCorNome}
-                      onChange={(e) => setNovaCorNome(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNovaCorNome(val);
+                        if (!hexTouched) {
+                          const guess = guessHexFromName(val);
+                          if (guess) setNovaCorHex(guess);
+                        }
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -513,12 +520,19 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                     <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Cor
                     </span>
-                    <label className="flex h-10 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input">
+                    <label
+                      className="flex h-10 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input transition-colors"
+                      style={{ backgroundColor: novaCorHex }}
+                      title={novaCorHex}
+                    >
                       <input
                         type="color"
                         value={novaCorHex}
-                        onChange={(e) => setNovaCorHex(e.target.value)}
-                        className="h-14 w-20 cursor-pointer border-0 bg-transparent p-0"
+                        onChange={(e) => {
+                          setNovaCorHex(e.target.value);
+                          setHexTouched(true);
+                        }}
+                        className="h-14 w-20 cursor-pointer border-0 bg-transparent p-0 opacity-0"
                       />
                     </label>
                   </div>
