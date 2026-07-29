@@ -171,7 +171,7 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
   const items = produtos.slice(0, 4);
 
   return (
-    <section className="relative mb-12 overflow-hidden rounded-[2rem] sm:rounded-[2.5rem]">
+    <section className="relative mb-10 overflow-hidden rounded-[1.5rem] sm:mb-12 sm:rounded-[2.5rem]">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#FFF4EC] via-[#FFE7D3] to-[#FFD5B0]" />
       <div
@@ -181,59 +181,65 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
             "radial-gradient(circle at 15% 20%, rgba(255,85,0,0.25), transparent 45%), radial-gradient(circle at 85% 80%, rgba(255,130,50,0.2), transparent 50%)",
         }}
       />
-      {/* Grain / dots */}
       <div
-        className="absolute inset-0 opacity-[0.15]"
+        className="absolute inset-0 opacity-[0.12] sm:opacity-[0.15]"
         style={{
           backgroundImage:
             "radial-gradient(circle, rgba(0,0,0,0.4) 1px, transparent 1px)",
-          backgroundSize: "22px 22px",
+          backgroundSize: "18px 18px",
         }}
       />
 
-      <div className="relative px-4 py-8 sm:px-8 sm:py-12 lg:px-12 lg:py-14">
+      <div className="relative px-4 py-6 sm:px-8 sm:py-12 lg:px-12 lg:py-14">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mb-6 flex flex-col gap-5 sm:mb-8 sm:gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-primary shadow-sm ring-1 ring-primary/20 backdrop-blur-sm">
-              <span className="relative flex h-2 w-2">
+            <div className="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-primary shadow-sm ring-1 ring-primary/20 backdrop-blur-sm sm:mb-3 sm:gap-2 sm:px-3 sm:py-1.5 sm:text-[11px] sm:tracking-[0.18em]">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary sm:h-2 sm:w-2" />
               </span>
               Ofertas ao vivo
             </div>
-            <h2 className="font-display text-3xl font-black leading-[0.95] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Promoções <span className="bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">do Dia</span>
+            <h2 className="font-display text-[2rem] font-black leading-[0.95] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              Promoções{" "}
+              <span className="bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">
+                do Dia
+              </span>
             </h2>
-            <p className="mt-3 max-w-md text-sm text-foreground/70 sm:text-base">
+            <p className="mt-2 max-w-md text-[13px] leading-snug text-foreground/70 sm:mt-3 sm:text-base">
               Selecionadas a dedo. Preços especiais por tempo limitado — corra antes que acabe.
             </p>
           </div>
 
           {/* Countdown + CTA */}
-          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center lg:flex-col lg:items-end">
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4 lg:flex-col lg:items-end">
             {countdown && !countdown.done && (
               <div className="flex flex-col gap-1.5">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/60">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/60">
                   <Clock className="h-3 w-3" />
                   Termina em
                 </span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1 sm:gap-1.5">
                   {[
                     { v: countdown.h, l: "Horas" },
                     { v: countdown.m, l: "Min" },
                     { v: countdown.s, l: "Seg" },
                   ].map((u, i) => (
-                    <div key={u.l} className="flex items-center gap-1.5">
-                      <div className="flex min-w-[3rem] flex-col items-center rounded-xl bg-foreground/90 px-2 py-1.5 shadow-lg">
-                        <span className="font-display text-xl font-black leading-none tabular-nums text-white sm:text-2xl">
+                    <div key={u.l} className="flex items-center gap-1 sm:gap-1.5">
+                      <div className="flex min-w-[2.75rem] flex-col items-center rounded-lg bg-foreground/90 px-2 py-1.5 shadow-lg sm:min-w-[3rem] sm:rounded-xl">
+                        <span className="font-display text-lg font-black leading-none tabular-nums text-white sm:text-2xl">
                           {pad(u.v)}
                         </span>
-                        <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-white/60">
+                        <span className="mt-0.5 text-[8px] font-semibold uppercase tracking-wider text-white/60 sm:text-[9px]">
                           {u.l}
                         </span>
                       </div>
-                      {i < 2 && <span className="font-display text-xl font-black text-foreground/40">:</span>}
+                      {i < 2 && (
+                        <span className="font-display text-lg font-black text-foreground/40 sm:text-xl">
+                          :
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -242,7 +248,7 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
             <Link
               to="/"
               search={{ promocao: "true" }}
-              className="btn-shine group inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-bold text-background shadow-xl shadow-foreground/20 transition-all hover:scale-[1.03] hover:shadow-2xl"
+              className="btn-shine group inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-[13px] font-bold text-background shadow-xl shadow-foreground/20 transition-all hover:scale-[1.03] hover:shadow-2xl sm:py-3 sm:text-sm"
             >
               Ver todas as ofertas
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -251,18 +257,21 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
         </div>
 
         {/* Cards: carousel on mobile, grid on sm+ */}
-        <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 lg:gap-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-pl-4 px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 lg:gap-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {items.map((p, i) => (
             <div
               key={p.id}
-              className="animate-fade-in"
+              className="animate-fade-in shrink-0 sm:shrink"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <PromoCard p={p} featured={items.length < 4 && i === 0} />
             </div>
           ))}
+          {/* trailing spacer so last card can snap fully on mobile */}
+          <div className="w-1 shrink-0 sm:hidden" aria-hidden />
         </div>
       </div>
     </section>
   );
 }
+
