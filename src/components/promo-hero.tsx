@@ -47,8 +47,8 @@ function PromoCard({ p, featured = false }: { p: ProductListItem; featured?: boo
     <Link
       to="/produto/$id"
       params={{ id: p.id }}
-      className={`group relative flex snap-start flex-col overflow-hidden rounded-3xl bg-white shadow-[0_10px_40px_-15px_rgba(255,85,0,0.35)] ring-1 ring-black/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_-20px_rgba(255,85,0,0.55)] ${
-        featured ? "w-[85vw] sm:w-auto" : "w-[75vw] sm:w-auto"
+      className={`group relative flex snap-start flex-col overflow-hidden rounded-2xl bg-white shadow-[0_10px_40px_-15px_rgba(255,85,0,0.35)] ring-1 ring-black/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_-20px_rgba(255,85,0,0.55)] sm:rounded-3xl ${
+        featured ? "w-[78vw] max-w-[320px] sm:w-auto sm:max-w-none" : "w-[68vw] max-w-[280px] sm:w-auto sm:max-w-none"
       }`}
     >
       {/* Image */}
