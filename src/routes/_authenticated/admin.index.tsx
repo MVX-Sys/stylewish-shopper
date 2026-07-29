@@ -16,7 +16,6 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 });
 
 type StatusFilter = "todos" | "ativos" | "inativos" | "esgotados" | "em-estoque";
-type DestaqueFilter = "todos" | "novidade" | "promocao";
 type SortKey =
   | "recentes"
   | "antigos"
@@ -44,7 +43,8 @@ function AdminProductsList() {
   const [cor, setCor] = useState<string>("todas");
   const [tamanho, setTamanho] = useState<string>("todos");
   const [status, setStatus] = useState<StatusFilter>("todos");
-  const [destaque, setDestaque] = useState<DestaqueFilter>("todos");
+  const [novidade, setNovidade] = useState<boolean>(false);
+  const [promocao, setPromocao] = useState<boolean>(false);
   const [precoMin, setPrecoMin] = useState<string>("");
   const [precoMax, setPrecoMax] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("recentes");
@@ -87,22 +87,22 @@ function AdminProductsList() {
   const activeCount =
     (q ? 1 : 0) +
     (categoriaId !== "todas" ? 1 : 0) +
-    
     (cor !== "todas" ? 1 : 0) +
     (tamanho !== "todos" ? 1 : 0) +
     (status !== "todos" ? 1 : 0) +
-    (destaque !== "todos" ? 1 : 0) +
+    (novidade ? 1 : 0) +
+    (promocao ? 1 : 0) +
     (precoMin ? 1 : 0) +
     (precoMax ? 1 : 0);
 
   const resetFilters = () => {
     setQ("");
     setCategoriaId("todas");
-    
     setCor("todas");
     setTamanho("todos");
     setStatus("todos");
-    setDestaque("todos");
+    setNovidade(false);
+    setPromocao(false);
     setPrecoMin("");
     setPrecoMax("");
     setSort("recentes");
@@ -124,8 +124,8 @@ function AdminProductsList() {
       if (status === "inativos" && p.ativo) return false;
       if (status === "esgotados" && !esg) return false;
       if (status === "em-estoque" && esg) return false;
-      if (destaque === "novidade" && !p.novidade) return false;
-      if (destaque === "promocao" && !p.promocao) return false;
+      if (novidade && !p.novidade) return false;
+      if (promocao && !p.promocao) return false;
       return true;
     });
     const totalEstoque = (p: (typeof produtos)[number]) =>
@@ -145,7 +145,7 @@ function AdminProductsList() {
     });
     if (sort === "antigos") sorted.reverse();
     return sorted;
-  }, [produtos, q, categoriaId, cor, tamanho, status, destaque, precoMin, precoMax, sort]);
+  }, [produtos, q, categoriaId, cor, tamanho, status, novidade, promocao, precoMin, precoMax, sort]);
 
   const del = async (id: string) => {
     const alvo = produtos.find((p) => p.id === id);
@@ -315,15 +315,26 @@ function AdminProductsList() {
                 <option value="em-estoque">Em estoque</option>
                 <option value="esgotados">Esgotados</option>
               </select>
-              <select
-                value={destaque}
-                onChange={(e) => setDestaque(e.target.value as DestaqueFilter)}
-                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
-              >
-                <option value="todos">Sem destaque</option>
-                <option value="novidade">Novidades</option>
-                <option value="promocao">Em promoção</option>
-              </select>
+              <div className="flex items-center gap-3 rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground/80 hover:text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={novidade}
+                    onChange={(e) => setNovidade(e.target.checked)}
+                    className="h-4 w-4 accent-foreground"
+                  />
+                  Novidade
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground/80 hover:text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={promocao}
+                    onChange={(e) => setPromocao(e.target.checked)}
+                    className="h-4 w-4 accent-foreground"
+                  />
+                  Promoção
+                </label>
+              </div>
               <div className="col-span-2 flex items-center gap-2 sm:col-span-3 lg:col-span-2">
                 <div className="flex flex-1 items-center rounded-lg border border-input bg-background px-2">
                   <span className="text-xs text-muted-foreground">R$</span>
