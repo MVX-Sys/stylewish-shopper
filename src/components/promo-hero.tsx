@@ -47,94 +47,86 @@ function PromoCard({ p, featured = false }: { p: ProductListItem; featured?: boo
     <Link
       to="/produto/$id"
       params={{ id: p.id }}
-      className={`group relative flex snap-start flex-col overflow-hidden rounded-2xl bg-white shadow-[0_10px_40px_-15px_rgba(255,85,0,0.35)] ring-1 ring-black/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_-20px_rgba(255,85,0,0.55)] sm:rounded-3xl ${
+      className={`group relative flex snap-start flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-black/[0.06] shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06),0_12px_32px_-16px_rgba(15,23,42,0.12)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_4px_12px_-2px_rgba(255,85,0,0.12),0_24px_48px_-20px_rgba(255,85,0,0.28)] hover:ring-primary/20 ${
         featured ? "w-[78vw] max-w-[320px] sm:w-auto sm:max-w-none" : "w-[68vw] max-w-[280px] sm:w-auto sm:max-w-none"
       }`}
     >
       {/* Image */}
-      <div className={`relative overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100/50 ${featured ? "aspect-[4/5]" : "aspect-square"}`}>
+      <div className={`relative overflow-hidden bg-neutral-100 ${featured ? "aspect-[4/5]" : "aspect-square"}`}>
         {img ? (
           <img
             src={img}
             alt={p.nome}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-110"
+            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
           />
         ) : (
-          <div className="h-full w-full animate-pulse bg-orange-100" />
+          <div className="h-full w-full animate-pulse bg-neutral-200" />
         )}
 
-        {/* Discount badge */}
+        {/* Discount badge — minimal chip */}
         <div className="absolute left-3 top-3 z-10">
-          <div className="relative">
-            <div className="absolute inset-0 animate-ping rounded-2xl bg-primary/40" />
-            <div className="relative flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-orange-600 px-3 py-1.5 text-primary-foreground shadow-lg">
-              <span className="text-[9px] font-bold uppercase leading-none tracking-wider opacity-90">Off</span>
-              <span className="font-display text-xl font-black leading-none tabular-nums">
-                -{promo.percentual}%
-              </span>
-            </div>
+          <div className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-primary-foreground shadow-sm">
+            <span className="font-display text-[13px] font-black leading-none tabular-nums">
+              -{promo.percentual}%
+            </span>
           </div>
         </div>
 
-        {/* Flash Sale Badge */}
+        {/* Flash Sale Badge — subtle */}
         <div className="absolute right-3 top-3 z-10">
-          <span className="inline-flex items-center gap-1 rounded-full bg-black/85 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-            <Zap className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-foreground shadow-sm backdrop-blur">
+            <Zap className="h-2.5 w-2.5 fill-primary text-primary" />
             Relâmpago
           </span>
         </div>
 
-        {/* Bottom overlay */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-
         {lowStock && (
           <div className="absolute bottom-3 left-3 z-10">
-            <span className="inline-flex items-center gap-1 rounded-full bg-red-500/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-sm">
-              <Flame className="h-3 w-3" />
-              Últimas unidades
+            <span className="inline-flex items-center gap-1 rounded-full bg-red-500 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-white shadow-sm">
+              <Flame className="h-2.5 w-2.5" />
+              Últimas
             </span>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-        <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-tight text-foreground sm:text-base">
+      <div className="flex flex-1 flex-col gap-2.5 p-3.5 sm:p-4">
+        <h3 className="line-clamp-2 min-h-[2.25rem] text-[13px] font-semibold leading-tight text-foreground sm:text-sm">
           {p.nome}
         </h3>
 
         {/* Price */}
-        <div className="space-y-1">
-          <div className="flex items-baseline gap-2">
-            <span className="font-display text-2xl font-black tabular-nums text-primary sm:text-3xl">
-              {brl(promo.precoFinal)}
-            </span>
-            <span className="text-sm font-medium tabular-nums text-muted-foreground line-through">
-              {brl(promo.precoOriginal)}
-            </span>
-          </div>
-          {economia > 0 && (
-            <p className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
-              <TrendingUp className="h-3 w-3" />
-              Você economiza {brl(economia)}
-            </p>
-          )}
+        <div className="flex items-baseline gap-2">
+          <span className="font-display text-xl font-black tabular-nums text-foreground sm:text-2xl">
+            {brl(promo.precoFinal)}
+          </span>
+          <span className="text-[11px] font-medium tabular-nums text-muted-foreground line-through">
+            {brl(promo.precoOriginal)}
+          </span>
         </div>
+
+        {economia > 0 && (
+          <p className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+            <TrendingUp className="h-3 w-3" />
+            Economize {brl(economia)}
+          </p>
+        )}
 
         {/* Stock bar */}
         {stock > 0 && stock <= 20 && (
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[10px] font-medium">
               <span className="inline-flex items-center gap-1 text-orange-600">
-                <Flame className="h-3 w-3" />
+                <Flame className="h-2.5 w-2.5" />
                 Vendendo rápido
               </span>
               <span className="tabular-nums text-muted-foreground">{stock} rest.</span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-orange-100">
+            <div className="h-1 overflow-hidden rounded-full bg-neutral-100">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-orange-600 transition-all"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all"
                 style={{ width: `${100 - stockPct}%` }}
               />
             </div>
@@ -142,11 +134,11 @@ function PromoCard({ p, featured = false }: { p: ProductListItem; featured?: boo
         )}
 
         {/* CTA */}
-        <div className="mt-auto">
-          <div className="btn-shine flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-orange-600 px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-md shadow-primary/30 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-primary/50 group-active:scale-[0.98]">
-            <ShoppingBag className="h-4 w-4" />
-            Comprar Agora
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+        <div className="mt-auto pt-1">
+          <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-foreground/10 bg-foreground px-3 py-2 text-[12px] font-semibold text-background transition-all duration-300 group-hover:bg-primary group-hover:border-primary sm:text-[13px]">
+            <ShoppingBag className="h-3.5 w-3.5" />
+            Comprar
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
           </div>
         </div>
       </div>
