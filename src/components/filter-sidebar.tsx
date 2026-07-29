@@ -97,6 +97,29 @@ function FilterContent({
         )}
       </div>
 
+      <Section title="Destaques">
+        <div className="space-y-1.5">
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
+            <input
+              type="checkbox"
+              checked={filters.novidades}
+              onChange={(e) => set("novidades", e.target.checked)}
+              className="h-3.5 w-3.5 accent-foreground"
+            />
+            Novidades
+          </label>
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
+            <input
+              type="checkbox"
+              checked={filters.promocao}
+              onChange={(e) => set("promocao", e.target.checked)}
+              className="h-3.5 w-3.5 accent-foreground"
+            />
+            Em promoção
+          </label>
+        </div>
+      </Section>
+
       <Section title="Ordenar">
         <div className="space-y-1.5">
           {(
@@ -120,57 +143,6 @@ function FilterContent({
               {label}
             </label>
           ))}
-        </div>
-      </Section>
-
-      <Section title="Categorias">
-        <div className="space-y-1.5">
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
-            <input
-              type="radio"
-              checked={filters.categoriaSlug === null}
-              onChange={() => set("categoriaSlug", null)}
-              className="h-3.5 w-3.5 accent-foreground"
-            />
-            Todas
-          </label>
-          {categorias.map((c) => (
-            <label
-              key={c.id}
-              className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground"
-            >
-              <input
-                type="radio"
-                checked={filters.categoriaSlug === c.slug}
-                onChange={() => set("categoriaSlug", c.slug)}
-                className="h-3.5 w-3.5 accent-foreground"
-              />
-              {c.nome}
-            </label>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Destaques" defaultOpen={false}>
-        <div className="space-y-1.5">
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
-            <input
-              type="checkbox"
-              checked={filters.novidades}
-              onChange={(e) => set("novidades", e.target.checked)}
-              className="h-3.5 w-3.5 accent-foreground"
-            />
-            Novidades
-          </label>
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
-            <input
-              type="checkbox"
-              checked={filters.promocao}
-              onChange={(e) => set("promocao", e.target.checked)}
-              className="h-3.5 w-3.5 accent-foreground"
-            />
-            Em promoção
-          </label>
         </div>
       </Section>
 
@@ -233,6 +205,34 @@ function FilterContent({
               </button>
             </div>
           )}
+        </div>
+      </Section>
+
+      <Section title="Categorias">
+        <div className="space-y-1.5">
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground">
+            <input
+              type="radio"
+              checked={filters.categoriaSlug === null}
+              onChange={() => set("categoriaSlug", null)}
+              className="h-3.5 w-3.5 accent-foreground"
+            />
+            Todas
+          </label>
+          {categorias.map((c) => (
+            <label
+              key={c.id}
+              className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground/80 hover:text-foreground"
+            >
+              <input
+                type="radio"
+                checked={filters.categoriaSlug === c.slug}
+                onChange={() => set("categoriaSlug", c.slug)}
+                className="h-3.5 w-3.5 accent-foreground"
+              />
+              {c.nome}
+            </label>
+          ))}
         </div>
       </Section>
     </>
