@@ -133,26 +133,7 @@ function Home() {
         <section>
           {/* Promoções do dia — faixa simples integrada */}
           {promocoes.length > 0 && !filters.promocao && !q && !activeSlug && (
-            <div className="mb-10">
-              <div className="mb-5 flex items-end justify-between gap-4">
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-foreground">Promoções do dia</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Ofertas válidas por tempo limitado.</p>
-                </div>
-                <Link
-                  to="/"
-                  search={{ promocao: "true" }}
-                  className="text-sm font-semibold text-primary hover:underline"
-                >
-                  Ver todas
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {promocoes.slice(0, 4).map((p) => (
-                  <ProductCard key={p.id} p={p} />
-                ))}
-              </div>
-            </div>
+            <PromoHero produtos={promocoes} />
           )}
 
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
