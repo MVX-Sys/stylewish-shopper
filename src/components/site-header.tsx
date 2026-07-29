@@ -8,7 +8,7 @@ import { BRAND } from "@/lib/config";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
-import logoAsset from "@/assets/acha-busca-icon.png.asset.json";
+import logoUrl from "@/assets/acha-busca-icon.png";
 
 export function SiteHeader() {
   const { count, setOpen } = useCart();
@@ -34,7 +34,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3 md:gap-8">
         <Link to="/" className="group flex min-w-0 items-center gap-2">
           <img
-            src={logoAsset.url}
+            src={logoUrl}
             alt={BRAND}
             className="h-11 w-11 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14 md:h-16 md:w-16"
           />
