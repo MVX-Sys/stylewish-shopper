@@ -73,55 +73,34 @@ function CheckoutPage() {
         return;
       }
     }
+    setShowAtendentes(true);
+  };
 
+  const enviarParaAtendente = (atendente: Atendente) => {
     const linhas = items.map((i) => {
-      const eff = itemPrecoEfetivo(i);
-      const promoTag = eff < i.preco ? ` (promo ${brl(eff)}, de ${brl(i.preco)})` : "";
-      return `• ${i.quantidade}x ${i.nome} — Cor ${i.cor}, Tam ${i.tamanho} — ${brl(
-        eff * i.quantidade,
-      )}${promoTag}`;
+      const variacao = `Cor ${i.cor}, Tam ${i.tamanho}`;
+      return `• ${i.quantidade}x ${i.nome} — ${variacao}`;
     });
 
-    const enderecoBloco =
-      formaEnvio === "ENTREGA"
-        ? [
-            "",
-            "*Endereço de entrega*",
-            `CEP: ${cep}`,
-            `Logradouro: ${logradouro}, ${numero}${complemento ? ` — ${complemento}` : ""}`,
-            `Bairro: ${bairro}`,
-            `Cidade/UF: ${cidade}/${estado}`,
-            referencia ? `Referência: ${referencia}` : null,
-            `Forma de entrega: ${formaEntrega}`,
-          ].filter(Boolean)
-        : ["", "*Retirada no local*"];
-
     const msg = [
-      `Olá, ${BRAND}! Gostaria de finalizar o pedido:`,
+      `Olá, ${atendente.nome}! Gostaria de fazer o seguinte pedido:`,
       "",
       "*Itens*",
       ...linhas,
-      "",
-      `Valor do pedido: ${brl(total)}`,
-      `Desconto: Não Aplicado`,
-      `Cupom: Não Aplicado`,
-      `*Valor Final: ${brl(valorFinal)}*`,
-      "",
-      `Forma de envio: ${formaEnvio}`,
-      ...enderecoBloco,
-      "",
-      `Forma de pagamento: ${formaPagamento}`,
-      observacoes ? `\nObservações: ${observacoes}` : "",
+      observacoes ? `\n*Observações*\n${observacoes}` : "",
     ]
       .filter(Boolean)
       .join("\n");
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${atendente.whatsapp}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
-    toast.success("Pedido enviado! Redirecionando ao WhatsApp…");
+    toast.success(`Redirecionando para o WhatsApp de ${atendente.nome}…`);
+    setShowAtendentes(false);
     clear();
     nav({ to: "/" });
   };
+
+
 
   return (
     <div className="min-h-screen bg-background">
