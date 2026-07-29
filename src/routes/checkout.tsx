@@ -354,6 +354,67 @@ function CheckoutPage() {
         </section>
       </main>
       <SiteFooter />
+
+      {showAtendentes && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Escolha um atendente"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          onClick={() => setShowAtendentes(false)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-premium"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowAtendentes(false)}
+              aria-label="Fechar"
+              className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <h2 className="font-display text-xl font-semibold tracking-tight">
+              Escolha um atendente
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Toque na foto do atendente para continuar seu pedido pelo WhatsApp.
+              Todos os detalhes de pagamento, entrega e valores serão combinados diretamente com ele.
+            </p>
+
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {ATENDENTES.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => enviarParaAtendente(a)}
+                  className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-background p-4 text-center transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-soft"
+                >
+                  <div className="relative h-24 w-24 overflow-hidden rounded-full ring-2 ring-border transition-all group-hover:ring-primary">
+                    <img
+                      src={a.foto}
+                      alt={a.nome}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{a.nome}</p>
+                    {a.cargo && (
+                      <p className="text-xs text-muted-foreground">{a.cargo}</p>
+                    )}
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    Falar no WhatsApp
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
