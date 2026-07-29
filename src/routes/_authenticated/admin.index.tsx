@@ -315,15 +315,26 @@ function AdminProductsList() {
                 <option value="em-estoque">Em estoque</option>
                 <option value="esgotados">Esgotados</option>
               </select>
-              <select
-                value={destaque}
-                onChange={(e) => setDestaque(e.target.value as DestaqueFilter)}
-                className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
-              >
-                <option value="todos">Sem destaque</option>
-                <option value="novidade">Novidades</option>
-                <option value="promocao">Em promoção</option>
-              </select>
+              <div className="flex items-center gap-3 rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground/80 hover:text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={novidade}
+                    onChange={(e) => setNovidade(e.target.checked)}
+                    className="h-4 w-4 accent-foreground"
+                  />
+                  Novidade
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground/80 hover:text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={promocao}
+                    onChange={(e) => setPromocao(e.target.checked)}
+                    className="h-4 w-4 accent-foreground"
+                  />
+                  Promoção
+                </label>
+              </div>
               <div className="col-span-2 flex items-center gap-2 sm:col-span-3 lg:col-span-2">
                 <div className="flex flex-1 items-center rounded-lg border border-input bg-background px-2">
                   <span className="text-xs text-muted-foreground">R$</span>
