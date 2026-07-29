@@ -67,6 +67,15 @@ export function SiteHeader() {
         </form>
 
         <div className="ml-auto flex shrink-0 items-center gap-0.5 text-sm sm:gap-2">
+          {!session && (
+            <Link
+              to="/auth"
+              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15"
+            >
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Entrar</span>
+            </Link>
+          )}
           {session && isAdmin && (
             <div className="hidden items-center gap-1 sm:flex">
               <Link
