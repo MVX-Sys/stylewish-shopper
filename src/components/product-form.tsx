@@ -553,6 +553,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                         setAddingCor(false);
                         setNovaCorNome("");
                         setNovaCorHex("#000000");
+                        setHexTouched(false);
                       }}
                       className="h-10 rounded-full border border-border px-4 text-xs font-medium hover:bg-accent"
                     >
