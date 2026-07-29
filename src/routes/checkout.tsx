@@ -50,6 +50,7 @@ function CheckoutPage() {
   );
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("PIX");
   const [observacoes, setObservacoes] = useState("");
+  const [showAtendentes, setShowAtendentes] = useState(false);
 
   const valorFinal = total;
   const minAtingido = useMemo(
