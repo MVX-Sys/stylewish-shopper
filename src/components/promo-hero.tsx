@@ -255,7 +255,7 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
           {items.map((p, i) => (
             <div
               key={p.id}
-              className="animate-fade-in shrink-0 sm:shrink"
+              className="animate-fade-in h-full shrink-0 sm:shrink"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <PromoCard p={p} />
