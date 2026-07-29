@@ -47,7 +47,7 @@ function PromoCard({ p }: { p: ProductListItem }) {
     <Link
       to="/produto/$id"
       params={{ id: p.id }}
-      className="group relative flex w-[78vw] max-w-[320px] snap-start flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-black/[0.06] shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06),0_12px_32px_-16px_rgba(15,23,42,0.12)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_4px_12px_-2px_rgba(255,85,0,0.12),0_24px_48px_-20px_rgba(255,85,0,0.28)] hover:ring-primary/20 sm:w-auto sm:max-w-none"
+      className="group relative flex h-full w-[78vw] max-w-[320px] snap-start flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-black/[0.06] shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06),0_12px_32px_-16px_rgba(15,23,42,0.12)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_4px_12px_-2px_rgba(255,85,0,0.12),0_24px_48px_-20px_rgba(255,85,0,0.28)] hover:ring-primary/20 sm:w-auto sm:max-w-none"
     >
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/5] bg-neutral-100">
@@ -105,31 +105,35 @@ function PromoCard({ p }: { p: ProductListItem }) {
           </span>
         </div>
 
-        {economia > 0 && (
-          <p className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-            <TrendingUp className="h-3 w-3" />
-            Economize {brl(economia)}
-          </p>
-        )}
+        <div className="min-h-[1.25rem]">
+          {economia > 0 && (
+            <p className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+              <TrendingUp className="h-3 w-3" />
+              Economize {brl(economia)}
+            </p>
+          )}
+        </div>
 
-        {/* Stock bar */}
-        {stock > 0 && stock <= 20 && (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[10px] font-medium">
-              <span className="inline-flex items-center gap-1 text-orange-600">
-                <Flame className="h-2.5 w-2.5" />
-                Vendendo rápido
-              </span>
-              <span className="tabular-nums text-muted-foreground">{stock} rest.</span>
+        {/* Stock bar — reserva de espaço fixa para manter proporção */}
+        <div className="min-h-[2rem]">
+          {stock > 0 && stock <= 20 && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-[10px] font-medium">
+                <span className="inline-flex items-center gap-1 text-orange-600">
+                  <Flame className="h-2.5 w-2.5" />
+                  Vendendo rápido
+                </span>
+                <span className="tabular-nums text-muted-foreground">{stock} rest.</span>
+              </div>
+              <div className="h-1 overflow-hidden rounded-full bg-neutral-100">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all"
+                  style={{ width: `${100 - stockPct}%` }}
+                />
+              </div>
             </div>
-            <div className="h-1 overflow-hidden rounded-full bg-neutral-100">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all"
-                style={{ width: `${100 - stockPct}%` }}
-              />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* CTA */}
         <div className="mt-auto pt-1">
@@ -251,7 +255,7 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
           {items.map((p, i) => (
             <div
               key={p.id}
-              className="animate-fade-in shrink-0 sm:shrink"
+              className="animate-fade-in h-full shrink-0 sm:shrink"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <PromoCard p={p} />
