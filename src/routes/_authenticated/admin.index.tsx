@@ -124,8 +124,8 @@ function AdminProductsList() {
       if (status === "inativos" && p.ativo) return false;
       if (status === "esgotados" && !esg) return false;
       if (status === "em-estoque" && esg) return false;
-      if (destaque === "novidade" && !p.novidade) return false;
-      if (destaque === "promocao" && !p.promocao) return false;
+      if (novidade && !p.novidade) return false;
+      if (promocao && !p.promocao) return false;
       return true;
     });
     const totalEstoque = (p: (typeof produtos)[number]) =>
