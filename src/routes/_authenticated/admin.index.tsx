@@ -87,22 +87,22 @@ function AdminProductsList() {
   const activeCount =
     (q ? 1 : 0) +
     (categoriaId !== "todas" ? 1 : 0) +
-    
     (cor !== "todas" ? 1 : 0) +
     (tamanho !== "todos" ? 1 : 0) +
     (status !== "todos" ? 1 : 0) +
-    (destaque !== "todos" ? 1 : 0) +
+    (novidade ? 1 : 0) +
+    (promocao ? 1 : 0) +
     (precoMin ? 1 : 0) +
     (precoMax ? 1 : 0);
 
   const resetFilters = () => {
     setQ("");
     setCategoriaId("todas");
-    
     setCor("todas");
     setTamanho("todos");
     setStatus("todos");
-    setDestaque("todos");
+    setNovidade(false);
+    setPromocao(false);
     setPrecoMin("");
     setPrecoMax("");
     setSort("recentes");
@@ -145,7 +145,7 @@ function AdminProductsList() {
     });
     if (sort === "antigos") sorted.reverse();
     return sorted;
-  }, [produtos, q, categoriaId, cor, tamanho, status, destaque, precoMin, precoMax, sort]);
+  }, [produtos, q, categoriaId, cor, tamanho, status, novidade, promocao, precoMin, precoMax, sort]);
 
   const del = async (id: string) => {
     const alvo = produtos.find((p) => p.id === id);
