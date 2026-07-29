@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
+import { PromoHero } from "@/components/promo-hero";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
 import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
