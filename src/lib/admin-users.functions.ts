@@ -29,11 +29,42 @@ export const listAdminUsers = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<AdminUserRow[]> => {
     await assertAdmin(context);
 
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      // Fallback for self-hosted deploys without the service role secret:
+      // list only users that have roles/permissions registered (no emails).
+      const [{ data: rolesRows }, { data: permRows }] = await Promise.all([
+        context.supabase.from("user_roles").select("user_id, role"),
+        context.supabase.from("user_permissions").select("user_id, permission"),
+      ]);
+      const map = new Map<string, AdminUserRow>();
+      const ensure = (id: string) => {
+        let row = map.get(id);
+        if (!row) {
+          row = {
+            id,
+            email: null,
+            created_at: new Date(0).toISOString(),
+            last_sign_in_at: null,
+            email_confirmed_at: null,
+            phone: null,
+            roles: [],
+            permissions: [],
+          };
+          map.set(id, row);
+        }
+        return row;
+      };
+      for (const r of rolesRows ?? []) ensure(r.user_id).roles.push(r.role);
+      for (const p of permRows ?? []) ensure(p.user_id).permissions.push(p.permission);
+      return [...map.values()];
+    }
+
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
 
     const perPage = 200;
+
     let page = 1;
     const users: Array<{
       id: string;
