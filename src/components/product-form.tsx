@@ -242,9 +242,13 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       toast.error("Essa cor já foi adicionada.");
       return;
     }
+    const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
+    const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
+    const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
+
     setVars((prev) => [
       ...prev,
-      ...TAMANHOS_PADRAO.map((t) => ({
+      ...sizesToUse.map((t) => ({
         nome_cor: nome,
         hex_cor: novaCorHex,
         tamanho: t,
