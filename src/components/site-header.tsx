@@ -12,7 +12,8 @@ import logoUrl from "@/assets/acha-busca-icon.png";
 
 export function SiteHeader() {
   const { count, setOpen } = useCart();
-  const { session, isAdmin } = useAuth();
+  const { session, roleKind, permissions } = useAuth();
+  const canSeePanel = hasAdminPanelAccess(roleKind, permissions);
   const { data: cats = [] } = useQuery({
     queryKey: ["categorias"],
     queryFn: listCategorias,
