@@ -25,8 +25,7 @@ type ImgRow = {
   _file?: File;
 };
 
-const TAMANHOS_PADRAO = ["P", "M", "G", "GG"];
-const TAMANHOS_CALCADOS = ["37", "38", "39", "40", "41", "42", "43", "44"];
+// Removemos as listas de tamanhos pré-definidos para permitir entrada livre.
 const CATEGORIAS_CALCADOS = ["chinelos", "tenis", "botas"];
 
 const CORES_CONHECIDAS: Record<string, string> = {
