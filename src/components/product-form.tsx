@@ -516,19 +516,30 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
 
           <Card title="Variações · Cores × Tamanhos × Estoque"
             action={
-              !addingCor && (
-                <button
-                  type="button"
-                  onClick={() => setAddingCor(true)}
-                  className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
-                >
-                  <Plus className="h-3 w-3" /> Adicionar cor
-                </button>
-              )
+              <div className="flex gap-2">
+                {!addingCor && (
+                  <button
+                    type="button"
+                    onClick={() => setAddingCor(true)}
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                  >
+                    <Plus className="h-3 w-3" /> Cor
+                  </button>
+                )}
+                {!addingTam && (
+                  <button
+                    type="button"
+                    onClick={() => setAddingTam(true)}
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                  >
+                    <Plus className="h-3 w-3" /> Tamanho
+                  </button>
+                )}
+              </div>
             }
           >
             {addingCor && (
-              <div className="rounded-xl border border-border bg-muted/30 p-4">
+              <div className="mb-4 rounded-xl border border-border bg-muted/30 p-4">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
                   <div>
                     <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
