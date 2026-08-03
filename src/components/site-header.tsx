@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listCategorias } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
+import { hasAdminPanelAccess } from "@/lib/permissions";
 import { BRAND } from "@/lib/config";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +13,8 @@ import logoUrl from "@/assets/acha-busca-icon.png";
 
 export function SiteHeader() {
   const { count, setOpen } = useCart();
-  const { session, isAdmin } = useAuth();
+  const { session, roleKind, permissions } = useAuth();
+  const canSeePanel = hasAdminPanelAccess(roleKind, permissions);
   const { data: cats = [] } = useQuery({
     queryKey: ["categorias"],
     queryFn: listCategorias,
@@ -76,7 +78,7 @@ export function SiteHeader() {
               <span className="hidden sm:inline">Entrar</span>
             </Link>
           )}
-          {session && isAdmin && (
+          {session && canSeePanel && (
             <div className="hidden items-center gap-1 sm:flex">
               <Link
                 to="/admin"
@@ -96,7 +98,7 @@ export function SiteHeader() {
               </button>
             </div>
           )}
-          {session && !isAdmin && (
+          {session && !canSeePanel && (
             <button
               onClick={async () => {
                 await supabase.auth.signOut();
