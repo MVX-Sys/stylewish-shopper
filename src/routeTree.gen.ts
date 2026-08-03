@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReposicoesRouteImport } from './routes/reposicoes'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -25,6 +26,11 @@ import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminProdutosNovoRouteImport } from './routes/_authenticated/admin.produtos.novo'
 import { Route as AuthenticatedAdminProdutosIdRouteImport } from './routes/_authenticated/admin.produtos.$id'
 
+const ReposicoesRoute = ReposicoesRouteImport.update({
+  id: '/reposicoes',
+  path: '/reposicoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/reposicoes': typeof ReposicoesRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/reposicoes': typeof ReposicoesRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/backup': typeof AuthenticatedAdminBackupRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/reposicoes': typeof ReposicoesRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/produto/$id': typeof ProdutoIdRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/pedidos'
     | '/perfil'
+    | '/reposicoes'
     | '/admin'
     | '/produto/$id'
     | '/admin/auditoria'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/pedidos'
     | '/perfil'
+    | '/reposicoes'
     | '/produto/$id'
     | '/admin/auditoria'
     | '/admin/backup'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/pedidos'
     | '/perfil'
+    | '/reposicoes'
     | '/_authenticated/admin'
     | '/produto/$id'
     | '/_authenticated/admin/auditoria'
@@ -213,11 +225,19 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   PedidosRoute: typeof PedidosRoute
   PerfilRoute: typeof PerfilRoute
+  ReposicoesRoute: typeof ReposicoesRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reposicoes': {
+      id: '/reposicoes'
+      path: '/reposicoes'
+      fullPath: '/reposicoes'
+      preLoaderRoute: typeof ReposicoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
@@ -367,6 +387,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   PedidosRoute: PedidosRoute,
   PerfilRoute: PerfilRoute,
+  ReposicoesRoute: ReposicoesRoute,
   ProdutoIdRoute: ProdutoIdRoute,
 }
 export const routeTree = rootRouteImport
