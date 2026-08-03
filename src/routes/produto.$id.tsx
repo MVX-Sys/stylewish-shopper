@@ -109,13 +109,23 @@ function ProductPage() {
     }
     const catSlug = p.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id)?.slug?.toLowerCase() || "" : "";
     const isFootwear = ["chinelos", "tenis", "botas"].some(slug => catSlug.includes(slug));
-    const sizeOrder = isFootwear 
-      ? ["37", "38", "39", "40", "41", "42", "43", "44"]
-      : ["PP", "P", "M", "G", "GG", "XG"];
+    const clothingOrder = ["PP", "P", "M", "G", "GG", "XG"];
 
-    const tams = Array.from(tamanhos).sort(
-      (a, b) => (sizeOrder.indexOf(a) + 100) - (sizeOrder.indexOf(b) + 100) || a.localeCompare(b),
-    );
+    const tams = Array.from(tamanhos).sort((a, b) => {
+      if (isFootwear) {
+        const numA = parseInt(a);
+        const numB = parseInt(b);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      }
+      const idxA = clothingOrder.indexOf(a);
+      const idxB = clothingOrder.indexOf(b);
+      
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      
+      return a.localeCompare(b);
+    });
     return { cores: Array.from(coresMap.values()), tamanhos: tams };
   }, [p]);
 
