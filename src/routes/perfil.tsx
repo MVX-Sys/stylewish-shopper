@@ -51,7 +51,7 @@ function ProfilePage() {
       icon: History,
       color: "text-blue-500",
       bg: "bg-blue-50",
-      href: "/", // TODO: Implement dedicated views
+      href: "/pedidos",
     },
     {
       title: "Compras Aprovadas",
@@ -59,7 +59,7 @@ function ProfilePage() {
       icon: CheckCircle,
       color: "text-green-500",
       bg: "bg-green-50",
-      href: "/",
+      href: "/pedidos",
     },
     {
       title: "Reposições Pedidas",
