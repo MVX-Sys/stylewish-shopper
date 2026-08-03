@@ -26,6 +26,8 @@ type ImgRow = {
 };
 
 const TAMANHOS_PADRAO = ["P", "M", "G", "GG"];
+const TAMANHOS_CALCADOS = ["37", "38", "39", "40", "41", "42", "43", "44"];
+const CATEGORIAS_CALCADOS = ["chinelos", "tenis", "botas"];
 
 const CORES_CONHECIDAS: Record<string, string> = {
   preto: "#000000",
@@ -240,9 +242,13 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       toast.error("Essa cor já foi adicionada.");
       return;
     }
+    const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
+    const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
+    const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
+
     setVars((prev) => [
       ...prev,
-      ...TAMANHOS_PADRAO.map((t) => ({
+      ...sizesToUse.map((t) => ({
         nome_cor: nome,
         hex_cor: novaCorHex,
         tamanho: t,
@@ -574,11 +580,17 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                   <thead className="bg-muted/60">
                     <tr className="text-xs uppercase tracking-wider text-muted-foreground">
                       <th className="p-3 text-left font-semibold">Cor</th>
-                      {TAMANHOS_PADRAO.map((t) => (
-                        <th key={t} className="p-3 text-center font-semibold">
-                          {t}
-                        </th>
-                      ))}
+                      {(() => {
+                        const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
+                        const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
+                        const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
+                        
+                        return sizesToUse.map((t) => (
+                          <th key={t} className="p-3 text-center font-semibold">
+                            {t}
+                          </th>
+                        ));
+                      })()}
                       <th></th>
                     </tr>
                   </thead>
@@ -594,17 +606,23 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                             <span className="font-medium">{c.nome}</span>
                           </div>
                         </td>
-                        {TAMANHOS_PADRAO.map((t) => (
-                          <td key={t} className="p-2 text-center">
-                            <input
-                              type="number"
-                              min={0}
-                              value={getEstoque(c.nome, t)}
-                              onChange={(e) => setEstoque(c.nome, t, Number(e.target.value))}
-                              className="w-16 rounded-lg border border-input bg-background px-2 py-1.5 text-center text-sm tabular-nums outline-none focus:border-foreground"
-                            />
-                          </td>
-                        ))}
+                        {(() => {
+                          const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
+                          const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
+                          const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
+                          
+                          return sizesToUse.map((t) => (
+                            <td key={t} className="p-2 text-center">
+                              <input
+                                type="number"
+                                min={0}
+                                value={getEstoque(c.nome, t)}
+                                onChange={(e) => setEstoque(c.nome, t, Number(e.target.value))}
+                                className="w-16 rounded-lg border border-input bg-background px-2 py-1.5 text-center text-sm tabular-nums outline-none focus:border-foreground"
+                              />
+                            </td>
+                          ));
+                        })()}
                         <td className="p-2 text-right">
                           <button
                             type="button"

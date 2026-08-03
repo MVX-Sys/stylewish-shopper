@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { getProduto, getPromoInfo, isEsgotado } from "@/lib/products";
+import { getProduto, getPromoInfo, isEsgotado, listCategorias, type Categoria } from "@/lib/products";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
@@ -37,6 +37,10 @@ function ProductPage() {
   const { data: p, isLoading } = useQuery({
     queryKey: ["produto", id],
     queryFn: () => getProduto(id),
+  });
+  const { data: categorias = [] } = useQuery<Categoria[]>({
+    queryKey: ["categorias"],
+    queryFn: listCategorias,
   });
   const { add, setOpen } = useCart();
 
@@ -103,9 +107,14 @@ function ProductPage() {
       coresMap.set(v.nome_cor, { nome: v.nome_cor, hex: v.hex_cor });
       tamanhos.add(v.tamanho);
     }
-    const order = ["PP", "P", "M", "G", "GG", "XG"];
+    const catSlug = p.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id)?.slug?.toLowerCase() || "" : "";
+    const isFootwear = ["chinelos", "tenis", "botas"].some(slug => catSlug.includes(slug));
+    const sizeOrder = isFootwear 
+      ? ["37", "38", "39", "40", "41", "42", "43", "44"]
+      : ["PP", "P", "M", "G", "GG", "XG"];
+
     const tams = Array.from(tamanhos).sort(
-      (a, b) => (order.indexOf(a) + 100) - (order.indexOf(b) + 100) || a.localeCompare(b),
+      (a, b) => (sizeOrder.indexOf(a) + 100) - (sizeOrder.indexOf(b) + 100) || a.localeCompare(b),
     );
     return { cores: Array.from(coresMap.values()), tamanhos: tams };
   }, [p]);
