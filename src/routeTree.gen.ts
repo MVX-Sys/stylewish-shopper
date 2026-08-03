@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReposicoesRouteImport } from './routes/reposicoes'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PedidosRouteImport } from './routes/pedidos'
+import { Route as DadosContaRouteImport } from './routes/dados-conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -39,6 +40,11 @@ const PerfilRoute = PerfilRouteImport.update({
 const PedidosRoute = PedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DadosContaRoute = DadosContaRouteImport.update({
+  id: '/dados-conta',
+  path: '/dados-conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/dados-conta': typeof DadosContaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
   '/reposicoes': typeof ReposicoesRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/dados-conta': typeof DadosContaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
   '/reposicoes': typeof ReposicoesRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/dados-conta': typeof DadosContaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
   '/reposicoes': typeof ReposicoesRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/checkout'
+    | '/dados-conta'
     | '/pedidos'
     | '/perfil'
     | '/reposicoes'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/checkout'
+    | '/dados-conta'
     | '/pedidos'
     | '/perfil'
     | '/reposicoes'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/checkout'
+    | '/dados-conta'
     | '/pedidos'
     | '/perfil'
     | '/reposicoes'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
+  DadosContaRoute: typeof DadosContaRoute
   PedidosRoute: typeof PedidosRoute
   PerfilRoute: typeof PerfilRoute
   ReposicoesRoute: typeof ReposicoesRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/pedidos'
       fullPath: '/pedidos'
       preLoaderRoute: typeof PedidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dados-conta': {
+      id: '/dados-conta'
+      path: '/dados-conta'
+      fullPath: '/dados-conta'
+      preLoaderRoute: typeof DadosContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -385,6 +405,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
+  DadosContaRoute: DadosContaRoute,
   PedidosRoute: PedidosRoute,
   PerfilRoute: PerfilRoute,
   ReposicoesRoute: ReposicoesRoute,
