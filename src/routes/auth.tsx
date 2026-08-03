@@ -25,7 +25,13 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (session && isAdmin) nav({ to: "/admin" });
+    if (session) {
+      if (isAdmin) {
+        nav({ to: "/admin" });
+      } else {
+        nav({ to: "/" });
+      }
+    }
   }, [session, isAdmin, nav]);
 
   const submit = async (e: React.FormEvent) => {
