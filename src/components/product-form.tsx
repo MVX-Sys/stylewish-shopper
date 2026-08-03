@@ -511,28 +511,17 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
             </Field>
           </Card>
 
-          <Card title="Variações · Cores × Tamanhos × Estoque"
+          <Card title="Variações · Cores × Tamanhos"
             action={
-              <div className="flex gap-2">
-                {!addingCor && (
-                  <button
-                    type="button"
-                    onClick={() => setAddingCor(true)}
-                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
-                  >
-                    <Plus className="h-3 w-3" /> Cor
-                  </button>
-                )}
-                {!addingTam && (
-                  <button
-                    type="button"
-                    onClick={() => setAddingTam(true)}
-                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
-                  >
-                    <Plus className="h-3 w-3" /> Tamanho
-                  </button>
-                )}
-              </div>
+              !addingCor && (
+                <button
+                  type="button"
+                  onClick={() => setAddingCor(true)}
+                  className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                >
+                  <Plus className="h-3 w-3" /> Adicionar cor
+                </button>
+              )
             }
           >
             {addingCor && (
@@ -565,12 +554,11 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                   </div>
                   <div>
                     <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Cor
+                      Visual
                     </span>
                     <label
                       className="flex h-10 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-input transition-colors"
                       style={{ backgroundColor: novaCorHex }}
-                      title={novaCorHex}
                     >
                       <input
                         type="color"
@@ -589,7 +577,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                       onClick={confirmAddCor}
                       className="h-10 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:opacity-90"
                     >
-                      Adicionar
+                      Confirmar Cor
                     </button>
                   </div>
                   <div className="flex items-end">
@@ -610,118 +598,77 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
               </div>
             )}
 
-            {addingTam && (
-              <div className="mb-4 rounded-xl border border-border bg-muted/30 p-4">
-                <div className="flex flex-wrap items-end gap-3">
-                  <div className="flex-1 min-w-[120px]">
-                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Novo Tamanho
-                    </span>
-                    <input
-                      autoFocus
-                      value={novoTam}
-                      onChange={(e) => setNovoTam(e.target.value.toUpperCase())}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          confirmAddTam();
-                        }
-                      }}
-                      placeholder="Ex: P, 38, GG..."
-                      className="input w-full"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={confirmAddTam}
-                    className="h-10 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:opacity-90"
-                  >
-                    Adicionar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAddingTam(false);
-                      setNovoTam("");
-                    }}
-                    className="h-10 rounded-full border border-border px-4 text-xs font-medium hover:bg-accent"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            )}
-
             {cores.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
-                Nenhuma cor cadastrada. Adicione ao menos uma cor para gerenciar estoque.
+                Nenhuma cor cadastrada. Adicione uma cor primeiro para definir os tamanhos.
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-border">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/60">
-                    <tr className="text-xs uppercase tracking-wider text-muted-foreground">
-                      <th className="p-3 text-left font-semibold">Cor</th>
-                      {(() => {
-                        const sizesToUse = Array.from(new Set(vars.map(v => v.tamanho)));
-                        return sizesToUse.map((t) => (
-                          <th key={t} className="p-3 text-center font-semibold group">
-                            <div className="flex items-center justify-center gap-1">
-                              {t}
+              <div className="space-y-4">
+                {cores.map((c) => (
+                  <div key={c.nome} className="rounded-xl border border-border bg-card overflow-hidden">
+                    {/* Cabeçalho da Cor */}
+                    <div className="flex items-center justify-between bg-muted/40 px-4 py-3 border-b border-border">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="h-6 w-6 rounded-full border border-border shadow-inner"
+                          style={{ backgroundColor: c.hex }}
+                        />
+                        <span className="font-display font-bold text-sm uppercase tracking-wider">{c.nome}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeCor(c.nome)}
+                        className="text-xs font-medium text-destructive hover:underline"
+                      >
+                        Remover Cor
+                      </button>
+                    </div>
+
+                    {/* Tamanhos da Cor */}
+                    <div className="p-4">
+                      <div className="flex flex-wrap gap-3 items-end">
+                        {vars
+                          .filter((v) => v.nome_cor === c.nome && v.tamanho !== "")
+                          .map((v) => (
+                            <div key={v.tamanho} className="group relative flex flex-col items-center gap-1.5 rounded-xl border border-border bg-muted/20 p-3 pt-2">
+                              <span className="text-[10px] font-bold uppercase text-muted-foreground">{v.tamanho}</span>
+                              <input
+                                type="number"
+                                min={0}
+                                value={v.quantidade_estoque}
+                                onChange={(e) => setEstoque(c.nome, v.tamanho, Number(e.target.value))}
+                                className="w-16 rounded-lg border border-input bg-background px-2 py-1.5 text-center text-sm tabular-nums outline-none focus:border-foreground"
+                              />
                               <button
                                 type="button"
-                                onClick={() => removeTam(t)}
-                                className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-opacity"
-                                title={`Remover tamanho ${t}`}
+                                onClick={() => removeTam(c.nome, v.tamanho)}
+                                className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
                               >
                                 <X className="h-3 w-3" />
                               </button>
                             </div>
-                          </th>
-                        ));
-                      })()}
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cores.map((c) => (
-                      <tr key={c.nome} className="border-t border-border">
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="h-6 w-6 rounded-full border border-border shadow-inner"
-                              style={{ backgroundColor: c.hex }}
-                            />
-                            <span className="font-medium">{c.nome}</span>
-                          </div>
-                        </td>
-                        {(() => {
-                          const sizesToUse = Array.from(new Set(vars.map(v => v.tamanho)));
-                          return sizesToUse.map((t) => (
-                            <td key={t} className="p-2 text-center">
-                              <input
-                                type="number"
-                                min={0}
-                                value={getEstoque(c.nome, t)}
-                                onChange={(e) => setEstoque(c.nome, t, Number(e.target.value))}
-                                className="w-16 rounded-lg border border-input bg-background px-2 py-1.5 text-center text-sm tabular-nums outline-none focus:border-foreground"
-                              />
-                            </td>
-                          ));
-                        })()}
-                        <td className="p-2 text-right">
-                          <button
-                            type="button"
-                            onClick={() => removeCor(c.nome)}
-                            className="rounded-full p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          ))}
+                        
+                        {/* Input para novo tamanho nesta cor */}
+                        <div className="flex items-center gap-2 rounded-xl border border-dashed border-border p-2">
+                          <input
+                            type="text"
+                            placeholder="Novo tam (ex: 38, P)"
+                            className="w-24 bg-transparent text-xs outline-none"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                confirmAddTam(c.nome, (e.target as HTMLInputElement).value);
+                                (e.target as HTMLInputElement).value = "";
+                              }
+                            }}
+                          />
+                          <span className="text-[10px] text-muted-foreground italic">Enter p/ add</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </Card>
