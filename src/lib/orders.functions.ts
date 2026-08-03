@@ -1,0 +1,75 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
+
+export const createOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({
+      itens: z.array(
+        z.object({
+          produto_id: z.string(),
+          variacao_id: z.string(),
+          quantidade: z.number(),
+          preco_unitario: z.number(),
+          nome: z.string(),
+          cor: z.string(),
+          tamanho: z.string(),
+        })
+      ),
+      total: z.number(),
+      forma_envio: z.string(),
+      forma_pagamento: z.string(),
+      endereco: z.any().optional(),
+      observacoes: z.string().optional(),
+    })
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // 1. Inserir o pedido principal
+    const { data: order, error: orderErr } = await supabase
+      .from("pedidos")
+      .insert({
+        user_id: userId,
+        total: data.total,
+        status: "pendente",
+        forma_envio: data.forma_envio,
+        forma_pagamento: data.forma_pagamento,
+        endereco: data.endereco,
+        observacoes: data.observacoes,
+      })
+      .select()
+      .single();
+
+    if (orderErr) throw orderErr;
+
+    // 2. Inserir os itens do pedido
+    const orderItems = data.itens.map((item) => ({
+      pedido_id: order.id,
+      produto_id: item.produto_id,
+      variacao_id: item.variacao_id,
+      quantidade: item.quantidade,
+      preco_unitario: item.preco_unitario,
+      detalhes: { cor: item.cor, tamanho: item.tamanho, nome: item.nome },
+    }));
+
+    const { error: itemsErr } = await supabase.from("pedidos_itens").insert(orderItems);
+    if (itemsErr) throw itemsErr;
+
+    return order;
+  });
+
+export const listUserOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("pedidos")
+      .select("*, itens:pedidos_itens(*)")
+      .eq("user_id", userId)
+      .order("criado_em", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  });
