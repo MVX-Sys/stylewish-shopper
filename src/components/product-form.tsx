@@ -26,6 +26,8 @@ type ImgRow = {
 };
 
 const TAMANHOS_PADRAO = ["P", "M", "G", "GG"];
+const TAMANHOS_CALCADOS = ["37", "38", "39", "40", "41", "42", "43", "44"];
+const CATEGORIAS_CALCADOS = ["chinelos", "tenis", "botas"];
 
 const CORES_CONHECIDAS: Record<string, string> = {
   preto: "#000000",
