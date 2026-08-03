@@ -25,7 +25,13 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (session && isAdmin) nav({ to: "/admin" });
+    if (session) {
+      if (isAdmin) {
+        nav({ to: "/admin" });
+      } else {
+        nav({ to: "/" });
+      }
+    }
   }, [session, isAdmin, nav]);
 
   const submit = async (e: React.FormEvent) => {
@@ -45,6 +51,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Bem-vindo!");
+        // The useEffect will handle redirection
       }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Erro");
