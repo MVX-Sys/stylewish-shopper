@@ -243,24 +243,55 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       toast.error("Essa cor já foi adicionada.");
       return;
     }
-    const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
-    const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
-    const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
 
-    setVars((prev) => [
-      ...prev,
-      ...sizesToUse.map((t) => ({
-        nome_cor: nome,
-        hex_cor: novaCorHex,
-        tamanho: t,
-        quantidade_estoque: 0,
-      })),
-    ]);
+    // Ao adicionar cor, não adicionamos tamanhos automaticamente
+    // O usuário deve adicionar os tamanhos manualmente
+    if (vars.length === 0) {
+      toast.info("Cor adicionada. Agora adicione os tamanhos desejados.");
+    }
+
     setNovaCorNome("");
     setNovaCorHex("#000000");
     setHexTouched(false);
     setAddingCor(false);
   };
+
+  const confirmAddTam = () => {
+    const tam = novoTam.trim();
+    if (!tam) {
+      toast.error("Informe o tamanho.");
+      return;
+    }
+    
+    // Pega todos os tamanhos existentes
+    const tamanhosExistentes = Array.from(new Set(vars.map(v => v.tamanho)));
+    if (tamanhosExistentes.includes(tam)) {
+      toast.error("Esse tamanho já existe.");
+      return;
+    }
+
+    // Se houver cores, cria a variação para cada cor com estoque 0
+    if (cores.length > 0) {
+      setVars(prev => [
+        ...prev,
+        ...cores.map(c => ({
+          nome_cor: c.nome,
+          hex_cor: c.hex,
+          tamanho: tam,
+          quantidade_estoque: 0
+        }))
+      ]);
+    } else {
+      // Se não houver cores, não podemos criar variações ainda
+      toast.warning("Adicione uma cor antes de adicionar tamanhos.");
+    }
+    
+    setNovoTam("");
+    setAddingTam(false);
+  };
+
+  const removeTam = (tam: string) =>
+    setVars((prev) => prev.filter((v) => v.tamanho !== tam));
 
 
   const removeCor = (nome: string) =>
