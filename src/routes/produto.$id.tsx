@@ -38,6 +38,10 @@ function ProductPage() {
     queryKey: ["produto", id],
     queryFn: () => getProduto(id),
   });
+  const { data: categorias = [] } = useQuery({
+    queryKey: ["categorias"],
+    queryFn: listCategorias,
+  });
   const { add, setOpen } = useCart();
 
   const [imgs, setImgs] = useState<string[]>([]);
