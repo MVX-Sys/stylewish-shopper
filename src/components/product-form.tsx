@@ -699,10 +699,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                           </div>
                         </td>
                         {(() => {
-                          const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
-                          const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
-                          const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
-                          
+                          const sizesToUse = Array.from(new Set(vars.map(v => v.tamanho)));
                           return sizesToUse.map((t) => (
                             <td key={t} className="p-2 text-center">
                               <input
