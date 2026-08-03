@@ -79,9 +79,15 @@ function CheckoutPage() {
   };
 
   const fnCreateOrder = useServerFn(createOrder);
+  const { session } = useAuth();
 
   const enviarParaAtendente = async (atendente: Atendente) => {
     try {
+      if (!session) {
+        toast.error("Você precisa estar logado para finalizar o pedido.");
+        nav({ to: "/auth" });
+        return;
+      }
       // 1. Persistir o pedido no banco de dados para o histórico do cliente
       await fnCreateOrder({
         data: {

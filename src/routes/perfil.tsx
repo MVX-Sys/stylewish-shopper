@@ -67,7 +67,7 @@ function ProfilePage() {
       icon: RefreshCcw,
       color: "text-orange-500",
       bg: "bg-orange-50",
-      href: "/",
+      href: "/reposicoes",
     },
     {
       title: "Dados da Conta",
