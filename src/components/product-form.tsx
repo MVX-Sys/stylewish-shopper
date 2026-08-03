@@ -666,13 +666,20 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                     <tr className="text-xs uppercase tracking-wider text-muted-foreground">
                       <th className="p-3 text-left font-semibold">Cor</th>
                       {(() => {
-                        const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
-                        const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
-                        const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
-                        
+                        const sizesToUse = Array.from(new Set(vars.map(v => v.tamanho)));
                         return sizesToUse.map((t) => (
-                          <th key={t} className="p-3 text-center font-semibold">
-                            {t}
+                          <th key={t} className="p-3 text-center font-semibold group">
+                            <div className="flex items-center justify-center gap-1">
+                              {t}
+                              <button
+                                type="button"
+                                onClick={() => removeTam(t)}
+                                className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-opacity"
+                                title={`Remover tamanho ${t}`}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
                           </th>
                         ));
                       })()}
