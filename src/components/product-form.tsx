@@ -124,10 +124,8 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   const [vars, setVars] = useState<VarRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [addingCor, setAddingCor] = useState(false);
-  const [addingTam, setAddingTam] = useState(false);
   const [novaCorNome, setNovaCorNome] = useState("");
   const [novaCorHex, setNovaCorHex] = useState("#000000");
-  const [novoTam, setNovoTam] = useState("");
   const [hexTouched, setHexTouched] = useState(false);
 
   useEffect(() => {
