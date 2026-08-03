@@ -26,7 +26,8 @@ export const Route = createFileRoute("/perfil")({
 });
 
 function ProfilePage() {
-  const { session, user } = useAuth();
+  const { session } = useAuth();
+  const user = session?.user;
   const nav = useNavigate();
 
   useEffect(() => {
