@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listCategorias } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
+import { hasAdminPanelAccess } from "@/lib/permissions";
 import { BRAND } from "@/lib/config";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
