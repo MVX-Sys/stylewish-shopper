@@ -244,54 +244,53 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       return;
     }
 
-    // Ao adicionar cor, não adicionamos tamanhos automaticamente
-    // O usuário deve adicionar os tamanhos manualmente
-    if (vars.length === 0) {
-      toast.info("Cor adicionada. Agora adicione os tamanhos desejados.");
-    }
+    // Apenas garante que a cor exista na lista de variações (mesmo sem tamanho inicial)
+    // Usamos um tamanho temporário vazio ou apenas não adicionamos nada se preferir,
+    // mas para a lógica do componente 'cores' funcionar, precisamos de ao menos uma entrada.
+    // Vamos adicionar uma entrada com tamanho vazio que será removida assim que o primeiro tamanho real for adicionado.
+    setVars((prev) => [
+      ...prev,
+      {
+        nome_cor: nome,
+        hex_cor: novaCorHex,
+        tamanho: "", // Tamanho vazio inicial
+        quantidade_estoque: 0,
+      },
+    ]);
 
     setNovaCorNome("");
     setNovaCorHex("#000000");
     setHexTouched(false);
     setAddingCor(false);
+    toast.success(`Cor ${nome} adicionada. Agora adicione os tamanhos para ela.`);
   };
 
-  const confirmAddTam = () => {
-    const tam = novoTam.trim();
-    if (!tam) {
-      toast.error("Informe o tamanho.");
-      return;
-    }
+  const confirmAddTam = (corNome: string, tamNome: string) => {
+    const tam = tamNome.trim().toUpperCase();
+    if (!tam) return;
     
-    // Pega todos os tamanhos existentes
-    const tamanhosExistentes = Array.from(new Set(vars.map(v => v.tamanho)));
-    if (tamanhosExistentes.includes(tam)) {
-      toast.error("Esse tamanho já existe.");
+    if (vars.some(v => v.nome_cor === corNome && v.tamanho === tam)) {
+      toast.error("Este tamanho já existe para esta cor.");
       return;
     }
 
-    // Se houver cores, cria a variação para cada cor com estoque 0
-    if (cores.length > 0) {
-      setVars(prev => [
-        ...prev,
-        ...cores.map(c => ({
-          nome_cor: c.nome,
-          hex_cor: c.hex,
+    setVars(prev => {
+      // Remove a entrada vazia inicial se existir
+      const filtered = prev.filter(v => !(v.nome_cor === corNome && v.tamanho === ""));
+      return [
+        ...filtered,
+        {
+          nome_cor: corNome,
+          hex_cor: cores.find(c => c.nome === corNome)?.hex || "#000000",
           tamanho: tam,
           quantidade_estoque: 0
-        }))
-      ]);
-    } else {
-      // Se não houver cores, não podemos criar variações ainda
-      toast.warning("Adicione uma cor antes de adicionar tamanhos.");
-    }
-    
-    setNovoTam("");
-    setAddingTam(false);
+        }
+      ];
+    });
   };
 
-  const removeTam = (tam: string) =>
-    setVars((prev) => prev.filter((v) => v.tamanho !== tam));
+  const removeTam = (cor: string, tam: string) =>
+    setVars((prev) => prev.filter((v) => !(v.nome_cor === cor && v.tamanho === tam)));
 
 
   const removeCor = (nome: string) =>
