@@ -25,8 +25,7 @@ type ImgRow = {
   _file?: File;
 };
 
-const TAMANHOS_PADRAO = ["P", "M", "G", "GG"];
-const TAMANHOS_CALCADOS = ["37", "38", "39", "40", "41", "42", "43", "44"];
+// Removemos as listas de tamanhos pré-definidos para permitir entrada livre.
 const CATEGORIAS_CALCADOS = ["chinelos", "tenis", "botas"];
 
 const CORES_CONHECIDAS: Record<string, string> = {
@@ -125,8 +124,10 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   const [vars, setVars] = useState<VarRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [addingCor, setAddingCor] = useState(false);
+  const [addingTam, setAddingTam] = useState(false);
   const [novaCorNome, setNovaCorNome] = useState("");
   const [novaCorHex, setNovaCorHex] = useState("#000000");
+  const [novoTam, setNovoTam] = useState("");
   const [hexTouched, setHexTouched] = useState(false);
 
   useEffect(() => {
@@ -242,24 +243,55 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       toast.error("Essa cor já foi adicionada.");
       return;
     }
-    const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
-    const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
-    const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
 
-    setVars((prev) => [
-      ...prev,
-      ...sizesToUse.map((t) => ({
-        nome_cor: nome,
-        hex_cor: novaCorHex,
-        tamanho: t,
-        quantidade_estoque: 0,
-      })),
-    ]);
+    // Ao adicionar cor, não adicionamos tamanhos automaticamente
+    // O usuário deve adicionar os tamanhos manualmente
+    if (vars.length === 0) {
+      toast.info("Cor adicionada. Agora adicione os tamanhos desejados.");
+    }
+
     setNovaCorNome("");
     setNovaCorHex("#000000");
     setHexTouched(false);
     setAddingCor(false);
   };
+
+  const confirmAddTam = () => {
+    const tam = novoTam.trim();
+    if (!tam) {
+      toast.error("Informe o tamanho.");
+      return;
+    }
+    
+    // Pega todos os tamanhos existentes
+    const tamanhosExistentes = Array.from(new Set(vars.map(v => v.tamanho)));
+    if (tamanhosExistentes.includes(tam)) {
+      toast.error("Esse tamanho já existe.");
+      return;
+    }
+
+    // Se houver cores, cria a variação para cada cor com estoque 0
+    if (cores.length > 0) {
+      setVars(prev => [
+        ...prev,
+        ...cores.map(c => ({
+          nome_cor: c.nome,
+          hex_cor: c.hex,
+          tamanho: tam,
+          quantidade_estoque: 0
+        }))
+      ]);
+    } else {
+      // Se não houver cores, não podemos criar variações ainda
+      toast.warning("Adicione uma cor antes de adicionar tamanhos.");
+    }
+    
+    setNovoTam("");
+    setAddingTam(false);
+  };
+
+  const removeTam = (tam: string) =>
+    setVars((prev) => prev.filter((v) => v.tamanho !== tam));
 
 
   const removeCor = (nome: string) =>
@@ -484,19 +516,30 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
 
           <Card title="Variações · Cores × Tamanhos × Estoque"
             action={
-              !addingCor && (
-                <button
-                  type="button"
-                  onClick={() => setAddingCor(true)}
-                  className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
-                >
-                  <Plus className="h-3 w-3" /> Adicionar cor
-                </button>
-              )
+              <div className="flex gap-2">
+                {!addingCor && (
+                  <button
+                    type="button"
+                    onClick={() => setAddingCor(true)}
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                  >
+                    <Plus className="h-3 w-3" /> Cor
+                  </button>
+                )}
+                {!addingTam && (
+                  <button
+                    type="button"
+                    onClick={() => setAddingTam(true)}
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                  >
+                    <Plus className="h-3 w-3" /> Tamanho
+                  </button>
+                )}
+              </div>
             }
           >
             {addingCor && (
-              <div className="rounded-xl border border-border bg-muted/30 p-4">
+              <div className="mb-4 rounded-xl border border-border bg-muted/30 p-4">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
                   <div>
                     <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -570,6 +613,48 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
               </div>
             )}
 
+            {addingTam && (
+              <div className="mb-4 rounded-xl border border-border bg-muted/30 p-4">
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="flex-1 min-w-[120px]">
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Novo Tamanho
+                    </span>
+                    <input
+                      autoFocus
+                      value={novoTam}
+                      onChange={(e) => setNovoTam(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          confirmAddTam();
+                        }
+                      }}
+                      placeholder="Ex: P, 38, GG..."
+                      className="input w-full"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={confirmAddTam}
+                    className="h-10 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                  >
+                    Adicionar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAddingTam(false);
+                      setNovoTam("");
+                    }}
+                    className="h-10 rounded-full border border-border px-4 text-xs font-medium hover:bg-accent"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
             {cores.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
                 Nenhuma cor cadastrada. Adicione ao menos uma cor para gerenciar estoque.
@@ -581,13 +666,20 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                     <tr className="text-xs uppercase tracking-wider text-muted-foreground">
                       <th className="p-3 text-left font-semibold">Cor</th>
                       {(() => {
-                        const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
-                        const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
-                        const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
-                        
+                        const sizesToUse = Array.from(new Set(vars.map(v => v.tamanho)));
                         return sizesToUse.map((t) => (
-                          <th key={t} className="p-3 text-center font-semibold">
-                            {t}
+                          <th key={t} className="p-3 text-center font-semibold group">
+                            <div className="flex items-center justify-center gap-1">
+                              {t}
+                              <button
+                                type="button"
+                                onClick={() => removeTam(t)}
+                                className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-opacity"
+                                title={`Remover tamanho ${t}`}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
                           </th>
                         ));
                       })()}
@@ -607,10 +699,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                           </div>
                         </td>
                         {(() => {
-                          const catSlug = categorias.find(c => c.id === categoriaId)?.slug?.toLowerCase() || "";
-                          const isFootwear = CATEGORIAS_CALCADOS.some(slug => catSlug.includes(slug));
-                          const sizesToUse = isFootwear ? TAMANHOS_CALCADOS : TAMANHOS_PADRAO;
-                          
+                          const sizesToUse = Array.from(new Set(vars.map(v => v.tamanho)));
                           return sizesToUse.map((t) => (
                             <td key={t} className="p-2 text-center">
                               <input
