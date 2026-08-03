@@ -78,7 +78,7 @@ export function SiteHeader() {
               <span className="hidden sm:inline">Entrar</span>
             </Link>
           )}
-          {session && isAdmin && (
+          {session && canSeePanel && (
             <div className="hidden items-center gap-1 sm:flex">
               <Link
                 to="/admin"
@@ -98,7 +98,7 @@ export function SiteHeader() {
               </button>
             </div>
           )}
-          {session && !isAdmin && (
+          {session && !canSeePanel && (
             <button
               onClick={async () => {
                 await supabase.auth.signOut();
