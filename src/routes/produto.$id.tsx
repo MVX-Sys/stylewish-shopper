@@ -103,9 +103,14 @@ function ProductPage() {
       coresMap.set(v.nome_cor, { nome: v.nome_cor, hex: v.hex_cor });
       tamanhos.add(v.tamanho);
     }
-    const order = ["PP", "P", "M", "G", "GG", "XG"];
+    const catSlug = p.categoria_id ? categorias.find(c => c.id === p.categoria_id)?.slug?.toLowerCase() || "" : "";
+    const isFootwear = ["chinelos", "tenis", "botas"].some(slug => catSlug.includes(slug));
+    const sizeOrder = isFootwear 
+      ? ["37", "38", "39", "40", "41", "42", "43", "44"]
+      : ["PP", "P", "M", "G", "GG", "XG"];
+
     const tams = Array.from(tamanhos).sort(
-      (a, b) => (order.indexOf(a) + 100) - (order.indexOf(b) + 100) || a.localeCompare(b),
+      (a, b) => (sizeOrder.indexOf(a) + 100) - (sizeOrder.indexOf(b) + 100) || a.localeCompare(b),
     );
     return { cores: Array.from(coresMap.values()), tamanhos: tams };
   }, [p]);
