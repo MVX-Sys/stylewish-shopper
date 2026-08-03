@@ -109,6 +109,94 @@ export type Database = {
           },
         ]
       }
+      pedidos: {
+        Row: {
+          criado_em: string | null
+          endereco: Json | null
+          forma_envio: string
+          forma_pagamento: string
+          id: string
+          observacoes: string | null
+          status: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string | null
+          endereco?: Json | null
+          forma_envio: string
+          forma_pagamento: string
+          id?: string
+          observacoes?: string | null
+          status?: string
+          total: number
+          user_id: string
+        }
+        Update: {
+          criado_em?: string | null
+          endereco?: Json | null
+          forma_envio?: string
+          forma_pagamento?: string
+          id?: string
+          observacoes?: string | null
+          status?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pedidos_itens: {
+        Row: {
+          detalhes: Json | null
+          id: string
+          pedido_id: string
+          preco_unitario: number
+          produto_id: string | null
+          quantidade: number
+          variacao_id: string | null
+        }
+        Insert: {
+          detalhes?: Json | null
+          id?: string
+          pedido_id: string
+          preco_unitario: number
+          produto_id?: string | null
+          quantidade: number
+          variacao_id?: string | null
+        }
+        Update: {
+          detalhes?: Json | null
+          id?: string
+          pedido_id?: string
+          preco_unitario?: number
+          produto_id?: string | null
+          quantidade?: number
+          variacao_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_itens_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_itens_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_itens_variacao_id_fkey"
+            columns: ["variacao_id"]
+            isOneToOne: false
+            referencedRelation: "variacoes_produto"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       produtos: {
         Row: {
           ativo: boolean
