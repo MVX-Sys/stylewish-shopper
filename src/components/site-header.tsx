@@ -78,15 +78,25 @@ export function SiteHeader() {
               <span className="hidden sm:inline">Entrar</span>
             </Link>
           )}
-          {session && canSeePanel && (
-            <div className="hidden items-center gap-1 sm:flex">
+          {session && (
+            <div className="flex items-center gap-1 sm:gap-2">
               <Link
-                to="/admin"
+                to="/perfil"
                 className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15"
               >
                 <User className="h-4 w-4" />
-                <span className="hidden md:inline">Painel</span>
+                <span className="hidden md:inline">Minha Conta</span>
               </Link>
+              
+              {canSeePanel && (
+                <Link
+                  to="/admin"
+                  className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15 sm:flex"
+                >
+                  <span className="md:inline">Painel</span>
+                </Link>
+              )}
+
               <button
                 onClick={async () => {
                   await supabase.auth.signOut();
@@ -97,18 +107,6 @@ export function SiteHeader() {
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
-          )}
-          {session && !canSeePanel && (
-            <button
-              onClick={async () => {
-                await supabase.auth.signOut();
-              }}
-              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white/80 hover:bg-white/15 hover:text-white sm:flex"
-              aria-label="Sair"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden md:inline">Sair</span>
-            </button>
           )}
           <ThemeToggle />
           <button

@@ -4,11 +4,14 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
+import { useAuth } from "@/lib/auth";
 import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
 import { ChevronLeft, MessageCircle, FileText, X } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 import atendenteGustavo from "@/assets/atendente-gustavo.jpg";
+import { createOrder } from "@/lib/orders.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 type Atendente = { id: string; nome: string; whatsapp: string; foto: string; cargo?: string };
 const ATENDENTES: Atendente[] = [
@@ -76,50 +79,87 @@ function CheckoutPage() {
     setShowAtendentes(true);
   };
 
-  const enviarParaAtendente = (atendente: Atendente) => {
-    const linhas = items.map((i) => {
-      const variacao = `Cor ${i.cor}, Tam ${i.tamanho}`;
-      const preco = itemPrecoEfetivo(i);
-      return `• ${i.quantidade}x ${i.nome} — ${variacao} — ${brl(preco)} (subtotal ${brl(preco * i.quantidade)})`;
-    });
+  const fnCreateOrder = useServerFn(createOrder);
+  const { session } = useAuth();
 
-    const enderecoLinhas =
-      formaEnvio === "ENTREGA"
-        ? [
-            "",
-            "*Endereço de entrega*",
-            `CEP: ${cep || "-"}`,
-            `Logradouro: ${logradouro || "-"}, Nº ${numero || "-"}${complemento ? ` — ${complemento}` : ""}`,
-            `Bairro: ${bairro || "-"}`,
-            `Cidade/UF: ${cidade || "-"}/${estado || "-"}`,
-            referencia ? `Referência: ${referencia}` : "",
-            `Forma de entrega: ${formaEntrega}`,
-          ].filter(Boolean)
-        : ["", "*Entrega*", "Retirada no local"];
+  const enviarParaAtendente = async (atendente: Atendente) => {
+    try {
+      if (!session) {
+        toast.error("Você precisa estar logado para finalizar o pedido.");
+        nav({ to: "/auth" });
+        return;
+      }
+      // 1. Persistir o pedido no banco de dados para o histórico do cliente
+      await fnCreateOrder({
+        data: {
+          total: valorFinal,
+          forma_envio: formaEnvio,
+          forma_pagamento: formaPagamento,
+          observacoes: observacoes,
+          endereco: formaEnvio === "ENTREGA" ? {
+            cep, logradouro, numero, complemento, bairro, cidade, estado, referencia, formaEntrega
+          } : undefined,
+          itens: items.map(i => ({
+            produto_id: i.produtoId,
+            variacao_id: i.key.split('|')[0], // key format: produtoId|cor|tamanho
+            quantidade: i.quantidade,
+            preco_unitario: itemPrecoEfetivo(i),
+            nome: i.nome,
+            cor: i.cor,
+            tamanho: i.tamanho
+          }))
+        }
+      });
 
-    const msg = [
-      `Olá, ${atendente.nome}! Gostaria de fazer o seguinte pedido:`,
-      "",
-      "*Itens*",
-      ...linhas,
-      "",
-      `*Total do pedido:* ${brl(valorFinal)}`,
-      "",
-      `*Forma de envio:* ${formaEnvio === "ENTREGA" ? "Entrega" : "Retirada no local"}`,
-      ...enderecoLinhas,
-      "",
-      `*Forma de pagamento:* ${formaPagamento}`,
-      observacoes ? `\n*Observações*\n${observacoes}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+      // 2. Gerar mensagem para o WhatsApp
+      const linhas = items.map((i) => {
+        const variacao = `Cor ${i.cor}, Tam ${i.tamanho}`;
+        const preco = itemPrecoEfetivo(i);
+        return `• ${i.quantidade}x ${i.nome} — ${variacao} — ${brl(preco)} (subtotal ${brl(preco * i.quantidade)})`;
+      });
 
-    const url = `https://wa.me/${atendente.whatsapp}?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
-    toast.success(`Redirecionando para o WhatsApp de ${atendente.nome}…`);
-    setShowAtendentes(false);
-    clear();
-    nav({ to: "/" });
+      const enderecoLinhas =
+        formaEnvio === "ENTREGA"
+          ? [
+              "",
+              "*Endereço de entrega*",
+              `CEP: ${cep || "-"}`,
+              `Logradouro: ${logradouro || "-"}, Nº ${numero || "-"}${complemento ? ` — ${complemento}` : ""}`,
+              `Bairro: ${bairro || "-"}`,
+              `Cidade/UF: ${cidade || "-"}/${estado || "-"}`,
+              referencia ? `Referência: ${referencia}` : "",
+              `Forma de entrega: ${formaEntrega}`,
+            ].filter(Boolean)
+          : ["", "*Entrega*", "Retirada no local"];
+
+      const msg = [
+        `Olá, ${atendente.nome}! Gostaria de fazer o seguinte pedido:`,
+        "",
+        "*Itens*",
+        ...linhas,
+        "",
+        `*Total do pedido:* ${brl(valorFinal)}`,
+        "",
+        `*Forma de envio:* ${formaEnvio === "ENTREGA" ? "Entrega" : "Retirada no local"}`,
+        ...enderecoLinhas,
+        "",
+        `*Forma de pagamento:* ${formaPagamento}`,
+        observacoes ? `\n*Observações*\n${observacoes}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      const url = `https://wa.me/${atendente.whatsapp}?text=${encodeURIComponent(msg)}`;
+      window.open(url, "_blank");
+      toast.success(`Pedido salvo! Redirecionando para o WhatsApp de ${atendente.nome}…`);
+      
+      setShowAtendentes(false);
+      clear();
+      nav({ to: "/perfil" });
+    } catch (err) {
+      console.error("Erro ao salvar pedido:", err);
+      toast.error("Erro ao processar pedido. Tente novamente.");
+    }
   };
 
 
