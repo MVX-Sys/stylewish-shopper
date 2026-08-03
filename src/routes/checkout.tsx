@@ -9,6 +9,8 @@ import { ChevronLeft, MessageCircle, FileText, X } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 import atendenteGustavo from "@/assets/atendente-gustavo.jpg";
+import { createOrder } from "@/lib/orders.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 type Atendente = { id: string; nome: string; whatsapp: string; foto: string; cargo?: string };
 const ATENDENTES: Atendente[] = [
