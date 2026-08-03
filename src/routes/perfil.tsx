@@ -75,7 +75,7 @@ function ProfilePage() {
       icon: Settings,
       color: "text-gray-500",
       bg: "bg-gray-50",
-      href: "/",
+      href: "/dados-conta",
     },
   ];
 
