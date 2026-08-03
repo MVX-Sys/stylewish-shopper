@@ -51,6 +51,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Bem-vindo!");
+        // The useEffect will handle redirection
       }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Erro");
