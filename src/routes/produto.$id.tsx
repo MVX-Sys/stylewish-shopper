@@ -38,7 +38,7 @@ function ProductPage() {
     queryKey: ["produto", id],
     queryFn: () => getProduto(id),
   });
-  const { data: categorias = [] } = useQuery({
+  const { data: categorias = [] } = useQuery<Categoria[]>({
     queryKey: ["categorias"],
     queryFn: listCategorias,
   });
