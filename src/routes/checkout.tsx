@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
+import { useAuth } from "@/lib/auth";
 import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
 import { ChevronLeft, MessageCircle, FileText, X } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
