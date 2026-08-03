@@ -107,7 +107,7 @@ function ProductPage() {
       coresMap.set(v.nome_cor, { nome: v.nome_cor, hex: v.hex_cor });
       tamanhos.add(v.tamanho);
     }
-    const catSlug = p.categoria_id ? categorias.find(c => c.id === p.categoria_id)?.slug?.toLowerCase() || "" : "";
+    const catSlug = p.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id)?.slug?.toLowerCase() || "" : "";
     const isFootwear = ["chinelos", "tenis", "botas"].some(slug => catSlug.includes(slug));
     const sizeOrder = isFootwear 
       ? ["37", "38", "39", "40", "41", "42", "43", "44"]
