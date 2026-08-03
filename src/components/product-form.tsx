@@ -613,6 +613,48 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
               </div>
             )}
 
+            {addingTam && (
+              <div className="mb-4 rounded-xl border border-border bg-muted/30 p-4">
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="flex-1 min-w-[120px]">
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Novo Tamanho
+                    </span>
+                    <input
+                      autoFocus
+                      value={novoTam}
+                      onChange={(e) => setNovoTam(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          confirmAddTam();
+                        }
+                      }}
+                      placeholder="Ex: P, 38, GG..."
+                      className="input w-full"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={confirmAddTam}
+                    className="h-10 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                  >
+                    Adicionar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAddingTam(false);
+                      setNovoTam("");
+                    }}
+                    className="h-10 rounded-full border border-border px-4 text-xs font-medium hover:bg-accent"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
             {cores.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
                 Nenhuma cor cadastrada. Adicione ao menos uma cor para gerenciar estoque.
