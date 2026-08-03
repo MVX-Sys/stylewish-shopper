@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { getProduto, getPromoInfo, isEsgotado } from "@/lib/products";
+import { getProduto, getPromoInfo, isEsgotado, listCategorias, type Categoria } from "@/lib/products";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
