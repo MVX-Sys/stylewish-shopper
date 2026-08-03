@@ -84,22 +84,24 @@ function CheckoutPage() {
     try {
       // 1. Persistir o pedido no banco de dados para o histórico do cliente
       await fnCreateOrder({
-        total: valorFinal,
-        forma_envio: formaEnvio,
-        forma_pagamento: formaPagamento,
-        observacoes: observacoes,
-        endereco: formaEnvio === "ENTREGA" ? {
-          cep, logradouro, numero, complemento, bairro, cidade, estado, referencia, formaEntrega
-        } : undefined,
-        itens: items.map(i => ({
-          produto_id: i.produtoId,
-          variacao_id: i.variacaoId,
-          quantidade: i.quantidade,
-          preco_unitario: itemPrecoEfetivo(i),
-          nome: i.nome,
-          cor: i.cor,
-          tamanho: i.tamanho
-        }))
+        data: {
+          total: valorFinal,
+          forma_envio: formaEnvio,
+          forma_pagamento: formaPagamento,
+          observacoes: observacoes,
+          endereco: formaEnvio === "ENTREGA" ? {
+            cep, logradouro, numero, complemento, bairro, cidade, estado, referencia, formaEntrega
+          } : undefined,
+          itens: items.map(i => ({
+            produto_id: i.produtoId,
+            variacao_id: i.key.split('|')[0], // key format: produtoId|cor|tamanho
+            quantidade: i.quantidade,
+            preco_unitario: itemPrecoEfetivo(i),
+            nome: i.nome,
+            cor: i.cor,
+            tamanho: i.tamanho
+          }))
+        }
       });
 
       // 2. Gerar mensagem para o WhatsApp
