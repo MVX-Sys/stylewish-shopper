@@ -157,22 +157,21 @@ function CheckoutPage() {
         .join("\n");
 
       const encodedMsg = encodeURIComponent(msgContent);
-      // Protocolo universal do WhatsApp para funcionar tanto em mobile quanto desktop
       const whatsappUrl = `https://wa.me/${atendente.whatsapp.replace(/\D/g, "")}?text=${encodedMsg}`;
       
-      // Abrir em uma nova aba para evitar interrupções no fluxo do app
-      // Tenta abrir o link do WhatsApp
-      // No celular, window.open pode ser bloqueado se não for disparado diretamente por clique
-      // mas aqui estamos dentro de um context assíncrono.
-      window.location.href = whatsappUrl;
-      toast.success(`Pedido salvo! Redirecionando para o WhatsApp de ${atendente.nome}…`);
+      // No celular, redirecionar via window.location.assign é mais confiável que window.open
+      // e garante que o usuário saia da aplicação para o WhatsApp.
+      window.location.assign(whatsappUrl);
+      
+      toast.success(`Pedido salvo! Redirecionando para o WhatsApp…`);
       
       setShowAtendentes(false);
       clear();
-      nav({ to: "/perfil" });
+      // Delay curto para permitir que a animação de toast apareça e o redirecionamento inicie
+      setTimeout(() => nav({ to: "/perfil" }), 1500);
     } catch (err) {
       console.error("Erro ao salvar pedido:", err);
-      toast.error("Erro ao processar pedido. Tente novamente.");
+      toast.error("Erro ao processar pedido. Verifique sua conexão e tente novamente.");
     }
   };
 
