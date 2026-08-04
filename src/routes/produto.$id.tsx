@@ -160,13 +160,13 @@ function ProductPage() {
           variacaoId: v.id,
           produtoId: p.id,
           nome: p.nome,
-          cor,
+          cor: cor,
           hexCor: v.hex_cor,
           tamanho: tam,
           preco: p.preco,
           precoPromocional: promo?.ativa ? promo.precoFinal : null,
           promocaoAte: promo?.ativa && promo.validoAte ? promo.validoAte.toISOString() : null,
-        } as any,
+        },
         q,
       );
     }
