@@ -39,7 +39,7 @@ export const createAtendente = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: atendente, error } = await supabase
       .from("atendentes" as any)
-      .insert(data)
+      .insert({ ...data, ativo: true })
       .select()
       .single();
 
