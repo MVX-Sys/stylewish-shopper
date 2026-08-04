@@ -41,7 +41,7 @@ function PromoCard({ p }: { p: ProductListItem }) {
   const stock = stockOf(p);
   const lowStock = stock > 0 && stock <= 8;
   const economia = promo.precoOriginal - promo.precoFinal;
-  const stockPct = Math.min(100, Math.max(8, (stock / 20) * 100));
+  const stockPct = Math.min(100, Math.max(8, (stock / 30) * 100));
 
   return (
     <Link
@@ -116,7 +116,7 @@ function PromoCard({ p }: { p: ProductListItem }) {
 
         {/* Stock bar — reserva de espaço fixa para manter proporção */}
         <div className="min-h-[2rem]">
-          {stock > 0 && stock <= 20 && (
+          {stock > 0 && stock <= 30 && (
             <div className="space-y-1">
               <div className="flex items-center justify-between text-[10px] font-medium">
                 <span className="inline-flex items-center gap-1 text-orange-600">
@@ -125,12 +125,13 @@ function PromoCard({ p }: { p: ProductListItem }) {
                 </span>
                 <span className="tabular-nums text-muted-foreground">{stock} rest.</span>
               </div>
-              <div className="h-1 overflow-hidden rounded-full bg-neutral-100">
+              <div className="h-1.5 overflow-hidden rounded-full bg-neutral-100/80">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all"
-                  style={{ width: `${100 - stockPct}%` }}
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all duration-1000"
+                  style={{ width: `${Math.max(10, 100 - stockPct)}%` }}
                 />
               </div>
+
             </div>
           )}
         </div>
@@ -167,7 +168,7 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
   return (
     <section className="relative mb-10 overflow-hidden rounded-[1.5rem] sm:mb-12 sm:rounded-[2.5rem]">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#FFF4EC] via-[#FFE7D3] to-[#FFD5B0]" />
+      <div className="absolute inset-0 bg-primary/10 transition-colors" />
       <div
         className="absolute inset-0 opacity-40"
         style={{
@@ -195,14 +196,15 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
               </span>
               Ofertas ao vivo
             </div>
-            <h2 className="font-display text-[2rem] font-black leading-[0.95] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Promoções{" "}
+            <h2 className="font-display text-[2.5rem] font-black leading-[0.95] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              Ofertas{" "}
               <span className="bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">
-                do Dia
+                Atacado
               </span>
             </h2>
+
             <p className="mt-2 max-w-md text-[13px] leading-snug text-foreground/70 sm:mt-3 sm:text-base">
-              Selecionadas a dedo. Preços especiais por tempo limitado — corra antes que acabe.
+              Oportunidades exclusivas para renovar seu estoque com os melhores preços do mercado.
             </p>
           </div>
 

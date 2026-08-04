@@ -108,7 +108,7 @@ function CheckoutPage() {
           } : undefined,
           itens: items.map(i => ({
             produto_id: i.produtoId,
-            variacao_id: (i as any).variacaoId || i.key.split('|')[0], 
+            variacao_id: i.variacaoId || (i as any).variacao_id || (i.key && i.key.includes('|') ? i.key.split('|')[0] : i.key), 
             quantidade: i.quantidade,
             preco_unitario: itemPrecoEfetivo(i),
             nome: i.nome,
@@ -159,19 +159,23 @@ function CheckoutPage() {
       const encodedMsg = encodeURIComponent(msgContent);
       const whatsappUrl = `https://wa.me/${atendente.whatsapp.replace(/\D/g, "")}?text=${encodedMsg}`;
       
-      // No celular, redirecionar via window.location.assign é mais confiável que window.open
-      // e garante que o usuário saia da aplicação para o WhatsApp.
-      window.location.assign(whatsappUrl);
-      
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp…`);
+
+      // No celular, redirecionar via window.location.href é o método mais robusto.
+      // Em alguns casos, browsers mobile bloqueiam redirecionamentos se houver atraso na promise.
+      // Definimos o href diretamente.
+      window.location.href = whatsappUrl;
+
       
       setShowAtendentes(false);
       clear();
       // Delay curto para permitir que a animação de toast apareça e o redirecionamento inicie
       setTimeout(() => nav({ to: "/perfil" }), 1500);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao salvar pedido:", err);
-      toast.error("Erro ao processar pedido. Verifique sua conexão e tente novamente.");
+      // Extrair mensagem de erro se disponível para ajudar no diagnóstico
+      const errorMsg = err?.message || (typeof err === 'string' ? err : "");
+      toast.error(`Erro ao processar pedido: ${errorMsg || "Tente novamente."}`);
     }
   };
 
