@@ -119,15 +119,22 @@ function AuthPage() {
                 </Link>
               ) : (
                 <div className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="mt-0.5 h-5 w-5 text-brand" />
+                  <div className="flex flex-col items-center text-center gap-3">
+                    <ShieldCheck className="h-10 w-10 text-primary" />
                     <div>
-                      <p className="text-sm font-semibold">Acesso administrativo</p>
+                      <p className="text-sm font-semibold">Conta de Cliente</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Sua conta não tem permissão de administrador. Entre em contato com o responsável pela loja para receber acesso.
+                        Sua conta está ativa. Você pode visualizar seus pedidos e gerenciar seus dados no seu perfil.
                       </p>
                     </div>
+                    <Link
+                      to="/perfil"
+                      className="btn-shine w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    >
+                      Acessar meu perfil
+                    </Link>
                   </div>
+
                 </div>
               )}
               <button
