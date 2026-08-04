@@ -159,14 +159,13 @@ function CheckoutPage() {
       const encodedMsg = encodeURIComponent(msgContent);
       const whatsappUrl = `https://wa.me/${atendente.whatsapp.replace(/\D/g, "")}?text=${encodedMsg}`;
       
-      // No celular, redirecionar via window.location.assign é mais confiável que window.open
-      // e garante que o usuário saia da aplicação para o WhatsApp.
-      // No celular, redirecionar via window.location.assign pode ser bloqueado se houver 
-      // um atraso entre a ação do usuário (clique) e o redirecionamento (fim da promise).
-      // Vamos usar uma abordagem que funcione melhor em contextos assíncronos.
-      window.location.href = whatsappUrl;
-      
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp…`);
+
+      // No celular, redirecionar via window.location.href é o método mais robusto.
+      // Em alguns casos, browsers mobile bloqueiam redirecionamentos se houver atraso na promise.
+      // Definimos o href diretamente.
+      window.location.href = whatsappUrl;
+
       
       setShowAtendentes(false);
       clear();
