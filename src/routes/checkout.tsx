@@ -108,7 +108,7 @@ function CheckoutPage() {
           } : undefined,
           itens: items.map(i => ({
             produto_id: i.produtoId,
-            variacao_id: i.variacaoId || (i as any).variacao_id || i.key.split('|')[0], 
+            variacao_id: i.variacaoId || (i as any).variacao_id || (i.key && i.key.includes('|') ? i.key.split('|')[0] : i.key), 
             quantidade: i.quantidade,
             preco_unitario: itemPrecoEfetivo(i),
             nome: i.nome,
