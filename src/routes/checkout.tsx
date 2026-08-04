@@ -157,9 +157,11 @@ function CheckoutPage() {
         .join("\n");
 
       const encodedMsg = encodeURIComponent(msgContent);
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=${atendente.whatsapp.replace(/\D/g, "")}&text=${encodedMsg}`;
+      // Protocolo universal do WhatsApp para funcionar tanto em mobile quanto desktop
+      const whatsappUrl = `https://wa.me/${atendente.whatsapp.replace(/\D/g, "")}?text=${encodedMsg}`;
       
-      window.open(whatsappUrl, "_blank");
+      // Abrir em uma nova aba para evitar interrupções no fluxo do app
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp de ${atendente.nome}…`);
       
       setShowAtendentes(false);
