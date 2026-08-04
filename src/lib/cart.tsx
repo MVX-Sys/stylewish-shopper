@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type CartItem = {
-  key: string; // produtoId|cor|tamanho
+  key: string; // variacaoId|cor|tamanho
+  variacaoId: string;
   produtoId: string;
   nome: string;
   cor: string;
@@ -66,7 +67,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, hydrated]);
 
   const add: CartCtx["add"] = (item, qty = 1) => {
-    const key = `${item.produtoId}|${item.cor}|${item.tamanho}`;
+    const cartItem = item as CartItem;
+    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}`;
     setItems((prev) => {
       const idx = prev.findIndex((x) => x.key === key);
       if (idx >= 0) {
@@ -74,7 +76,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         copy[idx] = { ...copy[idx], quantidade: copy[idx].quantidade + qty };
         return copy;
       }
-      return [...prev, { ...item, key, quantidade: qty }];
+      return [...prev, { ...cartItem, key, quantidade: qty }];
     });
   };
 

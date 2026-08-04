@@ -89,7 +89,7 @@ function CheckoutPage() {
         nav({ to: "/auth" });
         return;
       }
-      // 1. Persistir o pedido no banco de dados para o histórico do cliente
+      
       await fnCreateOrder({
         data: {
           total: valorFinal,
@@ -101,7 +101,7 @@ function CheckoutPage() {
           } : undefined,
           itens: items.map(i => ({
             produto_id: i.produtoId,
-            variacao_id: i.key.split('|')[0], // key format: produtoId|cor|tamanho
+            variacao_id: (i as any).variacaoId || i.key.split('|')[0], 
             quantidade: i.quantidade,
             preco_unitario: itemPrecoEfetivo(i),
             nome: i.nome,

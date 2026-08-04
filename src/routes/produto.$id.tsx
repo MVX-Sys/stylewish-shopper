@@ -157,6 +157,7 @@ function ProductPage() {
       if (!v) continue;
       add(
         {
+          variacaoId: v.id,
           produtoId: p.id,
           nome: p.nome,
           cor,
@@ -165,7 +166,7 @@ function ProductPage() {
           preco: p.preco,
           precoPromocional: promo?.ativa ? promo.precoFinal : null,
           promocaoAte: promo?.ativa && promo.validoAte ? promo.validoAte.toISOString() : null,
-        },
+        } as any,
         q,
       );
     }
