@@ -9,7 +9,9 @@ import {
   Settings, 
   LogOut, 
   ChevronRight,
+  ChevronLeft,
   RefreshCcw,
+
   ShoppingBag
 } from "lucide-react";
 import { useEffect } from "react";
