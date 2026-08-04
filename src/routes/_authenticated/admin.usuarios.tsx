@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -11,6 +11,7 @@ import {
   MailX,
   X,
   Check,
+  UserPlus,
 } from "lucide-react";
 import {
   listAdminUsers,
@@ -157,11 +158,21 @@ function UsuariosPage() {
         </button>
       </div>
 
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
         <StatCard icon={<Users className="h-4 w-4" />} label="Total" value={total} />
         <StatCard icon={<ShieldCheck className="h-4 w-4" />} label="Administradores" value={admins} />
         <StatCard icon={<ShieldCheck className="h-4 w-4" />} label="Funcionários" value={funcionarios} />
         <StatCard icon={<MailCheck className="h-4 w-4" />} label="Email confirmado" value={confirmed} />
+        <Link 
+          to="/admin/atendentes"
+          className="group flex flex-col justify-center gap-1 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-left transition-all hover:border-primary/50 hover:bg-primary/10"
+        >
+          <div className="flex items-center gap-2 text-primary">
+            <UserPlus className="h-4 w-4" />
+            <span className="text-xs font-semibold uppercase tracking-wider">Atendentes</span>
+          </div>
+          <p className="text-lg font-bold text-primary">Gerenciar</p>
+        </Link>
       </div>
 
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
