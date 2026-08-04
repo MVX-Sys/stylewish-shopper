@@ -161,7 +161,10 @@ function CheckoutPage() {
       const whatsappUrl = `https://wa.me/${atendente.whatsapp.replace(/\D/g, "")}?text=${encodedMsg}`;
       
       // Abrir em uma nova aba para evitar interrupções no fluxo do app
-      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      // Tenta abrir o link do WhatsApp
+      // No celular, window.open pode ser bloqueado se não for disparado diretamente por clique
+      // mas aqui estamos dentro de um context assíncrono.
+      window.location.href = whatsappUrl;
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp de ${atendente.nome}…`);
       
       setShowAtendentes(false);
