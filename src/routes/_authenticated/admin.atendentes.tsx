@@ -159,6 +159,17 @@ function AtendentesPage() {
                       src={supabase.storage.from("atendentes").getPublicUrl(a.foto_path).data.publicUrl}
                       alt={a.nome}
                       className="h-full w-full object-cover"
+                      onError={(e) => {
+                        console.error("Erro ao carregar imagem do atendente:", a.nome);
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          const icon = document.createElement('div');
+                          icon.className = "flex h-full w-full items-center justify-center bg-primary/10 text-primary";
+                          icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+                          parent.appendChild(icon);
+                        }
+                      }}
                     />
                   ) : (
                     <User className="h-6 w-6" />
@@ -286,16 +297,27 @@ function AtendentesPage() {
                           const fileExt = file.name.split(".").pop();
                           const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
-                          const { error: uploadError } = await supabase.storage
+                          const { data: uploadData, error: uploadError } = await supabase.storage
                             .from("atendentes")
-                            .upload(filePath, file);
+                            .upload(filePath, file, {
+                              cacheControl: "3600",
+                              upsert: false
+                            });
 
-                          if (uploadError) throw uploadError;
+                          if (uploadError) {
+                            console.error("Upload error detail:", uploadError);
+                            // If it's a 403, it's definitely RLS/Bucket policy
+                            if ((uploadError as any).status === 403 || uploadError.message?.includes("row-level security")) {
+                              throw new Error("Erro de permissão no servidor. O bucket 'atendentes' pode não estar configurado corretamente.");
+                            }
+                            throw uploadError;
+                          }
+                          
                           setFotoPath(filePath);
                           toast.success("Foto carregada!");
-                        } catch (err) {
-                          console.error("Erro upload:", err);
-                          toast.error("Erro ao carregar imagem");
+                        } catch (err: any) {
+                          console.error("Erro upload completo:", err);
+                          toast.error(`Erro ao carregar imagem: ${err.message || "Tente novamente"}`);
                         } finally {
                           setIsUploading(false);
                         }
