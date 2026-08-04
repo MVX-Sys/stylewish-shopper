@@ -139,7 +139,7 @@ function CheckoutPage() {
             ].filter(Boolean)
           : ["", "*Entrega*", "Retirada no local"];
 
-      const msg = [
+      const msgContent = [
         `Olá, ${atendente.nome}! Gostaria de fazer o seguinte pedido:`,
         "",
         "*Itens*",
@@ -156,8 +156,10 @@ function CheckoutPage() {
         .filter(Boolean)
         .join("\n");
 
-      const url = `https://wa.me/${atendente.whatsapp}?text=${encodeURIComponent(msg)}`;
-      window.open(url, "_blank");
+      const encodedMsg = encodeURIComponent(msgContent);
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${atendente.whatsapp.replace(/\D/g, "")}&text=${encodedMsg}`;
+      
+      window.open(whatsappUrl, "_blank");
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp de ${atendente.nome}…`);
       
       setShowAtendentes(false);
