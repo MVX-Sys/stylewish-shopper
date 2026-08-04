@@ -13,8 +13,9 @@ import { createOrder } from "@/lib/orders.functions";
 import { listAtendentes } from "@/lib/atendentes.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-type Atendente = { id: string; nome: string; whatsapp: string; foto: string; cargo?: string };
+type Atendente = { id: string; nome: string; whatsapp: string; foto_path: string | null; cargo?: string };
 // removido ATENDENTES estático
 
 export const Route = createFileRoute("/checkout")({
@@ -177,7 +178,7 @@ function CheckoutPage() {
       setShowAtendentes(false);
       clear();
       // Delay curto para permitir que a animação de toast apareça e o redirecionamento inicie
-      setTimeout(() => nav({ to: "/perfil" }), 1500);
+      setTimeout(() => nav({ to: "/perfil" }), 2000);
     } catch (err: any) {
       console.error("Erro ao salvar pedido:", err);
       // Extrair mensagem de erro se disponível para ajudar no diagnóstico

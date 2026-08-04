@@ -31,7 +31,7 @@ export const createAtendente = createServerFn({ method: "POST" })
     z.object({
       nome: z.string().min(1),
       whatsapp: z.string().min(8),
-      foto_path: z.string().optional(),
+      foto_path: z.string().optional().nullable(),
       cargo: z.string().optional(),
     })
   )
@@ -54,7 +54,7 @@ export const updateAtendente = createServerFn({ method: "POST" })
       id: z.string().uuid(),
       nome: z.string().optional(),
       whatsapp: z.string().optional(),
-      foto_path: z.string().optional(),
+      foto_path: z.string().optional().nullable(),
       cargo: z.string().optional(),
       ativo: z.boolean().optional(),
     })
