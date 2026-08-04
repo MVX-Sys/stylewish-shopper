@@ -466,38 +466,12 @@ function CheckoutPage() {
                   </div>
                   <div className="text-center">
                     <p className="font-display text-sm font-semibold">{a.nome}</p>
-                    <p className="text-[10px] text-muted-foreground">{a.cargo}</p>
+                    <p className="text-[10px] text-muted-foreground">{a.cargo || "Vendedor"}</p>
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">
                     <MessageCircle className="h-3 w-3" />
                     Falar no WhatsApp
                   </div>
-                </button>
-              ))}
-            </div>
-                  key={a.id}
-                  type="button"
-                  onClick={() => enviarParaAtendente(a)}
-                  className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-background p-4 text-center transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-soft"
-                >
-                  <div className="relative h-24 w-24 overflow-hidden rounded-full ring-2 ring-border transition-all group-hover:ring-primary">
-                    <img
-                      src={a.foto}
-                      alt={a.nome}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{a.nome}</p>
-                    {a.cargo && (
-                      <p className="text-xs text-muted-foreground">{a.cargo}</p>
-                    )}
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                    <MessageCircle className="h-3.5 w-3.5" />
-                    Falar no WhatsApp
-                  </span>
                 </button>
               ))}
             </div>
