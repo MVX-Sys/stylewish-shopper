@@ -41,7 +41,7 @@ function PromoCard({ p }: { p: ProductListItem }) {
   const stock = stockOf(p);
   const lowStock = stock > 0 && stock <= 8;
   const economia = promo.precoOriginal - promo.precoFinal;
-  const stockPct = Math.min(100, Math.max(8, (stock / 20) * 100));
+  const stockPct = Math.min(100, Math.max(8, (stock / 30) * 100));
 
   return (
     <Link
