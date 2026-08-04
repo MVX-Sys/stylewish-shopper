@@ -183,7 +183,7 @@ function CheckoutPage() {
       setShowAtendentes(false);
       clear();
       // Delay curto para permitir que a animação de toast apareça e o redirecionamento inicie
-      setTimeout(() => nav({ to: "/perfil" }), 2000);
+      setTimeout(() => nav({ to: "/perfil" }), 3000);
     } catch (err: any) {
       console.error("Erro ao salvar pedido:", err);
       // Extrair mensagem de erro se disponível para ajudar no diagnóstico
