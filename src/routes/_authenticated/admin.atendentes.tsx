@@ -306,21 +306,18 @@ function AtendentesPage() {
 
                           if (uploadError) {
                             console.error("Upload error detail:", uploadError);
+                            // If it's a 403, it's definitely RLS/Bucket policy
+                            if ((uploadError as any).status === 403 || uploadError.message?.includes("row-level security")) {
+                              throw new Error("Erro de permissão no servidor. O bucket 'atendentes' pode não estar configurado corretamente.");
+                            }
                             throw uploadError;
                           }
-                          
-                          // Verify if the file is actually accessible
-                          const { data: { publicUrl } } = supabase.storage
-                            .from("atendentes")
-                            .getPublicUrl(filePath);
-                            
-                          console.log("Generated Public URL:", publicUrl);
                           
                           setFotoPath(filePath);
                           toast.success("Foto carregada!");
                         } catch (err: any) {
                           console.error("Erro upload completo:", err);
-                          toast.error(`Erro ao carregar imagem: ${err.message || "Verifique as permissões"}`);
+                          toast.error(`Erro ao carregar imagem: ${err.message || "Tente novamente"}`);
                         } finally {
                           setIsUploading(false);
                         }
