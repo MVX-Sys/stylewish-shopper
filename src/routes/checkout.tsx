@@ -485,7 +485,7 @@ function CheckoutPage() {
                   <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-border group-hover:border-primary/30">
                     {a.foto_path ? (
                       <img
-                        src={`${supabase.storage.from("atendentes-v1-private").getPublicUrl(a.foto_path).data.publicUrl}?t=${a.criado_em ? new Date(a.criado_em).getTime() : Date.now()}`}
+                        src={`${supabase.storage.from("atendentes-v1-private").getPublicUrl(a.foto_path).data.publicUrl}?t=${Date.now()}`}
                         alt={a.nome}
                         className="h-full w-full object-cover"
                         onError={(e) => {
