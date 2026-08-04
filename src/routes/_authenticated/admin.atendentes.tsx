@@ -11,6 +11,8 @@ import {
   Briefcase,
   X,
   UserPlus,
+  Camera,
+  Upload,
 } from "lucide-react";
 import {
   listAtendentes,
@@ -22,6 +24,7 @@ import {
 import { BRAND } from "@/lib/config";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/atendentes")({
   head: () => ({
@@ -48,6 +51,8 @@ function AtendentesPage() {
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [cargo, setCargo] = useState("Vendedor");
+  const [fotoPath, setFotoPath] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const { data: atendentes, isLoading, error: queryError } = useQuery({
     queryKey: ["admin", "atendentes"],
@@ -56,7 +61,7 @@ function AtendentesPage() {
   });
 
   const addMutation = useMutation({
-    mutationFn: (data: { nome: string; whatsapp: string; cargo: string }) =>
+    mutationFn: (data: { nome: string; whatsapp: string; cargo: string; foto_path?: string | null }) =>
       addAtendente({ data }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "atendentes"] });
@@ -64,6 +69,7 @@ function AtendentesPage() {
       setNome("");
       setWhatsapp("");
       setCargo("Vendedor");
+      setFotoPath(null);
       toast.success("Atendente adicionado!");
     },
     onError: (err: any) => toast.error(err.message || "Erro ao adicionar atendente"),
@@ -147,8 +153,16 @@ function AtendentesPage() {
               }`}
             >
               <div className="flex items-start gap-4">
-                <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
-                  <User className="h-6 w-6" />
+                <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-primary">
+                  {a.foto_path ? (
+                    <img
+                      src={supabase.storage.from("atendentes").getPublicUrl(a.foto_path).data.publicUrl}
+                      alt={a.nome}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-6 w-6" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="truncate font-display font-semibold text-foreground">
@@ -235,6 +249,71 @@ function AtendentesPage() {
                 />
               </div>
 
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Foto do Perfil
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-full border-2 border-dashed border-border bg-muted text-muted-foreground">
+                    {fotoPath ? (
+                      <img
+                        src={supabase.storage.from("atendentes").getPublicUrl(fotoPath).data.publicUrl}
+                        alt="Preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-8 w-8" />
+                    )}
+                    {isUploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                        <Loader2 className="h-5 w-5 animate-spin text-white" />
+                      </div>
+                    )}
+                  </div>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold transition-colors hover:bg-accent">
+                    <Upload className="h-3.5 w-3.5" />
+                    {fotoPath ? "Alterar foto" : "Upload foto"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        try {
+                          setIsUploading(true);
+                          const fileExt = file.name.split(".").pop();
+                          const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+                          const { error: uploadError } = await supabase.storage
+                            .from("atendentes")
+                            .upload(filePath, file);
+
+                          if (uploadError) throw uploadError;
+                          setFotoPath(filePath);
+                          toast.success("Foto carregada!");
+                        } catch (err) {
+                          console.error("Erro upload:", err);
+                          toast.error("Erro ao carregar imagem");
+                        } finally {
+                          setIsUploading(false);
+                        }
+                      }}
+                    />
+                  </label>
+                  {fotoPath && (
+                    <button
+                      type="button"
+                      onClick={() => setFotoPath(null)}
+                      className="text-xs font-medium text-destructive hover:underline"
+                    >
+                      Remover
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div className="mt-8 flex gap-3 pt-4">
                 <button
                   onClick={() => setShowAdd(false)}
@@ -243,7 +322,7 @@ function AtendentesPage() {
                   Cancelar
                 </button>
                 <button
-                  onClick={() => addMutation.mutate({ nome, whatsapp, cargo })}
+                  onClick={() => addMutation.mutate({ nome, whatsapp, cargo, foto_path: fotoPath })}
                   disabled={addMutation.isPending || !nome || !whatsapp}
                   className="flex-1 btn-shine rounded-full bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
                 >

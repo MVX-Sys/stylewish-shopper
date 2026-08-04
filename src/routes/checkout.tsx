@@ -13,8 +13,9 @@ import { createOrder } from "@/lib/orders.functions";
 import { listAtendentes } from "@/lib/atendentes.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-type Atendente = { id: string; nome: string; whatsapp: string; foto: string; cargo?: string };
+type Atendente = { id: string; nome: string; whatsapp: string; foto_path: string | null; cargo?: string };
 // removido ATENDENTES estático
 
 export const Route = createFileRoute("/checkout")({
@@ -90,6 +91,7 @@ function CheckoutPage() {
   const atendentes = dbAtendentes || [];
 
   const enviarParaAtendente = async (atendente: Atendente) => {
+    console.log("Iniciando finalização com atendente:", atendente.nome);
     try {
       if (!session) {
         toast.error("Você precisa estar logado para finalizar o pedido.");
@@ -97,7 +99,8 @@ function CheckoutPage() {
         return;
       }
       
-      await fnCreateOrder({
+      console.log("Criando pedido no banco...");
+      const order = await fnCreateOrder({
         data: {
           total: valorFinal,
           forma_envio: formaEnvio,
@@ -125,6 +128,8 @@ function CheckoutPage() {
         }
       });
 
+      console.log("Pedido criado com sucesso:", order.id);
+      
       // 2. Gerar mensagem para o WhatsApp
       const linhas = items.map((i) => {
         const variacao = `Cor ${i.cor}, Tam ${i.tamanho}`;
@@ -166,6 +171,7 @@ function CheckoutPage() {
       const encodedMsg = encodeURIComponent(msgContent);
       const whatsappUrl = `https://wa.me/${atendente.whatsapp.replace(/\D/g, "")}?text=${encodedMsg}`;
       
+      console.log("Redirecionando para WhatsApp:", whatsappUrl);
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp…`);
 
       // No celular, redirecionar via window.location.href é o método mais robusto.
@@ -177,7 +183,7 @@ function CheckoutPage() {
       setShowAtendentes(false);
       clear();
       // Delay curto para permitir que a animação de toast apareça e o redirecionamento inicie
-      setTimeout(() => nav({ to: "/perfil" }), 1500);
+      setTimeout(() => nav({ to: "/perfil" }), 3000);
     } catch (err: any) {
       console.error("Erro ao salvar pedido:", err);
       // Extrair mensagem de erro se disponível para ajudar no diagnóstico
@@ -477,9 +483,17 @@ function CheckoutPage() {
                   className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md"
                 >
                   <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-border group-hover:border-primary/30">
-                    <div className="grid h-full w-full place-items-center bg-primary/10 text-primary">
-                      <User className="h-10 w-10" />
-                    </div>
+                    {a.foto_path ? (
+                      <img
+                        src={supabase.storage.from("atendentes").getPublicUrl(a.foto_path).data.publicUrl}
+                        alt={a.nome}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center bg-primary/10 text-primary">
+                        <User className="h-10 w-10" />
+                      </div>
+                    )}
                   </div>
                   <div className="text-center">
                     <p className="font-display text-sm font-semibold">{a.nome}</p>
