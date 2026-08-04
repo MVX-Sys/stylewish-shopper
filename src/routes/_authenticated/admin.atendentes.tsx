@@ -156,7 +156,7 @@ function AtendentesPage() {
                 <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-primary">
                   {a.foto_path ? (
                     <img
-                      src={supabase.storage.from("atendentes-v1").getPublicUrl(a.foto_path).data.publicUrl}
+                      src={supabase.storage.from("atendentes-v1-private").getPublicUrl(a.foto_path).data.publicUrl}
                       alt={a.nome}
                       className="h-full w-full object-cover"
                       onError={(e) => {
@@ -268,7 +268,7 @@ function AtendentesPage() {
                   <div className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-full border-2 border-dashed border-border bg-muted text-muted-foreground">
                     {fotoPath ? (
                       <img
-                        src={supabase.storage.from("atendentes-v1").getPublicUrl(fotoPath).data.publicUrl}
+                        src={supabase.storage.from("atendentes-v1-private").getPublicUrl(fotoPath).data.publicUrl}
                         alt="Preview"
                         className="h-full w-full object-cover"
                       />
@@ -298,7 +298,7 @@ function AtendentesPage() {
                           const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
                           const { data: uploadData, error: uploadError } = await supabase.storage
-                            .from("atendentes-v1")
+                            .from("atendentes-v1-private")
                             .upload(filePath, file, {
                               cacheControl: "3600",
                               upsert: false
