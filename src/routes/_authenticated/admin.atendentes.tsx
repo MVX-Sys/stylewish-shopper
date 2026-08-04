@@ -1,0 +1,244 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
+import {
+  Loader2,
+  Plus,
+  Trash2,
+  User,
+  Phone,
+  Briefcase,
+  X,
+  Check,
+  UserPlus,
+} from "lucide-react";
+import {
+  listAtendentes,
+  createAtendente,
+  updateAtendente,
+  deleteAtendente,
+} from "@/lib/atendentes.functions";
+import { BRAND } from "@/lib/config";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/_authenticated/admin/atendentes")({
+  head: () => ({
+    meta: [
+      { title: `Atendentes — ${BRAND}` },
+      {
+        name: "description",
+        content: `Gerencie os atendentes do WhatsApp na ${BRAND}.`,
+      },
+    ],
+  }),
+  component: AtendentesPage,
+});
+
+function AtendentesPage() {
+  const { isAdmin } = useAuth();
+  const fetchAtendentes = useServerFn(listAtendentes);
+  const addAtendente = useServerFn(createAtendente);
+  const editAtendente = useServerFn(updateAtendente);
+  const removeAtendente = useServerFn(deleteAtendente);
+  const qc = useQueryClient();
+
+  const [showAdd, setShowAdd] = useState(false);
+  const [nome, setNome] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [cargo, setCargo] = useState("Vendedor");
+
+  const { data: atendentes, isLoading, refetch } = useQuery({
+    queryKey: ["admin", "atendentes"],
+    queryFn: () => fetchAtendentes(),
+    enabled: isAdmin,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: (data: { nome: string; whatsapp: string; cargo: string }) =>
+      addAtendente({ data }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "atendentes"] });
+      setShowAdd(false);
+      setNome("");
+      setWhatsapp("");
+      setCargo("Vendedor");
+      toast.success("Atendente adicionado!");
+    },
+    onError: (err: any) => toast.error(err.message || "Erro ao adicionar atendente"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => removeAtendente({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "atendentes"] });
+      toast.success("Atendente removido!");
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: (args: { id: string; ativo: boolean }) =>
+      editAtendente({ data: { id: args.id, ativo: args.ativo } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "atendentes"] }),
+  });
+
+  if (!isAdmin) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+        Apenas administradores podem gerenciar atendentes.
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">
+            Atendentes WhatsApp
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Gerencie quem recebe os pedidos dos clientes no WhatsApp.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowAdd(true)}
+          className="btn-shine inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-95 active:scale-95"
+        >
+          <Plus className="h-4 w-4" />
+          Novo atendente
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="grid place-items-center rounded-2xl border border-border bg-card py-16">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Carregando atendentes…
+          </div>
+        </div>
+      ) : atendentes?.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+          Nenhum atendente cadastrado.
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {atendentes?.map((a) => (
+            <div
+              key={a.id}
+              className={`relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-all ${
+                !a.ativo ? "opacity-60" : "hover:border-primary/30 hover:shadow-md"
+              }`}
+            >
+              <div className="flex items-start gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
+                  <User className="h-6 w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="truncate font-display font-semibold text-foreground">
+                    {a.nome}
+                  </h3>
+                  <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Briefcase className="h-3 w-3" />
+                    {a.cargo}
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Phone className="h-3 w-3" />
+                    {a.whatsapp}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+                <button
+                  onClick={() => toggleMutation.mutate({ id: a.id, ativo: !a.ativo })}
+                  className={`text-xs font-semibold ${
+                    a.ativo ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {a.ativo ? "Ativo" : "Inativo"}
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm("Deseja realmente excluir este atendente?")) {
+                      deleteMutation.mutate(a.id);
+                    }
+                  }}
+                  className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showAdd && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="font-display text-xl font-semibold">Novo atendente</h2>
+              <button onClick={() => setShowAdd(false)} className="rounded-full p-1.5 hover:bg-accent">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Nome
+                </label>
+                <input
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  placeholder="Ex: Gustavo"
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  WhatsApp (com DDD e 55)
+                </label>
+                <input
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="Ex: 5587991547820"
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Cargo
+                </label>
+                <input
+                  value={cargo}
+                  onChange={(e) => setCargo(e.target.value)}
+                  placeholder="Ex: Vendedor"
+                  className="input"
+                />
+              </div>
+
+              <div className="mt-8 flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowAdd(false)}
+                  className="flex-1 rounded-full border border-border py-2.5 text-sm font-semibold transition-colors hover:bg-accent"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => addMutation.mutate({ nome, whatsapp, cargo })}
+                  disabled={addMutation.isPending || !nome || !whatsapp}
+                  className="flex-1 btn-shine rounded-full bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                >
+                  {addMutation.isPending ? "Salvando…" : "Salvar"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
