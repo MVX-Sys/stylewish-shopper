@@ -106,10 +106,22 @@ function CheckoutPage() {
           endereco: formaEnvio === "ENTREGA" ? {
             cep, logradouro, numero, complemento, bairro, cidade, estado, referencia, formaEntrega
           } : undefined,
-          itens: items.map(i => ({
-            produto_id: i.produtoId,
-            variacao_id: i.variacaoId || (i as any).variacao_id || (i.key && i.key.includes('|') ? i.key.split('|')[0] : i.key), 
-            quantidade: i.quantidade,
+          itens: items.map(i => {
+            const vId = i.variacaoId || (i as any).variacao_id;
+            if (!vId) {
+              console.error("Item sem variacaoId:", i);
+              throw new Error(`O item "${i.nome}" está com dados incompletos no carrinho. Remova e adicione novamente.`);
+            }
+            return {
+              produto_id: i.produtoId,
+              variacao_id: vId,
+              quantidade: i.quantidade,
+              preco_unitario: itemPrecoEfetivo(i),
+              nome: i.nome,
+              cor: i.cor,
+              tamanho: i.tamanho
+            };
+          })
             preco_unitario: itemPrecoEfetivo(i),
             nome: i.nome,
             cor: i.cor,
