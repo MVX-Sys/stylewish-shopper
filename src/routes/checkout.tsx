@@ -6,17 +6,16 @@ import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
-import { ChevronLeft, MessageCircle, FileText, X } from "lucide-react";
+import { ChevronLeft, MessageCircle, FileText, X, User } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
-import atendenteGustavo from "@/assets/atendente-gustavo.jpg";
 import { createOrder } from "@/lib/orders.functions";
+import { listAtendentes } from "@/lib/atendentes.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 
 type Atendente = { id: string; nome: string; whatsapp: string; foto: string; cargo?: string };
-const ATENDENTES: Atendente[] = [
-  { id: "gustavo", nome: "Gustavo", whatsapp: "5587991547820", foto: atendenteGustavo, cargo: "Vendedor" },
-];
+// removido ATENDENTES estático
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -80,7 +79,15 @@ function CheckoutPage() {
   };
 
   const fnCreateOrder = useServerFn(createOrder);
+  const fetchAtendentes = useServerFn(listAtendentes);
   const { session } = useAuth();
+
+  const { data: dbAtendentes, isLoading: loadingAtendentes } = useQuery({
+    queryKey: ["atendentes"],
+    queryFn: () => fetchAtendentes(),
+  });
+
+  const atendentes = dbAtendentes || [];
 
   const enviarParaAtendente = async (atendente: Atendente) => {
     try {
@@ -442,13 +449,32 @@ function CheckoutPage() {
               Escolha um atendente
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Toque na foto do atendente para continuar seu pedido pelo WhatsApp.
-              Todos os detalhes de pagamento, entrega e valores serão combinados diretamente com ele.
+              {loadingAtendentes ? "Carregando atendentes..." : atendentes.length === 0 ? "Nenhum atendente disponível no momento." : "Toque na foto do atendente para continuar seu pedido pelo WhatsApp. Todos os detalhes de pagamento, entrega e valores serão combinados diretamente com ele."}
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {ATENDENTES.map((a) => (
+              {atendentes.map((a) => (
                 <button
+                  key={a.id}
+                  onClick={() => enviarParaAtendente(a as any)}
+                  className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md"
+                >
+                  <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-border group-hover:border-primary/30">
+                    <div className="grid h-full w-full place-items-center bg-primary/10 text-primary">
+                      <User className="h-10 w-10" />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-display text-sm font-semibold">{a.nome}</p>
+                    <p className="text-[10px] text-muted-foreground">{a.cargo}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                    <MessageCircle className="h-3 w-3" />
+                    Falar no WhatsApp
+                  </div>
+                </button>
+              ))}
+            </div>
                   key={a.id}
                   type="button"
                   onClick={() => enviarParaAtendente(a)}
