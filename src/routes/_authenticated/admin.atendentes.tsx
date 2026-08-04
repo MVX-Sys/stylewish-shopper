@@ -292,7 +292,7 @@ function AtendentesPage() {
                     {fotoPath ? "Alterar foto" : "Upload foto"}
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/*,.heic,.heif,.webp,.avif"
                       className="hidden"
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
