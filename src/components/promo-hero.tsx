@@ -168,7 +168,7 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
   return (
     <section className="relative mb-10 overflow-hidden rounded-[1.5rem] sm:mb-12 sm:rounded-[2.5rem]">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#FFF4EC] via-[#FFE7D3] to-[#FFD5B0]" />
+      <div className="absolute inset-0 bg-primary/10 transition-colors" />
       <div
         className="absolute inset-0 opacity-40"
         style={{
