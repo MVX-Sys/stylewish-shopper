@@ -286,16 +286,30 @@ function AtendentesPage() {
                           const fileExt = file.name.split(".").pop();
                           const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
-                          const { error: uploadError } = await supabase.storage
+                          const { data: uploadData, error: uploadError } = await supabase.storage
                             .from("atendentes")
-                            .upload(filePath, file);
+                            .upload(filePath, file, {
+                              cacheControl: "3600",
+                              upsert: false
+                            });
 
-                          if (uploadError) throw uploadError;
+                          if (uploadError) {
+                            console.error("Upload error detail:", uploadError);
+                            throw uploadError;
+                          }
+                          
+                          // Verify if the file is actually accessible
+                          const { data: { publicUrl } } = supabase.storage
+                            .from("atendentes")
+                            .getPublicUrl(filePath);
+                            
+                          console.log("Generated Public URL:", publicUrl);
+                          
                           setFotoPath(filePath);
                           toast.success("Foto carregada!");
-                        } catch (err) {
-                          console.error("Erro upload:", err);
-                          toast.error("Erro ao carregar imagem");
+                        } catch (err: any) {
+                          console.error("Erro upload completo:", err);
+                          toast.error(`Erro ao carregar imagem: ${err.message || "Verifique as permissões"}`);
                         } finally {
                           setIsUploading(false);
                         }
