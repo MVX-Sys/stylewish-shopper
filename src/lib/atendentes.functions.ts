@@ -22,7 +22,7 @@ export const listAtendentes = createServerFn({ method: "GET" })
       .order("criado_em", { ascending: false });
 
     if (error) throw error;
-    return (data ?? []) as AtendenteRow[];
+    return (data as unknown) as AtendenteRow[];
   });
 
 export const createAtendente = createServerFn({ method: "POST" })
@@ -44,7 +44,7 @@ export const createAtendente = createServerFn({ method: "POST" })
       .single();
 
     if (error) throw error;
-    return atendente as AtendenteRow;
+    return (atendente as unknown) as AtendenteRow;
   });
 
 export const updateAtendente = createServerFn({ method: "POST" })
@@ -70,7 +70,7 @@ export const updateAtendente = createServerFn({ method: "POST" })
       .single();
 
     if (error) throw error;
-    return atendente as AtendenteRow;
+    return (atendente as unknown) as AtendenteRow;
   });
 
 export const deleteAtendente = createServerFn({ method: "POST" })
