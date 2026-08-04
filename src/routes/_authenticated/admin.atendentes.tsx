@@ -156,7 +156,7 @@ function AtendentesPage() {
                 <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-primary">
                   {a.foto_path ? (
                     <img
-                      src={supabase.storage.from("atendentes-v1-private").getPublicUrl(a.foto_path).data.publicUrl}
+                      src={`${supabase.storage.from("atendentes-v1-private").getPublicUrl(a.foto_path).data.publicUrl}?t=${new Date(a.criado_em).getTime()}`}
                       alt={a.nome}
                       className="h-full w-full object-cover"
                       onError={(e) => {
@@ -268,7 +268,7 @@ function AtendentesPage() {
                   <div className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-full border-2 border-dashed border-border bg-muted text-muted-foreground">
                     {fotoPath ? (
                       <img
-                        src={supabase.storage.from("atendentes-v1-private").getPublicUrl(fotoPath).data.publicUrl}
+                        src={`${supabase.storage.from("atendentes-v1-private").getPublicUrl(fotoPath).data.publicUrl}?t=${Date.now()}`}
                         alt="Preview"
                         className="h-full w-full object-cover"
                         key={fotoPath}
