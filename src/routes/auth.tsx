@@ -151,8 +151,9 @@ function AuthPage() {
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 {mode === "signin"
-                  ? "Entre para acessar o painel."
-                  : "Cadastre-se para acessar recursos administrativos."}
+                  ? "Entre para acompanhar seus pedidos."
+                  : "Cadastre-se para realizar pedidos e salvar seu histórico."}
+
               </p>
 
               <form onSubmit={submit} className="mt-8 space-y-4">
