@@ -271,6 +271,12 @@ function AtendentesPage() {
                         src={supabase.storage.from("atendentes-v1-private").getPublicUrl(fotoPath).data.publicUrl}
                         alt="Preview"
                         className="h-full w-full object-cover"
+                        key={fotoPath}
+                        onLoad={() => console.log("Preview image loaded successfully")}
+                        onError={(e) => {
+                          console.error("Preview image load error:", e);
+                          toast.error("Erro ao carregar preview da imagem");
+                        }}
                       />
                     ) : (
                       <User className="h-8 w-8" />
