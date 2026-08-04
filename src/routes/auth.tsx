@@ -86,8 +86,9 @@ function AuthPage() {
 
         </div>
         <p className="text-xs uppercase tracking-widest opacity-50">
-          Área restrita
+          Acesso Seguro
         </p>
+
       </div>
 
       {/* Right form panel */}
