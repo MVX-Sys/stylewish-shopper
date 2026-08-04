@@ -196,12 +196,13 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
               </span>
               Ofertas ao vivo
             </div>
-            <h2 className="font-display text-[2rem] font-black leading-[0.95] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Promoções{" "}
+            <h2 className="font-display text-[2.5rem] font-black leading-[0.95] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              Ofertas{" "}
               <span className="bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">
-                do Dia
+                Atacado
               </span>
             </h2>
+
             <p className="mt-2 max-w-md text-[13px] leading-snug text-foreground/70 sm:mt-3 sm:text-base">
               Selecionadas a dedo. Preços especiais por tempo limitado — corra antes que acabe.
             </p>
