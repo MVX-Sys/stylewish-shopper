@@ -268,7 +268,7 @@ function AtendentesPage() {
                   <div className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-full border-2 border-dashed border-border bg-muted text-muted-foreground">
                     {fotoPath ? (
                       <img
-                        src={supabase.storage.from("atendentes-v1-private").getPublicUrl(fotoPath).data.publicUrl}
+                        src={`${supabase.storage.from("atendentes-v1-private").getPublicUrl(fotoPath).data.publicUrl}?t=${Date.now()}`}
                         alt="Preview"
                         className="h-full w-full object-cover"
                         key={fotoPath}
