@@ -271,6 +271,12 @@ function AtendentesPage() {
                         src={supabase.storage.from("atendentes-v1-private").getPublicUrl(fotoPath).data.publicUrl}
                         alt="Preview"
                         className="h-full w-full object-cover"
+                        key={fotoPath}
+                        onLoad={() => console.log("Preview image loaded successfully")}
+                        onError={(e) => {
+                          console.error("Preview image load error:", e);
+                          toast.error("Erro ao carregar preview da imagem");
+                        }}
                       />
                     ) : (
                       <User className="h-8 w-8" />
@@ -300,8 +306,8 @@ function AtendentesPage() {
                           const { data: uploadData, error: uploadError } = await supabase.storage
                             .from("atendentes-v1-private")
                             .upload(filePath, file, {
-                              cacheControl: "3600",
-                              upsert: false
+                              cacheControl: "0",
+                              upsert: true
                             });
 
                           if (uploadError) {
