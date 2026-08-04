@@ -81,8 +81,9 @@ function AuthPage() {
             {BRAND}
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed opacity-70">
-            Painel administrativo. Gerencie catálogo, imagens, estoques e variações.
+            Acesse sua conta para gerenciar seus pedidos, acompanhar entregas e receber ofertas exclusivas.
           </p>
+
         </div>
         <p className="text-xs uppercase tracking-widest opacity-50">
           Área restrita
