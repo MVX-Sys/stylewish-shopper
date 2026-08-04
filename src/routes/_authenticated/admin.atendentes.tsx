@@ -10,7 +10,6 @@ import {
   Phone,
   Briefcase,
   X,
-  Check,
   UserPlus,
 } from "lucide-react";
 import {
@@ -18,6 +17,7 @@ import {
   createAtendente,
   updateAtendente,
   deleteAtendente,
+  type AtendenteRow,
 } from "@/lib/atendentes.functions";
 import { BRAND } from "@/lib/config";
 import { useAuth } from "@/lib/auth";
@@ -49,7 +49,7 @@ function AtendentesPage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [cargo, setCargo] = useState("Vendedor");
 
-  const { data: atendentes, isLoading, refetch } = useQuery({
+  const { data: atendentes, isLoading } = useQuery({
     queryKey: ["admin", "atendentes"],
     queryFn: () => fetchAtendentes(),
     enabled: isAdmin,
@@ -124,7 +124,7 @@ function AtendentesPage() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {atendentes?.map((a) => (
+          {atendentes?.map((a: AtendenteRow) => (
             <div
               key={a.id}
               className={`relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-all ${
