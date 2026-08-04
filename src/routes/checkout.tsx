@@ -161,7 +161,10 @@ function CheckoutPage() {
       
       // No celular, redirecionar via window.location.assign é mais confiável que window.open
       // e garante que o usuário saia da aplicação para o WhatsApp.
-      window.location.assign(whatsappUrl);
+      // No celular, redirecionar via window.location.assign pode ser bloqueado se houver 
+      // um atraso entre a ação do usuário (clique) e o redirecionamento (fim da promise).
+      // Vamos usar uma abordagem que funcione melhor em contextos assíncronos.
+      window.location.href = whatsappUrl;
       
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp…`);
       
