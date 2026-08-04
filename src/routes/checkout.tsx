@@ -122,11 +122,6 @@ function CheckoutPage() {
               tamanho: i.tamanho
             };
           })
-            preco_unitario: itemPrecoEfetivo(i),
-            nome: i.nome,
-            cor: i.cor,
-            tamanho: i.tamanho
-          }))
         }
       });
 
