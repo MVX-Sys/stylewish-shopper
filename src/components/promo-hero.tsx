@@ -125,12 +125,13 @@ function PromoCard({ p }: { p: ProductListItem }) {
                 </span>
                 <span className="tabular-nums text-muted-foreground">{stock} rest.</span>
               </div>
-              <div className="h-1 overflow-hidden rounded-full bg-neutral-100">
+              <div className="h-1.5 overflow-hidden rounded-full bg-neutral-100/80">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all"
-                  style={{ width: `${100 - stockPct}%` }}
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-orange-500 transition-all duration-1000"
+                  style={{ width: `${Math.max(10, 100 - stockPct)}%` }}
                 />
               </div>
+
             </div>
           )}
         </div>
