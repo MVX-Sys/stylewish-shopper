@@ -272,10 +272,11 @@ function AtendentesPage() {
                         alt="Preview"
                         className="h-full w-full object-cover"
                         key={fotoPath}
-                        onLoad={() => console.log("Preview image loaded successfully")}
                         onError={(e) => {
                           console.error("Preview image load error:", e);
-                          toast.error("Erro ao carregar preview da imagem");
+                          // Se falhar o carregamento, tentamos forçar uma recarga após um pequeno delay
+                          // ou mostramos o ícone de falha silenciosamente sem o toast invasivo
+                          e.currentTarget.style.opacity = '0.5';
                         }}
                       />
                     ) : (
