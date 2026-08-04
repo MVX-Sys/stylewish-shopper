@@ -50,6 +50,36 @@ export type Database = {
         }
         Relationships: []
       }
+      atendentes: {
+        Row: {
+          ativo: boolean | null
+          cargo: string | null
+          criado_em: string | null
+          foto_path: string | null
+          id: string
+          nome: string
+          whatsapp: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          cargo?: string | null
+          criado_em?: string | null
+          foto_path?: string | null
+          id?: string
+          nome: string
+          whatsapp: string
+        }
+        Update: {
+          ativo?: boolean | null
+          cargo?: string | null
+          criado_em?: string | null
+          foto_path?: string | null
+          id?: string
+          nome?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
       categorias: {
         Row: {
           criado_em: string

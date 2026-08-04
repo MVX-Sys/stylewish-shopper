@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin/atendentes")({
 });
 
 function AtendentesPage() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, roleKind } = useAuth();
   const fetchAtendentes = useServerFn(listAtendentes);
   const addAtendente = useServerFn(createAtendente);
   const editAtendente = useServerFn(updateAtendente);
@@ -49,10 +49,10 @@ function AtendentesPage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [cargo, setCargo] = useState("Vendedor");
 
-  const { data: atendentes, isLoading } = useQuery({
+  const { data: atendentes, isLoading, error: queryError } = useQuery({
     queryKey: ["admin", "atendentes"],
     queryFn: () => fetchAtendentes(),
-    enabled: isAdmin,
+    enabled: !!roleKind && roleKind !== "cliente",
   });
 
   const addMutation = useMutation({
@@ -83,10 +83,25 @@ function AtendentesPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "atendentes"] }),
   });
 
-  if (!isAdmin) {
+  if (roleKind === "cliente") {
     return (
       <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
-        Apenas administradores podem gerenciar atendentes.
+        Acesso restrito ao painel administrativo.
+      </div>
+    );
+  }
+
+  if (queryError) {
+    return (
+      <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-10 text-center text-sm text-destructive">
+        Erro ao carregar atendentes. Por favor, verifique se a tabela foi criada corretamente.
+        <br />
+        <button 
+          onClick={() => qc.invalidateQueries({ queryKey: ["admin", "atendentes"] })}
+          className="mt-4 rounded-full bg-destructive px-4 py-2 text-white"
+        >
+          Tentar novamente
+        </button>
       </div>
     );
   }
