@@ -116,7 +116,7 @@ function PromoCard({ p }: { p: ProductListItem }) {
 
         {/* Stock bar — reserva de espaço fixa para manter proporção */}
         <div className="min-h-[2rem]">
-          {stock > 0 && stock <= 20 && (
+          {stock > 0 && stock <= 30 && (
             <div className="space-y-1">
               <div className="flex items-center justify-between text-[10px] font-medium">
                 <span className="inline-flex items-center gap-1 text-orange-600">
