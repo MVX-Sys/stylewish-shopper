@@ -204,7 +204,7 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
             </h2>
 
             <p className="mt-2 max-w-md text-[13px] leading-snug text-foreground/70 sm:mt-3 sm:text-base">
-              Selecionadas a dedo. Preços especiais por tempo limitado — corra antes que acabe.
+              Oportunidades exclusivas para renovar seu estoque com os melhores preços do mercado.
             </p>
           </div>
 
