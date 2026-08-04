@@ -172,9 +172,11 @@ function CheckoutPage() {
       clear();
       // Delay curto para permitir que a animação de toast apareça e o redirecionamento inicie
       setTimeout(() => nav({ to: "/perfil" }), 1500);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao salvar pedido:", err);
-      toast.error("Erro ao processar pedido. Verifique sua conexão e tente novamente.");
+      // Extrair mensagem de erro se disponível para ajudar no diagnóstico
+      const errorMsg = err?.message || (typeof err === 'string' ? err : "");
+      toast.error(`Erro ao processar pedido: ${errorMsg || "Tente novamente."}`);
     }
   };
 
