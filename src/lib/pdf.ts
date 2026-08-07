@@ -98,11 +98,9 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
   // Replace image with QR Code
   let qrCodeAdded = false;
   try {
-    const qrContent = JSON.stringify({
-      id: p.id,
-      nome: p.nome,
-      url: typeof window !== 'undefined' ? `${window.location.origin}/produto/${p.id}` : ''
-    });
+    const qrContent = typeof window !== 'undefined' 
+      ? `${window.location.origin}/produto/${p.id}` 
+      : p.id;
     const qrDataUrl = await QRCode.toDataURL(qrContent, {
       margin: 1,
       width: 200,
@@ -282,12 +280,9 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     
     // Add product QR Code instead of image
     try {
-      const qrContent = JSON.stringify({
-        id: it.produtoId,
-        nome: it.nome,
-        cor: it.cor,
-        tamanho: it.tamanho
-      });
+      const qrContent = typeof window !== 'undefined' 
+        ? `${window.location.origin}/produto/${it.produtoId}` 
+        : it.produtoId;
       const qrDataUrl = await QRCode.toDataURL(qrContent, {
         margin: 1,
         width: 100,
