@@ -307,7 +307,7 @@ function CheckoutPage() {
                     formaPagamento,
                     endereco:
                       formaEnvio === "ENTREGA"
-                        ? { formaEntrega: "TRANSPORTADORA A COMBINAR" }
+                        ? {} // Endereço vazio, pois foi removido do formulário
                         : undefined,
                     observacoes,
                   });
