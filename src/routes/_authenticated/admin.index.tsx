@@ -51,6 +51,29 @@ function AdminProductsList() {
   const [sort, setSort] = useState<SortKey>("recentes");
   const [showFilters, setShowFilters] = useState(true);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [qrToView, setQrToView] = useState<{ id: string; nome: string } | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const nav = useNavigate();
+
+  useEffect(() => {
+    if (qrToView) {
+      import("qrcode").then(async (QRCode) => {
+        const content = JSON.stringify({
+          id: qrToView.id,
+          nome: qrToView.nome,
+          url: typeof window !== "undefined" ? `${window.location.origin}/produto/${qrToView.id}` : "",
+        });
+        const url = await QRCode.default.toDataURL(content, {
+          margin: 2,
+          width: 300,
+          color: { dark: "#111827", light: "#FFFFFF" },
+        });
+        setQrDataUrl(url);
+      });
+    } else {
+      setQrDataUrl("");
+    }
+  }, [qrToView]);
 
   useEffect(() => {
     let controls: any = null;
