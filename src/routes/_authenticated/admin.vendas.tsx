@@ -106,6 +106,30 @@ function SalesAdminPage() {
         </div>
       </div>
 
+      {/* Navigation Tabs */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-1">
+        <div className="flex items-center gap-1">
+          <Link 
+            to="/admin" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Produtos
+          </Link>
+          <Link 
+            to="/admin/vendas" 
+            className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
+          >
+            Vendas
+          </Link>
+          <Link 
+            to="/admin/usuarios" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Usuários
+          </Link>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-5">
