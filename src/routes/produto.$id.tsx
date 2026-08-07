@@ -707,6 +707,34 @@ Baixar PDF
           </div>
         </div>
       )}
+
+      <Dialog open={showQR} onOpenChange={setShowQR}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>QR Code do Produto</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center space-y-4 py-6">
+            <div className="overflow-hidden rounded-xl border border-border bg-white p-2">
+              <img src={qrDataUrl} alt="QR Code" className="h-64 w-64" />
+            </div>
+            <p className="text-center text-sm text-muted-foreground">
+              Aponte a câmera do celular para abrir este produto
+            </p>
+            <button
+              onClick={() => {
+                const link = document.createElement("a");
+                link.download = `qrcode-${p?.nome}.png`;
+                link.href = qrDataUrl;
+                link.click();
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-all hover:opacity-90"
+            >
+              <Download className="h-4 w-4" />
+              Baixar QR Code
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
