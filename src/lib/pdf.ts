@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
+import QRCode from "qrcode";
 import { brl } from "./format";
 import { BRAND } from "./config";
 import type { ProductListItem } from "./products";
@@ -94,35 +95,34 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
 
   let y = 32;
 
-  // Layout improvement: Image on the left, details on the right
-  const productImgs = (p as any).imagens || [];
-  let imageAdded = false;
-  if (productImgs.length > 0) {
-    const firstPhoto = productImgs[0].storage_path;
-    const imgUrl = await import('./storage').then(m => m.getImageUrl(firstPhoto));
-    const imgData = await fetchImageAsBase64(imgUrl);
-    if (imgData) {
-      try {
-        const imgSize = 60;
-        // Force the image into the PDF by ensuring format and using 'FAST'
-        // Using JPEG as base but jsPDF will detect the data URI type
-        doc.addImage(imgData, "JPEG", 14, y, imgSize, imgSize, undefined, 'FAST');
-        imageAdded = true;
-      } catch (e) {
-        console.error("Error adding product image to PDF:", e);
-        // Fallback attempt with explicit format if first try fails
-        try {
-          doc.addImage(imgData, 14, y, 60, 60);
-          imageAdded = true;
-        } catch (e2) {
-          console.error("Critical error adding image:", e2);
-        }
+  // Replace image with QR Code
+  let qrCodeAdded = false;
+  try {
+    const qrContent = JSON.stringify({
+      id: p.id,
+      nome: p.nome,
+      url: typeof window !== 'undefined' ? `${window.location.origin}/produto/${p.id}` : ''
+    });
+    const qrDataUrl = await QRCode.toDataURL(qrContent, {
+      margin: 1,
+      width: 200,
+      color: {
+        dark: "#111827",
+        light: "#FFFFFF"
       }
+    });
+    
+    if (qrDataUrl) {
+      const qrSize = 40;
+      doc.addImage(qrDataUrl, "PNG", 14, y, qrSize, qrSize, undefined, 'FAST');
+      qrCodeAdded = true;
     }
+  } catch (e) {
+    console.error("Error generating QR code for product PDF:", e);
   }
 
-  const contentX = imageAdded ? 70 : 14;
-  const contentWidth = imageAdded ? 126 : 182;
+  const contentX = qrCodeAdded ? 60 : 14;
+  const contentWidth = qrCodeAdded ? 136 : 182;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
@@ -263,7 +263,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
   doc.setFontSize(9);
   doc.setTextColor(...MUTED);
   doc.text("QTD", 18, y);
-  doc.text("IMAGEM", 32, y);
+  doc.text("QR CODE", 32, y);
   doc.text("PRODUTO", 75, y);
   doc.text("UNIT.", 160, y);
   doc.text("SUBTOTAL", 196, y, { align: "right" });
@@ -280,24 +280,29 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       y = 32;
     }
     
-    // Add product thumbnail
-    if (it.foto) {
-      const imgData = await fetchImageAsBase64(it.foto);
-      if (imgData) {
-        try {
-          const imgSize = 18;
-          // Force the image into the PDF
-          doc.addImage(imgData, "JPEG", 32, y - 4, imgSize, imgSize, undefined, 'FAST');
-        } catch (e) {
-          console.error("Error drawing image in PDF:", e);
-          // Simple fallback
-          try {
-            doc.addImage(imgData, 32, y - 4, 18, 18);
-          } catch (e2) {
-            console.warn("Failed second attempt at drawing item image");
-          }
+    // Add product QR Code instead of image
+    try {
+      const qrContent = JSON.stringify({
+        id: it.produtoId,
+        nome: it.nome,
+        cor: it.cor,
+        tamanho: it.tamanho
+      });
+      const qrDataUrl = await QRCode.toDataURL(qrContent, {
+        margin: 1,
+        width: 100,
+        color: {
+          dark: "#111827",
+          light: "#FFFFFF"
         }
+      });
+      
+      if (qrDataUrl) {
+        const qrSize = 18;
+        doc.addImage(qrDataUrl, "PNG", 32, y - 4, qrSize, qrSize, undefined, 'FAST');
       }
+    } catch (e) {
+      console.error("Error drawing QR code in PDF:", e);
     }
 
     const desc = `${it.nome}\n${it.cor} · ${it.tamanho}`;
