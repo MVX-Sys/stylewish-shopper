@@ -241,14 +241,17 @@ export function PromoHero({ produtos }: { produtos: ProductListItem[] }) {
                 </div>
               </div>
             )}
-            <Link
-              to="/"
-              search={{ promocao: "true" }}
+            <button
+              onClick={() => {
+                const searchParams = new URLSearchParams(window.location.search);
+                searchParams.set("promo", "true");
+                window.location.search = searchParams.toString();
+              }}
               className="btn-shine group inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-[13px] font-bold text-background shadow-xl shadow-foreground/20 transition-all hover:scale-[1.03] hover:shadow-2xl sm:py-3 sm:text-sm"
             >
               Ver todas as ofertas
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
+            </button>
           </div>
         </div>
 
