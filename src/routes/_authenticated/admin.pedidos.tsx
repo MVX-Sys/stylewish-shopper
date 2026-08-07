@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { 
@@ -11,7 +11,7 @@ import {
   Users,
   Loader2
 } from "lucide-react";
-import { listPedidos } from "@/lib/pedidos.functions";
+import { listPedidos, updatePedidoStatus } from "@/lib/pedidos.functions";
 import { listAtendentes } from "@/lib/atendentes.functions";
 import { listAdminUsers } from "@/lib/admin-users.functions";
 import { brl } from "@/lib/format";
@@ -33,7 +33,9 @@ type Periodo = "dia" | "semana" | "mes" | "semestre" | "todos";
 
 function PedidosAdminPage() {
   const { isAdmin } = useAuth();
+  const qc = useQueryClient();
   const fetchPedidos = useServerFn(listPedidos);
+  const updateStatus = useServerFn(updatePedidoStatus);
   const fetchAtendentes = useServerFn(listAtendentes);
   const fetchUsers = useServerFn(listAdminUsers);
 
@@ -305,9 +307,28 @@ function PedidosAdminPage() {
                   return (
                     <tr key={pedido.id} className="transition-colors hover:bg-muted/30">
                       <td className="px-4 py-3">
-                        <div className="flex flex-col">
-                          <span className="font-medium">{formatDate(pedido.created_at)}</span>
-                          <span className="text-[10px] text-muted-foreground font-mono">{pedido.id.split("-")[0]}</span>
+                        <div className="flex items-center gap-3">
+                          <select 
+                            value={pedido.status}
+                            onChange={async (e) => {
+                              try {
+                                await updateStatus({ data: { id: pedido.id, status: e.target.value } });
+                                qc.invalidateQueries({ queryKey: ["admin-pedidos"] });
+                              } catch (err) {
+                                console.error("Erro ao atualizar status:", err);
+                              }
+                            }}
+                            className="rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-primary"
+                          >
+                            <option value="pendente">Pendente</option>
+                            <option value="confirmado">Confirmado</option>
+                            <option value="entregue">Entregue</option>
+                            <option value="cancelado">Cancelado</option>
+                          </select>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{formatDate(pedido.created_at)}</span>
+                            <span className="text-[10px] text-muted-foreground font-mono">{pedido.id.split("-")[0]}</span>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">

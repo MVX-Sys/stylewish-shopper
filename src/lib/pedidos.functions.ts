@@ -49,10 +49,14 @@ export const listPedidos = createServerFn({ method: "GET" })
         atendente:atendentes(nome),
         itens:pedidos_itens(*)
       `)
-      .order("created_at", { ascending: false });
+      .order("criado_em", { ascending: false });
 
     if (input?.usuario_id) {
       query = query.eq("user_id", input.usuario_id);
+    }
+    
+    if (input?.atendente_id) {
+      query = query.eq("atendente_id", input.atendente_id);
     }
     // atendente_id doesn't exist in schema yet according to TS error, but we'll try to add it later if needed
     // For now let's just use what's there
@@ -65,7 +69,7 @@ export const listPedidos = createServerFn({ method: "GET" })
       else if (input.periodo === "mes") startDate.setMonth(now.getMonth() - 1);
       else if (input.periodo === "semestre") startDate.setMonth(now.getMonth() - 6);
       
-      query = query.gte("created_at", startDate.toISOString());
+      query = query.gte("criado_em", startDate.toISOString());
     }
 
     const { data, error } = await query;
