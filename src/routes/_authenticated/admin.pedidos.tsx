@@ -105,6 +105,13 @@ function PedidosAdminPage() {
             Acompanhe e gerencie as vendas realizadas na plataforma.
           </p>
         </div>
+        <Link 
+          to="/admin/pedidos" 
+          className="flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-brand/30 active:scale-95"
+        >
+          <ShoppingBag className="h-4 w-4" />
+          Gerenciar Pedidos
+        </Link>
       </div>
 
       {/* Navigation Tabs */}
@@ -124,13 +131,6 @@ function PedidosAdminPage() {
           </Link>
         </div>
 
-        <Link 
-          to="/admin/pedidos" 
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm ring-2 ring-primary ring-offset-2 transition-all hover:bg-primary/90 active:scale-95"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          Gerenciar Pedidos
-        </Link>
       </div>
 
 
