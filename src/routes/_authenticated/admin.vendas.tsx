@@ -14,11 +14,12 @@ import {
   ChevronRight
 } from "lucide-react";
 import { getVendasPorAtendente } from "@/lib/vendas.functions";
+import { listAtendentes } from "@/lib/atendentes.functions";
 import { brl } from "@/lib/format";
 import { BRAND } from "@/lib/config";
 import { supabase } from "@/integrations/supabase/client";
 import { ExportMenu } from "@/components/export-menu";
-import { downloadTableCSV, downloadTablePDF, downloadTableXLSX } from "@/lib/pdf";
+import { downloadTableCSV, downloadRelatorioVendasPDF, downloadTableXLSX } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/vendas")({
   head: () => ({
@@ -98,13 +99,7 @@ function SalesAdminPage() {
               } else if (format === "xlsx") {
                 downloadTableXLSX(`vendas-atendentes-${periodo}`, "Vendas", headers, dataToExport);
               } else {
-                const columns = [
-                  { label: "Atendente", width: 60 },
-                  { label: "Pedidos", width: 30 },
-                  { label: "Vendido", width: 45 },
-                  { label: "Ticket Médio", width: 45 },
-                ];
-                downloadTablePDF(`Desempenho de Vendas (${periodLabels[periodo]})`, `vendas-${periodo}`, columns, dataToExport);
+                downloadRelatorioVendasPDF(`Relatório de Vendas (${periodLabels[periodo]})`, `vendas-${periodo}`, dataToExport);
               }
             }}
           />
