@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2 } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
@@ -51,6 +51,29 @@ function AdminProductsList() {
   const [sort, setSort] = useState<SortKey>("recentes");
   const [showFilters, setShowFilters] = useState(true);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [qrToView, setQrToView] = useState<{ id: string; nome: string } | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const nav = useNavigate();
+
+  useEffect(() => {
+    if (qrToView) {
+      import("qrcode").then(async (QRCode) => {
+        const content = JSON.stringify({
+          id: qrToView.id,
+          nome: qrToView.nome,
+          url: typeof window !== "undefined" ? `${window.location.origin}/produto/${qrToView.id}` : "",
+        });
+        const url = await QRCode.default.toDataURL(content, {
+          margin: 2,
+          width: 300,
+          color: { dark: "#111827", light: "#FFFFFF" },
+        });
+        setQrDataUrl(url);
+      });
+    } else {
+      setQrDataUrl("");
+    }
+  }, [qrToView]);
 
   useEffect(() => {
     let controls: any = null;
@@ -64,12 +87,11 @@ function AdminProductsList() {
               // Try to parse if it's JSON from our generated PDF
               const data = JSON.parse(text);
               if (data.id) {
-                setQ(data.id);
+                nav({ to: "/admin/produtos/$id", params: { id: data.id } });
                 setShowQRScanner(false);
                 toast.success("Produto localizado via QR Code!");
               }
             } catch {
-              // Fallback to raw text if not JSON
               setQ(text);
               setShowQRScanner(false);
               toast.success("Código QR lido!");
@@ -535,6 +557,13 @@ function AdminProductsList() {
                       </td>
                       <td className="p-3">
                         <div className="flex justify-end gap-1">
+                          <button
+                            onClick={() => setQrToView({ id: p.id, nome: p.nome })}
+                            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                            title="Ver QR Code"
+                          >
+                            <QrCode className="h-4 w-4" />
+                          </button>
                           <Link
                             to="/produto/$id"
                             params={{ id: p.id }}
@@ -572,6 +601,43 @@ function AdminProductsList() {
           </div>
         )}
       </div>
+
+      {qrToView && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-background shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <div>
+                <h3 className="font-display font-semibold">QR Code do Produto</h3>
+                <p className="text-xs text-muted-foreground">{qrToView.nome}</p>
+              </div>
+              <button
+                onClick={() => setQrToView(null)}
+                className="rounded-full p-1 hover:bg-accent"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-6 p-8">
+              <div className="aspect-square w-full max-w-[200px] overflow-hidden rounded-xl border border-border bg-white p-2">
+                {qrDataUrl ? (
+                  <img src={qrDataUrl} alt="QR Code" className="h-full w-full" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              <a
+                href={qrDataUrl}
+                download={`qr-${qrToView.nome.toLowerCase().replace(/\s+/g, "-")}.png`}
+                className="w-full rounded-full bg-foreground py-2 text-center text-sm font-semibold text-background transition-opacity hover:opacity-90"
+              >
+                Baixar QR Code
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
