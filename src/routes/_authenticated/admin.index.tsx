@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode } from "lucide-react";
+import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
 import { downloadProductsCSV, downloadProductsPDF, downloadProductsXLSX } from "@/lib/pdf";
@@ -49,6 +50,45 @@ function AdminProductsList() {
   const [precoMax, setPrecoMax] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("recentes");
   const [showFilters, setShowFilters] = useState(true);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+
+  useEffect(() => {
+    let controls: any = null;
+    if (showQRScanner) {
+      const codeReader = new BrowserMultiFormatReader();
+      codeReader
+        .decodeFromVideoDevice(null, "video", (result, err) => {
+          if (result) {
+            const text = result.getText();
+            try {
+              // Try to parse if it's JSON from our generated PDF
+              const data = JSON.parse(text);
+              if (data.id) {
+                setQ(data.id);
+                setShowQRScanner(false);
+                toast.success("Produto localizado via QR Code!");
+              }
+            } catch {
+              // Fallback to raw text if not JSON
+              setQ(text);
+              setShowQRScanner(false);
+              toast.success("Código QR lido!");
+            }
+          }
+        })
+        .then((ctrl) => {
+          controls = ctrl;
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.error("Erro ao acessar a câmera.");
+          setShowQRScanner(false);
+        });
+    }
+    return () => {
+      if (controls) controls.stop();
+    };
+  }, [showQRScanner]);
 
   useEffect(() => {
     produtos.forEach((p) => {
@@ -223,9 +263,39 @@ function AdminProductsList() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Buscar por nome…"
-                className="w-full rounded-full border border-input bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-foreground"
+                className="w-full rounded-full border border-input bg-background py-2 pl-9 pr-10 text-sm outline-none focus:border-foreground"
               />
+              <button
+                onClick={() => setShowQRScanner(true)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                title="Escanear QR Code"
+              >
+                <QrCode className="h-4 w-4" />
+              </button>
             </div>
+            {showQRScanner && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+                <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-background shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-border p-4">
+                    <h3 className="font-display font-semibold">Escanear Produto</h3>
+                    <button
+                      onClick={() => setShowQRScanner(false)}
+                      className="rounded-full p-1 hover:bg-accent"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div className="aspect-square w-full bg-black">
+                    <video id="video" className="h-full w-full object-cover" />
+                  </div>
+                  <div className="p-4 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Aponte a câmera para o QR Code do produto.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <select
                 value={sort}
