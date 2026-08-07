@@ -601,6 +601,43 @@ function AdminProductsList() {
           </div>
         )}
       </div>
+
+      {qrToView && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-background shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <div>
+                <h3 className="font-display font-semibold">QR Code do Produto</h3>
+                <p className="text-xs text-muted-foreground">{qrToView.nome}</p>
+              </div>
+              <button
+                onClick={() => setQrToView(null)}
+                className="rounded-full p-1 hover:bg-accent"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-6 p-8">
+              <div className="aspect-square w-full max-w-[200px] overflow-hidden rounded-xl border border-border bg-white p-2">
+                {qrDataUrl ? (
+                  <img src={qrDataUrl} alt="QR Code" className="h-full w-full" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              <a
+                href={qrDataUrl}
+                download={`qr-${qrToView.nome.toLowerCase().replace(/\s+/g, "-")}.png`}
+                className="w-full rounded-full bg-foreground py-2 text-center text-sm font-semibold text-background transition-opacity hover:opacity-90"
+              >
+                Baixar QR Code
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
