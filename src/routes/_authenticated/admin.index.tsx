@@ -58,11 +58,9 @@ function AdminProductsList() {
   useEffect(() => {
     if (qrToView) {
       import("qrcode").then(async (QRCode) => {
-        const content = JSON.stringify({
-          id: qrToView.id,
-          nome: qrToView.nome,
-          url: typeof window !== "undefined" ? `${window.location.origin}/produto/${qrToView.id}` : "",
-        });
+        const content = typeof window !== "undefined" 
+          ? `${window.location.origin}/produto/${qrToView.id}` 
+          : qrToView.id;
         const url = await QRCode.default.toDataURL(content, {
           margin: 2,
           width: 300,
@@ -84,17 +82,25 @@ function AdminProductsList() {
           if (result) {
             const text = result.getText();
             try {
-              // Try to parse if it's JSON from our generated PDF
-              const data = JSON.parse(text);
-              if (data.id) {
-                nav({ to: "/admin/produtos/$id", params: { id: data.id } });
+              // Now the QR content is directly the URL or ID
+              if (text.includes("/produto/")) {
+                const parts = text.split("/");
+                const id = parts[parts.length - 1];
+                nav({ to: "/admin/produtos/$id", params: { id } });
                 setShowQRScanner(false);
                 toast.success("Produto localizado via QR Code!");
+              } else if (text.length > 20) { // Likely a UUID
+                nav({ to: "/admin/produtos/$id", params: { id: text } });
+                setShowQRScanner(false);
+                toast.success("Produto localizado via ID!");
+              } else {
+                setQ(text);
+                setShowQRScanner(false);
+                toast.success("Busca preenchida via QR Code!");
               }
             } catch {
               setQ(text);
               setShowQRScanner(false);
-              toast.success("Código QR lido!");
             }
           }
         })
