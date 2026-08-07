@@ -5,6 +5,22 @@ import { BRAND } from "./config";
 import type { ProductListItem } from "./products";
 import type { CartItem } from "./cart";
 
+const fetchImageAsBase64 = async (url: string): Promise<string> => {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error("Error fetching image for PDF:", error);
+    return "";
+  }
+};
+
 const ORANGE: [number, number, number] = [255, 85, 0];
 const DARK: [number, number, number] = [17, 24, 39];
 const MUTED: [number, number, number] = [107, 114, 128];
@@ -47,11 +63,26 @@ function footer(doc: jsPDF) {
   doc.setTextColor(...DARK);
 }
 
-export function downloadProductPDF(p: ProductListItem, categoriaNome?: string) {
+export async function downloadProductPDF(p: ProductListItem, categoriaNome?: string) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   header(doc, "Ficha do produto");
 
   let y = 32;
+
+  // Add product image if available
+  const productImgs = (p as any).imagens || [];
+  if (productImgs.length > 0) {
+    const firstPhoto = productImgs[0].storage_path;
+    const imgUrl = await import('./storage').then(m => m.getImageUrl(firstPhoto));
+    const imgData = await fetchImageAsBase64(imgUrl);
+    if (imgData) {
+      // Draw image in a box
+      const imgWidth = 60;
+      const imgHeight = 60;
+      doc.addImage(imgData, "JPEG", 14, y, imgWidth, imgHeight);
+      y += imgHeight + 8;
+    }
+  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
@@ -158,7 +189,7 @@ export type OrderPDFPayload = {
   observacoes?: string;
 };
 
-export function downloadOrderPDF(order: OrderPDFPayload) {
+export async function downloadOrderPDF(order: OrderPDFPayload): Promise<Blob> {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   header(doc, "Resumo do pedido");
 
@@ -180,7 +211,8 @@ export function downloadOrderPDF(order: OrderPDFPayload) {
   doc.setFontSize(9);
   doc.setTextColor(...MUTED);
   doc.text("QTD", 18, y);
-  doc.text("PRODUTO", 32, y);
+  doc.text("IMAGEM", 32, y);
+  doc.text("PRODUTO", 55, y);
   doc.text("UNIT.", 150, y);
   doc.text("SUBTOTAL", 196, y, { align: "right" });
   doc.setTextColor(...DARK);
@@ -189,19 +221,30 @@ export function downloadOrderPDF(order: OrderPDFPayload) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   for (const it of order.items) {
-    if (y > 260) {
+    if (y > 250) {
       footer(doc);
       doc.addPage();
       header(doc, "Resumo do pedido");
       y = 32;
     }
+    
+    // Add product thumbnail
+    if (it.foto) {
+      const imgData = await fetchImageAsBase64(it.foto);
+      if (imgData) {
+        doc.addImage(imgData, "JPEG", 32, y - 4, 15, 15);
+      }
+    }
+
     const desc = `${it.nome} — ${it.cor} · ${it.tamanho}`;
-    const lines = doc.splitTextToSize(desc, 112);
+    const lines = doc.splitTextToSize(desc, 90);
     doc.text(String(it.quantidade), 18, y);
-    doc.text(lines, 32, y);
+    doc.text(lines, 55, y);
     doc.text(brl(it.preco), 150, y);
     doc.text(brl(it.preco * it.quantidade), 196, y, { align: "right" });
-    y += Math.max(lines.length * 5, 6);
+    
+    const rowHeight = Math.max(lines.length * 5, 18);
+    y += rowHeight;
     doc.setDrawColor(...LINE);
     doc.line(14, y - 2, 196, y - 2);
   }
@@ -266,7 +309,12 @@ export function downloadOrderPDF(order: OrderPDFPayload) {
 
   footer(doc);
   const stamp = new Date().toISOString().slice(0, 10);
-  doc.save(`pedido-${BRAND.toLowerCase()}-${stamp}.pdf`);
+  const pdfBlob = doc.output("blob");
+  // Only trigger download if we're not just getting the blob
+  if (typeof window !== "undefined") {
+    doc.save(`pedido-${BRAND.toLowerCase()}-${stamp}.pdf`);
+  }
+  return pdfBlob;
 }
 
 export type AuditLogExport = {

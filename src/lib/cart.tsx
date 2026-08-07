@@ -12,6 +12,7 @@ export type CartItem = {
   precoPromocional?: number | null; // preço promocional definido, se houver
   promocaoAte?: string | null; // ISO expiry
   quantidade: number;
+  foto?: string | null;
 };
 
 export function itemPrecoEfetivo(i: Pick<CartItem, "preco" | "precoPromocional" | "promocaoAte">): number {
