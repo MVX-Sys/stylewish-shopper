@@ -32,7 +32,7 @@ export const Route = createFileRoute("/checkout")({
 });
 
 type FormaEnvio = "ENTREGA" | "RETIRADA";
-type FormaEntrega = "AZUL CARGO" | "TRANSPORTADORA A COMBINAR";
+type FormaEntrega = "TRANSPORTADORA A COMBINAR";
 type FormaPagamento = "PIX" | "DINHEIRO" | "CARTÃO DE CRÉDITO" | "CARTÃO DE DÉBITO";
 
 function CheckoutPage() {
@@ -107,7 +107,7 @@ function CheckoutPage() {
           forma_pagamento: formaPagamento,
           observacoes: observacoes,
           endereco: formaEnvio === "ENTREGA" ? {
-            cep, logradouro, numero, complemento, bairro, cidade, estado, referencia, formaEntrega
+            cep, logradouro, numero, complemento, bairro, cidade, estado, referencia, formaEntrega: "TRANSPORTADORA A COMBINAR"
           } : undefined,
           itens: items.map(i => {
             const vId = i.variacaoId || (i as any).variacao_id;
@@ -147,7 +147,7 @@ function CheckoutPage() {
               `Bairro: ${bairro || "-"}`,
               `Cidade/UF: ${cidade || "-"}/${estado || "-"}`,
               referencia ? `Referência: ${referencia}` : "",
-              `Forma de entrega: ${formaEntrega}`,
+              `Forma de entrega: TRANSPORTADORA A COMBINAR`,
             ].filter(Boolean)
           : ["", "*Entrega*", "Retirada no local"];
 
@@ -392,7 +392,7 @@ function CheckoutPage() {
                     items,
                     total,
                     formaEnvio,
-                    formaEntrega: formaEnvio === "ENTREGA" ? formaEntrega : undefined,
+                    formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
                     formaPagamento,
                     endereco:
                       formaEnvio === "ENTREGA"
