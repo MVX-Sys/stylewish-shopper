@@ -315,18 +315,26 @@ function PedidosAdminPage() {
                         <div className="flex items-center gap-3">
                           <select 
                             value={pedido.status}
+                            disabled={pedido.status === "confirmado" || pedido.status === "entregue"}
                             onChange={async (e) => {
+                              const newStatus = e.target.value;
+                              const confirmMsg = newStatus === "confirmado" 
+                                ? "Ao confirmar este pedido, o estoque dos produtos será baixado automaticamente. Deseja continuar?"
+                                : `Deseja alterar o status para "${newStatus}"?`;
+
+                              if (!window.confirm(confirmMsg)) return;
+
                               try {
-                                await updateStatus({ data: { id: pedido.id, status: e.target.value } });
+                                await updateStatus({ data: { id: pedido.id, status: newStatus } });
                                 qc.invalidateQueries({ queryKey: ["admin-pedidos"] });
                               } catch (err) {
                                 console.error("Erro ao atualizar status:", err);
                               }
                             }}
-                            className="rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-primary"
+                            className="rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <option value="pendente">Pendente</option>
-                            <option value="confirmado">Confirmado</option>
+                            <option value="confirmado">Confirmado (Baixa Estoque)</option>
                             <option value="entregue">Entregue</option>
                             <option value="cancelado">Cancelado</option>
                           </select>
