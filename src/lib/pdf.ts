@@ -280,24 +280,29 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       y = 32;
     }
     
-    // Add product thumbnail
-    if (it.foto) {
-      const imgData = await fetchImageAsBase64(it.foto);
-      if (imgData) {
-        try {
-          const imgSize = 18;
-          // Force the image into the PDF
-          doc.addImage(imgData, "JPEG", 32, y - 4, imgSize, imgSize, undefined, 'FAST');
-        } catch (e) {
-          console.error("Error drawing image in PDF:", e);
-          // Simple fallback
-          try {
-            doc.addImage(imgData, 32, y - 4, 18, 18);
-          } catch (e2) {
-            console.warn("Failed second attempt at drawing item image");
-          }
+    // Add product QR Code instead of image
+    try {
+      const qrContent = JSON.stringify({
+        id: it.produto_id,
+        nome: it.nome,
+        cor: it.cor,
+        tamanho: it.tamanho
+      });
+      const qrDataUrl = await QRCode.toDataURL(qrContent, {
+        margin: 1,
+        width: 100,
+        color: {
+          dark: "#111827",
+          light: "#FFFFFF"
         }
+      });
+      
+      if (qrDataUrl) {
+        const qrSize = 18;
+        doc.addImage(qrDataUrl, "PNG", 32, y - 4, qrSize, qrSize, undefined, 'FAST');
       }
+    } catch (e) {
+      console.error("Error drawing QR code in PDF:", e);
     }
 
     const desc = `${it.nome}\n${it.cor} · ${it.tamanho}`;
