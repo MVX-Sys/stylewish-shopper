@@ -217,6 +217,42 @@ function ProductPage() {
     }
   };
 
+  const [showQR, setShowQR] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    toast.success("Link copiado!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareWhatsApp = () => {
+    if (!p) return;
+    const text = `Confira este produto na ${BRAND}: *${p.nome}*\n\n${shareUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const handleGenerateQR = async () => {
+    try {
+      const url = await QRCode.toDataURL(shareUrl, {
+        width: 400,
+        margin: 2,
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+      });
+      setQrDataUrl(url);
+      setShowQR(true);
+    } catch (err) {
+      toast.error("Erro ao gerar QR Code");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
