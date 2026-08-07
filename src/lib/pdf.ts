@@ -95,35 +95,34 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
 
   let y = 32;
 
-  // Layout improvement: Image on the left, details on the right
-  const productImgs = (p as any).imagens || [];
-  let imageAdded = false;
-  if (productImgs.length > 0) {
-    const firstPhoto = productImgs[0].storage_path;
-    const imgUrl = await import('./storage').then(m => m.getImageUrl(firstPhoto));
-    const imgData = await fetchImageAsBase64(imgUrl);
-    if (imgData) {
-      try {
-        const imgSize = 60;
-        // Force the image into the PDF by ensuring format and using 'FAST'
-        // Using JPEG as base but jsPDF will detect the data URI type
-        doc.addImage(imgData, "JPEG", 14, y, imgSize, imgSize, undefined, 'FAST');
-        imageAdded = true;
-      } catch (e) {
-        console.error("Error adding product image to PDF:", e);
-        // Fallback attempt with explicit format if first try fails
-        try {
-          doc.addImage(imgData, 14, y, 60, 60);
-          imageAdded = true;
-        } catch (e2) {
-          console.error("Critical error adding image:", e2);
-        }
+  // Replace image with QR Code
+  let qrCodeAdded = false;
+  try {
+    const qrContent = JSON.stringify({
+      id: p.id,
+      nome: p.nome,
+      url: typeof window !== 'undefined' ? `${window.location.origin}/produto/${p.id}` : ''
+    });
+    const qrDataUrl = await QRCode.toDataURL(qrContent, {
+      margin: 1,
+      width: 200,
+      color: {
+        dark: "#111827",
+        light: "#FFFFFF"
       }
+    });
+    
+    if (qrDataUrl) {
+      const qrSize = 40;
+      doc.addImage(qrDataUrl, "PNG", 14, y, qrSize, qrSize, undefined, 'FAST');
+      qrCodeAdded = true;
     }
+  } catch (e) {
+    console.error("Error generating QR code for product PDF:", e);
   }
 
-  const contentX = imageAdded ? 70 : 14;
-  const contentWidth = imageAdded ? 126 : 182;
+  const contentX = qrCodeAdded ? 60 : 14;
+  const contentWidth = qrCodeAdded ? 136 : 182;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
