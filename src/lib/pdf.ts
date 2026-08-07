@@ -276,11 +276,17 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       const imgData = await fetchImageAsBase64(it.foto);
       if (imgData) {
         try {
-          // Adjust image box and position
           const imgSize = 18;
+          // Force the image into the PDF
           doc.addImage(imgData, "JPEG", 32, y - 4, imgSize, imgSize, undefined, 'FAST');
         } catch (e) {
           console.error("Error drawing image in PDF:", e);
+          // Simple fallback
+          try {
+            doc.addImage(imgData, 32, y - 4, 18, 18);
+          } catch (e2) {
+            console.warn("Failed second attempt at drawing item image");
+          }
         }
       }
     }
