@@ -6,13 +6,23 @@ import type { ProductListItem } from "./products";
 import { type CartItem, itemPrecoEfetivo } from "./cart";
 
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
+  if (!url) return "";
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { mode: 'cors', cache: 'no-cache' });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const blob = await response.blob();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        // Verify if it's a valid data URL and has content
+        if (result && result.startsWith('data:image')) {
+          resolve(result);
+        } else {
+          resolve("");
+        }
+      };
+      reader.onerror = () => resolve("");
       reader.readAsDataURL(blob);
     });
   } catch (error) {
@@ -77,9 +87,14 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
     const imgUrl = await import('./storage').then(m => m.getImageUrl(firstPhoto));
     const imgData = await fetchImageAsBase64(imgUrl);
     if (imgData) {
-      const imgSize = 50;
-      doc.addImage(imgData, "JPEG", 14, y, imgSize, imgSize);
-      imageAdded = true;
+      try {
+        const imgSize = 60;
+        // Check image orientation/aspect ratio if possible, or just use a safe box
+        doc.addImage(imgData, "JPEG", 14, y, imgSize, imgSize, undefined, 'FAST');
+        imageAdded = true;
+      } catch (e) {
+        console.error("Error adding product image to PDF:", e);
+      }
     }
   }
 
@@ -239,8 +254,8 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       if (imgData) {
         try {
           // Adjust image box and position
-          const imgSize = 15;
-          doc.addImage(imgData, "JPEG", 32, y - 2, imgSize, imgSize);
+          const imgSize = 18;
+          doc.addImage(imgData, "JPEG", 32, y - 4, imgSize, imgSize, undefined, 'FAST');
         } catch (e) {
           console.error("Error drawing image in PDF:", e);
         }
