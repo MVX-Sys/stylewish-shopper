@@ -1,19 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { 
   Search, 
-  Filter, 
-  Calendar, 
   User, 
   ShoppingBag, 
   Clock, 
   CheckCircle2, 
-  XCircle, 
-  AlertCircle,
-  ChevronDown,
-  Download
+  Users,
+  Loader2
 } from "lucide-react";
 import { listPedidos } from "@/lib/pedidos.functions";
 import { listAtendentes } from "@/lib/atendentes.functions";
@@ -49,9 +45,11 @@ function PedidosAdminPage() {
   const { data: pedidos = [], isLoading } = useQuery({
     queryKey: ["admin-pedidos", periodo, atendenteId, usuarioId],
     queryFn: () => fetchPedidos({ 
-      periodo, 
-      atendente_id: atendenteId === "todos" ? undefined : atendenteId,
-      usuario_id: usuarioId === "todos" ? undefined : usuarioId
+      data: {
+        periodo, 
+        atendente_id: atendenteId === "todos" ? undefined : atendenteId,
+        usuario_id: usuarioId === "todos" ? undefined : usuarioId
+      }
     }),
   });
 
@@ -70,8 +68,8 @@ function PedidosAdminPage() {
     if (!q.trim()) return pedidos;
     const term = q.toLowerCase();
     return pedidos.filter(p => 
-      p.cliente_nome.toLowerCase().includes(term) ||
-      p.cliente_whatsapp.includes(term) ||
+      (p.cliente_nome || "").toLowerCase().includes(term) ||
+      (p.cliente_whatsapp || "").includes(term) ||
       p.id.toLowerCase().includes(term)
     );
   }, [pedidos, q]);
@@ -85,6 +83,7 @@ function PedidosAdminPage() {
   }, [pedidos]);
 
   const formatDate = (date: string) => {
+    if (!date) return "—";
     return new Date(date).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -106,7 +105,6 @@ function PedidosAdminPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
       {/* Navigation Tabs */}
       <div className="flex items-center gap-1 border-b border-border">
         <Link 
@@ -129,6 +127,7 @@ function PedidosAdminPage() {
         </Link>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-3">
@@ -144,7 +143,7 @@ function PedidosAdminPage() {
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-lg bg-blue-500/10 text-blue-500">
-              <Calendar className="h-5 w-5" />
+              <Clock className="h-5 w-5" />
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total de Peças</p>
@@ -237,13 +236,13 @@ function PedidosAdminPage() {
                   Cliente: p.cliente_nome,
                   WhatsApp: p.cliente_whatsapp,
                   Atendente: p.atendente?.nome || "—",
-                  Total: p.total,
+                  Total: brl(p.total),
                   Peças: p.itens?.reduce((acc, i) => acc + i.quantidade, 0) || 0,
                   Status: p.status
                 }));
-                if (format === "csv") downloadTableCSV(dataToExport, "pedidos");
-                else if (format === "xlsx") downloadTableXLSX(dataToExport, "pedidos");
-                else downloadTablePDF(dataToExport, "pedidos");
+                if (format === "csv") downloadTableCSV(dataToExport, "pedidos", "pedidos");
+                else if (format === "xlsx") downloadTableXLSX(dataToExport, "pedidos", "pedidos", "pedidos");
+                else downloadTablePDF(dataToExport, "pedidos", "pedidos", "pedidos");
               }}
             />
           </div>
@@ -336,24 +335,5 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${styles[status] || "bg-muted text-muted-foreground"}`}>
       {status}
     </span>
-  );
-}
-
-function Loader2(props: any) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
   );
 }
