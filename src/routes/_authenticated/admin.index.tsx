@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
@@ -282,26 +282,31 @@ function AdminProductsList() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-1 border-b border-border">
-        <Link 
-          to="/admin" 
-          className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
-        >
-          Produtos
-        </Link>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-1">
+        <div className="flex items-center gap-1">
+          <Link 
+            to="/admin" 
+            className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
+          >
+            Produtos
+          </Link>
+          <Link 
+            to="/admin/usuarios" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Usuários
+          </Link>
+        </div>
+
         <Link 
           to="/admin/pedidos" 
-          className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95"
         >
-          Pedidos
-        </Link>
-        <Link 
-          to="/admin/usuarios" 
-          className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
-        >
-          Usuários
+          <ShoppingBag className="h-4 w-4" />
+          Gerenciar Pedidos
         </Link>
       </div>
+
 
       {/* Table */}
       <div className="rounded-xl border border-border bg-card">
