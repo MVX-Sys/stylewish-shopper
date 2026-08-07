@@ -50,6 +50,45 @@ function AdminProductsList() {
   const [precoMax, setPrecoMax] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("recentes");
   const [showFilters, setShowFilters] = useState(true);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+
+  useEffect(() => {
+    let controls: any = null;
+    if (showQRScanner) {
+      const codeReader = new BrowserMultiFormatReader();
+      codeReader
+        .decodeFromVideoDevice(undefined, "video", (result, err) => {
+          if (result) {
+            const text = result.getText();
+            try {
+              // Try to parse if it's JSON from our generated PDF
+              const data = JSON.parse(text);
+              if (data.id) {
+                setQ(data.id);
+                setShowQRScanner(false);
+                toast.success("Produto localizado via QR Code!");
+              }
+            } catch {
+              // Fallback to raw text if not JSON
+              setQ(text);
+              setShowQRScanner(false);
+              toast.success("Código QR lido!");
+            }
+          }
+        })
+        .then((ctrl) => {
+          controls = ctrl;
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.error("Erro ao acessar a câmera.");
+          setShowQRScanner(false);
+        });
+    }
+    return () => {
+      if (controls) controls.stop();
+    };
+  }, [showQRScanner]);
 
   useEffect(() => {
     produtos.forEach((p) => {
