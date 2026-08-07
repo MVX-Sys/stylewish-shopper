@@ -263,7 +263,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
   doc.setFontSize(9);
   doc.setTextColor(...MUTED);
   doc.text("QTD", 18, y);
-  doc.text("IMAGEM", 32, y);
+  doc.text("QR CODE", 32, y);
   doc.text("PRODUTO", 75, y);
   doc.text("UNIT.", 160, y);
   doc.text("SUBTOTAL", 196, y, { align: "right" });
