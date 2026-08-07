@@ -42,9 +42,10 @@ export const createOrder = createServerFn({ method: "POST" })
         forma_pagamento: data.forma_pagamento,
         endereco: data.endereco,
         observacoes: data.observacoes,
-        atendente_id: data.atendente_id,
-        cliente_nome: data.cliente_nome,
-        cliente_whatsapp: data.cliente_whatsapp,
+        atendente_id: data.atendente_id as any,
+        cliente_nome: data.cliente_nome as any,
+        cliente_whatsapp: data.cliente_whatsapp as any,
+
 
       })
       .select()
