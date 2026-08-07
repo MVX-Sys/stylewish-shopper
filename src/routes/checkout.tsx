@@ -307,7 +307,7 @@ function CheckoutPage() {
                     formaPagamento,
                     endereco:
                       formaEnvio === "ENTREGA"
-                        ? { cep, logradouro, numero, complemento, bairro, cidade, estado, referencia }
+                        ? { formaEntrega: "TRANSPORTADORA A COMBINAR" }
                         : undefined,
                     observacoes,
                   });
