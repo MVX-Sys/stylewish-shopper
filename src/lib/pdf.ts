@@ -283,7 +283,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     // Add product QR Code instead of image
     try {
       const qrContent = JSON.stringify({
-        id: it.produto_id,
+        id: it.produtoId,
         nome: it.nome,
         cor: it.cor,
         tamanho: it.tamanho
