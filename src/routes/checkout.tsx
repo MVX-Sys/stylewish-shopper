@@ -103,7 +103,7 @@ function CheckoutPage() {
         formaPagamento,
         endereco: formaEnvio === "ENTREGA" ? {} : undefined,
         observacoes,
-      });
+      }, true);
 
       console.log("Criando pedido no banco...");
       const order = await fnCreateOrder({

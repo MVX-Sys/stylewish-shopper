@@ -194,7 +194,7 @@ export type OrderPDFPayload = {
   observacoes?: string;
 };
 
-export async function downloadOrderPDF(order: OrderPDFPayload): Promise<Blob> {
+export async function downloadOrderPDF(order: OrderPDFPayload, download = true): Promise<Blob> {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   header(doc, "Resumo do pedido");
 
@@ -321,8 +321,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload): Promise<Blob> {
   footer(doc);
   const stamp = new Date().toISOString().slice(0, 10);
   const pdfBlob = doc.output("blob");
-  // Only trigger download if we're not just getting the blob
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && download) {
     doc.save(`pedido-${BRAND.toLowerCase()}-${stamp}.pdf`);
   }
   return pdfBlob;
