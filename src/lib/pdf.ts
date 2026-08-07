@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { brl } from "./format";
 import { BRAND } from "./config";
 import type { ProductListItem } from "./products";
-import type { CartItem } from "./cart";
+import { type CartItem, itemPrecoEfetivo } from "./cart";
 
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
   try {
@@ -69,33 +69,38 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
 
   let y = 32;
 
-  // Add product image if available
+  // Layout improvement: Image on the left, details on the right
   const productImgs = (p as any).imagens || [];
+  let imageAdded = false;
   if (productImgs.length > 0) {
     const firstPhoto = productImgs[0].storage_path;
     const imgUrl = await import('./storage').then(m => m.getImageUrl(firstPhoto));
     const imgData = await fetchImageAsBase64(imgUrl);
     if (imgData) {
-      // Draw image in a box
-      const imgWidth = 60;
-      const imgHeight = 60;
-      doc.addImage(imgData, "JPEG", 14, y, imgWidth, imgHeight);
-      y += imgHeight + 8;
+      const imgSize = 50;
+      doc.addImage(imgData, "JPEG", 14, y, imgSize, imgSize);
+      imageAdded = true;
     }
   }
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  const nomeLines = doc.splitTextToSize(p.nome, 180);
-  doc.text(nomeLines, 14, y);
-  y += nomeLines.length * 7 + 2;
+  const contentX = imageAdded ? 70 : 14;
+  const contentWidth = imageAdded ? 126 : 182;
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
+  doc.setFontSize(16);
+  const nomeLines = doc.splitTextToSize(p.nome, contentWidth);
+  doc.text(nomeLines, contentX, y + 5);
+  
+  const textY = y + 5 + (nomeLines.length * 6);
+  
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
   doc.setTextColor(...ORANGE);
-  doc.text(brl(p.preco), 14, y + 4);
+  doc.text(brl(p.preco), contentX, textY + 8);
   doc.setTextColor(...DARK);
-  y += 12;
+
+  y = Math.max(y + 55, textY + 15);
+  y += 5;
 
   const badges: string[] = [];
   if (p.novidade) badges.push("NOVIDADE");
@@ -212,8 +217,8 @@ export async function downloadOrderPDF(order: OrderPDFPayload): Promise<Blob> {
   doc.setTextColor(...MUTED);
   doc.text("QTD", 18, y);
   doc.text("IMAGEM", 32, y);
-  doc.text("PRODUTO", 55, y);
-  doc.text("UNIT.", 150, y);
+  doc.text("PRODUTO", 75, y);
+  doc.text("UNIT.", 160, y);
   doc.text("SUBTOTAL", 196, y, { align: "right" });
   doc.setTextColor(...DARK);
   y += 6;
@@ -221,7 +226,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload): Promise<Blob> {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   for (const it of order.items) {
-    if (y > 250) {
+    if (y > 240) {
       footer(doc);
       doc.addPage();
       header(doc, "Resumo do pedido");
@@ -232,18 +237,24 @@ export async function downloadOrderPDF(order: OrderPDFPayload): Promise<Blob> {
     if (it.foto) {
       const imgData = await fetchImageAsBase64(it.foto);
       if (imgData) {
-        doc.addImage(imgData, "JPEG", 32, y - 4, 15, 15);
+        try {
+          // Adjust image box and position
+          const imgSize = 15;
+          doc.addImage(imgData, "JPEG", 32, y - 2, imgSize, imgSize);
+        } catch (e) {
+          console.error("Error drawing image in PDF:", e);
+        }
       }
     }
 
-    const desc = `${it.nome} — ${it.cor} · ${it.tamanho}`;
-    const lines = doc.splitTextToSize(desc, 90);
-    doc.text(String(it.quantidade), 18, y);
-    doc.text(lines, 55, y);
-    doc.text(brl(it.preco), 150, y);
-    doc.text(brl(it.preco * it.quantidade), 196, y, { align: "right" });
+    const desc = `${it.nome}\n${it.cor} · ${it.tamanho}`;
+    const lines = doc.splitTextToSize(desc, 80);
+    doc.text(String(it.quantidade), 18, y + 5);
+    doc.text(lines, 75, y + 5);
+    doc.text(brl(itemPrecoEfetivo(it)), 160, y + 5);
+    doc.text(brl(itemPrecoEfetivo(it) * it.quantidade), 196, y + 5, { align: "right" });
     
-    const rowHeight = Math.max(lines.length * 5, 18);
+    const rowHeight = Math.max(lines.length * 5 + 8, 20);
     y += rowHeight;
     doc.setDrawColor(...LINE);
     doc.line(14, y - 2, 196, y - 2);
