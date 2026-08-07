@@ -177,9 +177,10 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
   if (p.variacoes.length > 0) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("Variações disponíveis", 14, y);
+    doc.text("Grade de Variações", 14, y);
     y += 6;
 
+    // Table header
     doc.setFillColor(249, 250, 251);
     doc.rect(14, y - 4, 182, 7, "F");
     doc.setFontSize(9);
@@ -202,7 +203,15 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
       doc.setDrawColor(...LINE);
       doc.line(14, y + 1, 196, y + 1);
       y += 5;
-      doc.text(v.nome_cor, 18, y);
+      
+      // Color dot
+      if (v.hex_cor) {
+        doc.setFillColor(v.hex_cor);
+        doc.setDrawColor(...LINE);
+        doc.circle(16, y - 1, 1.5, "F");
+      }
+      
+      doc.text(v.nome_cor, 20, y);
       doc.text(v.tamanho, 90, y);
       doc.text(String(v.quantidade_estoque), 160, y);
       y += 2;

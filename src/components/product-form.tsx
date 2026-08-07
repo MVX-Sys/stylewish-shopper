@@ -511,7 +511,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
             </Field>
           </Card>
 
-          <Card title="Variações · Cores × Tamanhos"
+          <Card title="Gestão de Estoque por Variação"
             action={
               !addingCor && (
                 <button

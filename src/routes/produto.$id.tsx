@@ -397,10 +397,10 @@ function ProductPage() {
                   <div>
                     <div className="mb-2 flex items-center justify-between">
                       <p className="text-xs font-semibold uppercase tracking-wider">
-                        Escolha cor e tamanho
+                        Selecione as Variações
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {matriz.cores.length} cor{matriz.cores.length > 1 ? "es" : ""} · {matriz.tamanhos.length} tam.
+                      <p className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {p.variacoes.length} combinações disponíveis
                       </p>
                     </div>
                     <div className="overflow-x-auto rounded-xl border border-border bg-card">
