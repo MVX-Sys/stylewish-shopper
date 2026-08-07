@@ -70,12 +70,7 @@ function CheckoutPage() {
       toast.error(`Valor mínimo para compra: ${brl(VALOR_MINIMO_COMPRA)}`);
       return;
     }
-    if (formaEnvio === "ENTREGA") {
-      if (!cep.trim() || !logradouro.trim() || !numero.trim() || !bairro.trim() || !cidade.trim() || !estado.trim()) {
-        toast.error("Preencha o endereço completo para entrega.");
-        return;
-      }
-    }
+    // Removido validações de endereço pois o formulário foi simplificado
     setShowAtendentes(true);
   };
 
@@ -107,7 +102,7 @@ function CheckoutPage() {
           forma_pagamento: formaPagamento,
           observacoes: observacoes,
           endereco: formaEnvio === "ENTREGA" ? {
-            cep, logradouro, numero, complemento, bairro, cidade, estado, referencia, formaEntrega: "TRANSPORTADORA A COMBINAR"
+            formaEntrega: "TRANSPORTADORA A COMBINAR"
           } : undefined,
           itens: items.map(i => {
             const vId = i.variacaoId || (i as any).variacao_id;
@@ -141,14 +136,9 @@ function CheckoutPage() {
         formaEnvio === "ENTREGA"
           ? [
               "",
-              "*Endereço de entrega*",
-              `CEP: ${cep || "-"}`,
-              `Logradouro: ${logradouro || "-"}, Nº ${numero || "-"}${complemento ? ` — ${complemento}` : ""}`,
-              `Bairro: ${bairro || "-"}`,
-              `Cidade/UF: ${cidade || "-"}/${estado || "-"}`,
-              referencia ? `Referência: ${referencia}` : "",
-              `Forma de entrega: TRANSPORTADORA A COMBINAR`,
-            ].filter(Boolean)
+              "*Entrega*",
+              "Forma de entrega: TRANSPORTADORA A COMBINAR",
+            ]
           : ["", "*Entrega*", "Retirada no local"];
 
       const msgContent = [
@@ -159,7 +149,7 @@ function CheckoutPage() {
         "",
         `*Total do pedido:* ${brl(valorFinal)}`,
         "",
-        `*Forma de envio:* ${formaEnvio === "ENTREGA" ? "Entrega" : "Retirada no local"}`,
+        `*Forma de envio:* ${formaEnvio === "ENTREGA" ? "ENTREGA (Transportadora a combinar)" : "Retirada no local"}`,
         ...enderecoLinhas,
         "",
         `*Forma de pagamento:* ${formaPagamento}`,
@@ -254,91 +244,12 @@ function CheckoutPage() {
               onChange={(e) => setFormaEnvio(e.target.value as FormaEnvio)}
               className="input"
             >
-              <option value="ENTREGA">ENTREGA</option>
+              <option value="ENTREGA">ENTREGA (Transportadora a combinar)</option>
               <option value="RETIRADA">RETIRADA NO LOCAL</option>
             </select>
           </Field>
 
-          {formaEnvio === "ENTREGA" && (
-            <>
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Field label="CEP:">
-                  <input
-                    value={cep}
-                    onChange={(e) => setCep(e.target.value)}
-                    maxLength={9}
-                    placeholder="00000-000"
-                    className="input"
-                  />
-                </Field>
-                <Field label="Logradouro:" className="sm:col-span-2">
-                  <input
-                    value={logradouro}
-                    onChange={(e) => setLogradouro(e.target.value)}
-                    maxLength={120}
-                    className="input"
-                  />
-                </Field>
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Field label="Número:">
-                  <input
-                    value={numero}
-                    onChange={(e) => setNumero(e.target.value)}
-                    maxLength={10}
-                    className="input"
-                  />
-                </Field>
-                <Field label="Complemento:">
-                  <input
-                    value={complemento}
-                    onChange={(e) => setComplemento(e.target.value)}
-                    maxLength={80}
-                    className="input"
-                  />
-                </Field>
-                <Field label="Bairro:">
-                  <input
-                    value={bairro}
-                    onChange={(e) => setBairro(e.target.value)}
-                    maxLength={80}
-                    className="input"
-                  />
-                </Field>
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label="Estado:">
-                  <input
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value.toUpperCase())}
-                    maxLength={2}
-                    placeholder="UF"
-                    className="input"
-                  />
-                </Field>
-                <Field label="Cidade:">
-                  <input
-                    value={cidade}
-                    onChange={(e) => setCidade(e.target.value)}
-                    maxLength={80}
-                    className="input"
-                  />
-                </Field>
-              </div>
-
-              <Field label="Ponto de Referência:" className="mt-4">
-                <input
-                  value={referencia}
-                  onChange={(e) => setReferencia(e.target.value)}
-                  maxLength={160}
-                  className="input"
-                />
-              </Field>
-
-            </>
-          )}
+          {/* Removido campos de endereço conforme solicitado */}
 
           <Field label="Forma de Pagamento:" required className="mt-4">
             <div className="flex flex-wrap gap-2">
