@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
+import QRCode from "qrcode";
 import { brl } from "./format";
 import { BRAND } from "./config";
 import type { ProductListItem } from "./products";
