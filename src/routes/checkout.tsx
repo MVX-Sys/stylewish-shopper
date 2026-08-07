@@ -94,6 +94,17 @@ function CheckoutPage() {
         return;
       }
       
+      console.log("Gerando PDF do pedido...");
+      const pdfBlob = await downloadOrderPDF({
+        items,
+        total,
+        formaEnvio,
+        formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
+        formaPagamento,
+        endereco: formaEnvio === "ENTREGA" ? {} : undefined,
+        observacoes,
+      });
+
       console.log("Criando pedido no banco...");
       const order = await fnCreateOrder({
         data: {
@@ -154,6 +165,8 @@ function CheckoutPage() {
         "",
         `*Forma de pagamento:* ${formaPagamento}`,
         observacoes ? `\n*Observações*\n${observacoes}` : "",
+        "",
+        "_(Acabei de baixar o PDF do meu pedido e estou enviando em anexo aqui)_",
       ]
         .filter(Boolean)
         .join("\n");
