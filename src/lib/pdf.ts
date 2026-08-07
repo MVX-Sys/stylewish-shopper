@@ -8,21 +8,36 @@ import { type CartItem, itemPrecoEfetivo } from "./cart";
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
   if (!url) return "";
   try {
-    const response = await fetch(url, { mode: 'cors', cache: 'no-cache' });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    // Add cache busting and ensure anonymous cross-origin
+    const separator = url.includes('?') ? '&' : '?';
+    const proxyUrl = `${url}${separator}t=${Date.now()}`;
+    
+    const response = await fetch(proxyUrl, { 
+      mode: 'cors', 
+      credentials: 'omit',
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      console.warn(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      return "";
+    }
+    
     const blob = await response.blob();
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
-        // Verify if it's a valid data URL and has content
         if (result && result.startsWith('data:image')) {
           resolve(result);
         } else {
           resolve("");
         }
       };
-      reader.onerror = () => resolve("");
+      reader.onerror = () => {
+        console.error("FileReader error");
+        resolve("");
+      };
       reader.readAsDataURL(blob);
     });
   } catch (error) {
