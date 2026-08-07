@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -131,6 +131,31 @@ function AtendentesPage() {
           Novo atendente
         </button>
       </div>
+
+      {/* Navigation Tabs */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-1 mb-8">
+        <div className="flex items-center gap-1">
+          <Link 
+            to="/admin" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Produtos
+          </Link>
+          <Link 
+            to="/admin/vendas" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Vendas
+          </Link>
+          <Link 
+            to="/admin/usuarios" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Usuários
+          </Link>
+        </div>
+      </div>
+
 
       {isLoading ? (
         <div className="grid place-items-center rounded-2xl border border-border bg-card py-16">
