@@ -5,6 +5,7 @@ import { brl } from "@/lib/format";
 
 export function CartDrawer() {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
+  const minAtingido = total >= 200; // Hardcoded or from config if exported
   const nav = useNavigate();
 
   const finalizar = () => {

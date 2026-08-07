@@ -337,29 +337,6 @@ function CheckoutPage() {
                 />
               </Field>
 
-              <Field label="Forma de Entrega:" required className="mt-4">
-                <div className="flex flex-wrap gap-2">
-                  {(["AZUL CARGO", "TRANSPORTADORA A COMBINAR"] as FormaEntrega[]).map(
-                    (op) => {
-                      const active = formaEntrega === op;
-                      return (
-                        <button
-                          key={op}
-                          type="button"
-                          onClick={() => setFormaEntrega(op)}
-                          className={`rounded-md border px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                            active
-                              ? "border-foreground bg-foreground text-background"
-                              : "border-border bg-background hover:bg-accent"
-                          }`}
-                        >
-                          {op}
-                        </button>
-                      );
-                    },
-                  )}
-                </div>
-              </Field>
             </>
           )}
 
