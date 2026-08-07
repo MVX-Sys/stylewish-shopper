@@ -774,3 +774,32 @@ export function downloadProductsXLSX(rows: ProductExportRow[]) {
   });
   downloadTableXLSX("produtos", "Produtos", headers, data);
 }
+
+export function downloadRelatorioVendasPDF(
+  titulo: string,
+  filename: string,
+  rows: string[][]
+) {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  header(doc, titulo);
+
+  let y = 32;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("Resumo de Desempenho", 14, y);
+  y += 10;
+
+  (doc as any).autoTable({
+    startY: y,
+    head: [["Atendente", "Pedidos", "Vendido", "Ticket Médio"]],
+    body: rows,
+    theme: "striped",
+    headStyles: { fillColor: ORANGE },
+    margin: { left: 14, right: 14 },
+    styles: { font: "helvetica", fontSize: 9 },
+  });
+
+  footer(doc);
+  doc.save(`${filename}.pdf`);
+}
+
