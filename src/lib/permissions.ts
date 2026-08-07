@@ -3,7 +3,8 @@ export type PermissionKey =
   | "solicitacoes.manage"
   | "auditoria.view"
   | "backup.manage"
-  | "usuarios.manage";
+  | "usuarios.manage"
+  | "pedidos.view";
 
 export const ALL_PERMISSIONS: {
   key: PermissionKey;
@@ -34,6 +35,11 @@ export const ALL_PERMISSIONS: {
     key: "usuarios.manage",
     label: "Gerenciar usuários",
     description: "Alterar papéis e permissões de outros usuários.",
+  },
+  {
+    key: "pedidos.view",
+    label: "Ver Pedidos e Vendas",
+    description: "Visualizar histórico de pedidos e relatórios de vendas.",
   },
 ];
 
