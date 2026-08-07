@@ -146,13 +146,13 @@ export type OrderPDFPayload = {
   formaEntrega?: string;
   formaPagamento: string;
   endereco?: {
-    cep: string;
-    logradouro: string;
-    numero: string;
+    cep?: string;
+    logradouro?: string;
+    numero?: string;
     complemento?: string;
-    bairro: string;
-    cidade: string;
-    estado: string;
+    bairro?: string;
+    cidade?: string;
+    estado?: string;
     referencia?: string;
   };
   observacoes?: string;
@@ -240,10 +240,10 @@ export function downloadOrderPDF(order: OrderPDFPayload) {
     doc.setFontSize(10);
     const e = order.endereco;
     const linhas = [
-      `CEP: ${e.cep}`,
-      `${e.logradouro}, ${e.numero}${e.complemento ? ` — ${e.complemento}` : ""}`,
-      `Bairro: ${e.bairro}`,
-      `Cidade/UF: ${e.cidade}/${e.estado}`,
+      e.cep ? `CEP: ${e.cep}` : null,
+      e.logradouro ? `${e.logradouro}, ${e.numero}${e.complemento ? ` — ${e.complemento}` : ""}` : null,
+      e.bairro ? `Bairro: ${e.bairro}` : null,
+      e.cidade && e.estado ? `Cidade/UF: ${e.cidade}/${e.estado}` : null,
       e.referencia ? `Referência: ${e.referencia}` : null,
     ].filter(Boolean) as string[];
     for (const l of linhas) {
