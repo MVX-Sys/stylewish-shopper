@@ -150,13 +150,22 @@ function UsuariosPage() {
             Defina quem é administrador, funcionário ou cliente do sistema.
           </p>
         </div>
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
-        >
-          {isFetching ? "Atualizando…" : "Atualizar"}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link 
+            to="/admin/pedidos" 
+            className="flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-brand/30 active:scale-95"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            Gerenciar Pedidos
+          </Link>
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
+          >
+            {isFetching ? "Atualizando…" : "Atualizar"}
+          </button>
+        </div>
       </div>
 
       {/* Navigation Tabs */}
@@ -176,13 +185,6 @@ function UsuariosPage() {
           </Link>
         </div>
 
-        <Link 
-          to="/admin/pedidos" 
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          Gerenciar Pedidos
-        </Link>
       </div>
 
 

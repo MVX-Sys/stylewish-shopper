@@ -243,15 +243,24 @@ function AdminProductsList() {
             Gerencie o catálogo, estoque e variações da loja.
           </p>
         </div>
-        <Link
-          to="/admin/produtos/novo"
-          className="btn-shine group inline-flex items-center gap-2.5 self-start rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground shadow-lg shadow-primary/25 ring-2 ring-primary/20 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30 sm:self-end"
-        >
-          <span className="grid h-6 w-6 place-items-center rounded-full bg-primary-foreground/20">
-            <Plus className="h-4 w-4" />
-          </span>
-          Adicionar novo produto
-        </Link>
+        <div className="flex flex-wrap items-center gap-3 self-start sm:self-end">
+          <Link 
+            to="/admin/pedidos" 
+            className="flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-brand/30 active:scale-95"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            Gerenciar Pedidos
+          </Link>
+          <Link
+            to="/admin/produtos/novo"
+            className="btn-shine group inline-flex items-center gap-2.5 rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground shadow-lg shadow-primary/25 ring-2 ring-primary/20 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30"
+          >
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-primary-foreground/20">
+              <Plus className="h-4 w-4" />
+            </span>
+            Adicionar novo produto
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}
@@ -298,13 +307,6 @@ function AdminProductsList() {
           </Link>
         </div>
 
-        <Link 
-          to="/admin/pedidos" 
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          Gerenciar Pedidos
-        </Link>
       </div>
 
 
