@@ -139,8 +139,8 @@ function UsuariosPage() {
   }
 
   return (
-    <div>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">
             Usuários cadastrados
@@ -158,7 +158,29 @@ function UsuariosPage() {
         </button>
       </div>
 
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+      {/* Navigation Tabs */}
+      <div className="flex items-center gap-1 border-b border-border">
+        <Link 
+          to="/admin" 
+          className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+        >
+          Produtos
+        </Link>
+        <Link 
+          to="/admin/pedidos" 
+          className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+        >
+          Pedidos
+        </Link>
+        <Link 
+          to="/admin/usuarios" 
+          className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
+        >
+          Usuários
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
         <StatCard icon={<Users className="h-4 w-4" />} label="Total" value={total} />
         <StatCard icon={<ShieldCheck className="h-4 w-4" />} label="Administradores" value={admins} />
         <StatCard icon={<ShieldCheck className="h-4 w-4" />} label="Funcionários" value={funcionarios} />
@@ -175,7 +197,7 @@ function UsuariosPage() {
         </Link>
       </div>
 
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -344,6 +366,18 @@ function UsuariosPage() {
   );
 }
 
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-4">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        {icon}
+        <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
+      </div>
+      <p className="text-xl font-bold">{value}</p>
+    </div>
+  );
+}
+
 function RoleBadge({ kind }: { kind: UserRoleKind }) {
   const styles: Record<UserRoleKind, string> = {
     admin: "bg-primary/15 text-primary",
@@ -383,8 +417,6 @@ function EditRoleModal({
       prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key],
     );
   }
-
-  const canDemoteSelf = !(isSelf && initialKind === "admin" && role !== "admin");
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
@@ -457,52 +489,42 @@ function EditRoleModal({
                             : "border-border bg-background"
                         }`}
                       >
-                        {active && <Check className="h-3.5 w-3.5" />}
+                        {active && <Check className="h-3 w-3" />}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold">{p.label}</span>
-                        <span className="block text-xs text-muted-foreground">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold leading-none">{p.label}</p>
+                        <p className="mt-1 text-[11px] leading-tight text-muted-foreground">
                           {p.description}
-                        </span>
-                      </span>
+                        </p>
+                      </div>
                     </button>
                   );
                 })}
               </div>
-              {perms.length === 0 && (
-                <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">
-                  Sem permissões marcadas, o funcionário não conseguirá acessar o painel.
-                </p>
-              )}
             </div>
           )}
 
-          {!canDemoteSelf && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
-              Você não pode remover seu próprio acesso de administrador.
-            </div>
-          )}
           {errorMessage && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+            <p className="rounded-lg bg-destructive/5 px-3 py-2 text-xs text-destructive">
               {errorMessage}
-            </div>
+            </p>
           )}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
+        <div className="flex items-center justify-end gap-3 border-t border-border px-5 py-4 bg-muted/20">
           <button
             onClick={onClose}
-            className="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
+            className="rounded-full px-4 py-2 text-xs font-semibold transition-colors hover:bg-accent"
           >
             Cancelar
           </button>
           <button
             onClick={() => onSave(role, perms)}
-            disabled={saving || !canDemoteSelf}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            disabled={saving}
+            className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-xs font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            Salvar
+            {saving && <Loader2 className="h-3 w-3 animate-spin" />}
+            Salvar alterações
           </button>
         </div>
       </div>
@@ -523,47 +545,26 @@ function RoleOption({
 }) {
   return (
     <button
-      type="button"
       onClick={onClick}
-      className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-colors ${
+      className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${
         selected
           ? "border-primary bg-primary/5"
           : "border-border bg-background hover:bg-accent"
       }`}
     >
-      <span
-        className={`mt-0.5 grid h-5 w-5 place-items-center rounded-full border ${
+      <div
+        className={`mt-0.5 grid h-5 w-5 place-items-center rounded-full border-2 ${
           selected ? "border-primary" : "border-border"
         }`}
       >
-        {selected && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold">{title}</span>
-        <span className="block text-xs text-muted-foreground">{description}</span>
-      </span>
-    </button>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-        {icon}
-        {label}
+        {selected && <div className="h-2 w-2 rounded-full bg-primary" />}
       </div>
-      <p className="mt-2 font-display text-2xl font-semibold tabular-nums">
-        {value}
-      </p>
-    </div>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold leading-none">{title}</p>
+        <p className="mt-1 text-[11px] leading-tight text-muted-foreground">
+          {description}
+        </p>
+      </div>
+    </button>
   );
 }

@@ -110,6 +110,9 @@ function CheckoutPage() {
         data: {
           total: valorFinal,
           forma_envio: formaEnvio,
+          atendente_id: atendente.id,
+          cliente_nome: session?.user.email?.split("@")[0] || "Cliente",
+          cliente_whatsapp: session?.user.phone || "",
           forma_pagamento: formaPagamento,
           observacoes: observacoes,
           endereco: formaEnvio === "ENTREGA" ? {
