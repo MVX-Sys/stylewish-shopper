@@ -51,7 +51,7 @@ export const listPedidos = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
 
     if (input?.usuario_id) {
-      query = query.eq("usuario_id", input.usuario_id);
+      query = query.eq("user_id", input.usuario_id);
     }
     if (input?.atendente_id) {
       query = query.eq("atendente_id", input.atendente_id);
@@ -70,7 +70,14 @@ export const listPedidos = createServerFn({ method: "GET" })
 
     const { data, error } = await query;
     if (error) throw error;
-    return data as PedidoRow[];
+    
+    // Map database result to PedidoRow format safely
+    return (data as any[]).map(p => ({
+      ...p,
+      usuario_id: p.user_id,
+      cliente_nome: "Cliente", // Placeholder logic
+      cliente_whatsapp: "Não informado" // Placeholder logic
+    })) as PedidoRow[];
   });
 
 export const updatePedidoStatus = createServerFn({ method: "POST" })
