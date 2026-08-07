@@ -70,9 +70,11 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
   let y = 32;
 
   // Add product image if available
-  if (p.fotos && p.fotos.length > 0) {
-    const firstPhoto = p.fotos[0];
-    const imgData = await fetchImageAsBase64(firstPhoto);
+  const productImgs = (p as any).imagens || [];
+  if (productImgs.length > 0) {
+    const firstPhoto = productImgs[0].storage_path;
+    const imgUrl = await import('./storage').then(m => m.getImageUrl(firstPhoto));
+    const imgData = await fetchImageAsBase64(imgUrl);
     if (imgData) {
       // Draw image in a box
       const imgWidth = 60;
