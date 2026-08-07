@@ -57,7 +57,7 @@ function AdminProductsList() {
     if (showQRScanner) {
       const codeReader = new BrowserMultiFormatReader();
       codeReader
-        .decodeFromVideoDevice(undefined, "video", (result, err) => {
+        .decodeFromVideoDevice(null, "video", (result, err) => {
           if (result) {
             const text = result.getText();
             try {
