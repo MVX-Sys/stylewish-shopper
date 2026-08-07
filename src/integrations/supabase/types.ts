@@ -141,6 +141,9 @@ export type Database = {
       }
       pedidos: {
         Row: {
+          atendente_id: string | null
+          cliente_nome: string | null
+          cliente_whatsapp: string | null
           criado_em: string | null
           endereco: Json | null
           forma_envio: string
@@ -152,6 +155,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          atendente_id?: string | null
+          cliente_nome?: string | null
+          cliente_whatsapp?: string | null
           criado_em?: string | null
           endereco?: Json | null
           forma_envio: string
@@ -163,6 +169,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          atendente_id?: string | null
+          cliente_nome?: string | null
+          cliente_whatsapp?: string | null
           criado_em?: string | null
           endereco?: Json | null
           forma_envio?: string
@@ -173,7 +182,15 @@ export type Database = {
           total?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_atendente_id_fkey"
+            columns: ["atendente_id"]
+            isOneToOne: false
+            referencedRelation: "atendentes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pedidos_itens: {
         Row: {

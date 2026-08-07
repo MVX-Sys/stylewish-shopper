@@ -281,6 +281,28 @@ function AdminProductsList() {
         ))}
       </div>
 
+      {/* Navigation Tabs */}
+      <div className="flex items-center gap-1 border-b border-border">
+        <Link 
+          to="/admin" 
+          className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
+        >
+          Produtos
+        </Link>
+        <Link 
+          to="/admin/pedidos" 
+          className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+        >
+          Pedidos
+        </Link>
+        <Link 
+          to="/admin/usuarios" 
+          className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+        >
+          Usuários
+        </Link>
+      </div>
+
       {/* Table */}
       <div className="rounded-xl border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border p-4">

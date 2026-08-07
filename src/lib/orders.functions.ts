@@ -22,7 +22,11 @@ export const createOrder = createServerFn({ method: "POST" })
       forma_pagamento: z.string(),
       endereco: z.any().optional(),
       observacoes: z.string().optional(),
+      atendente_id: z.string().optional(),
+      cliente_nome: z.string().optional(),
+      cliente_whatsapp: z.string().optional(),
     })
+
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -38,6 +42,11 @@ export const createOrder = createServerFn({ method: "POST" })
         forma_pagamento: data.forma_pagamento,
         endereco: data.endereco,
         observacoes: data.observacoes,
+        atendente_id: data.atendente_id as any,
+        cliente_nome: data.cliente_nome as any,
+        cliente_whatsapp: data.cliente_whatsapp as any,
+
+
       })
       .select()
       .single();
