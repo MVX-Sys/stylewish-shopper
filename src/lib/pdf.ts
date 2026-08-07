@@ -8,21 +8,36 @@ import { type CartItem, itemPrecoEfetivo } from "./cart";
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
   if (!url) return "";
   try {
-    const response = await fetch(url, { mode: 'cors', cache: 'no-cache' });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    // Add cache busting and ensure anonymous cross-origin
+    const separator = url.includes('?') ? '&' : '?';
+    const proxyUrl = `${url}${separator}t=${Date.now()}`;
+    
+    const response = await fetch(proxyUrl, { 
+      mode: 'cors', 
+      credentials: 'omit',
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      console.warn(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      return "";
+    }
+    
     const blob = await response.blob();
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
-        // Verify if it's a valid data URL and has content
         if (result && result.startsWith('data:image')) {
           resolve(result);
         } else {
           resolve("");
         }
       };
-      reader.onerror = () => resolve("");
+      reader.onerror = () => {
+        console.error("FileReader error");
+        resolve("");
+      };
       reader.readAsDataURL(blob);
     });
   } catch (error) {
@@ -89,11 +104,19 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
     if (imgData) {
       try {
         const imgSize = 60;
-        // Check image orientation/aspect ratio if possible, or just use a safe box
+        // Force the image into the PDF by ensuring format and using 'FAST'
+        // Using JPEG as base but jsPDF will detect the data URI type
         doc.addImage(imgData, "JPEG", 14, y, imgSize, imgSize, undefined, 'FAST');
         imageAdded = true;
       } catch (e) {
         console.error("Error adding product image to PDF:", e);
+        // Fallback attempt with explicit format if first try fails
+        try {
+          doc.addImage(imgData, 14, y, 60, 60);
+          imageAdded = true;
+        } catch (e2) {
+          console.error("Critical error adding image:", e2);
+        }
       }
     }
   }
@@ -253,11 +276,17 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       const imgData = await fetchImageAsBase64(it.foto);
       if (imgData) {
         try {
-          // Adjust image box and position
           const imgSize = 18;
+          // Force the image into the PDF
           doc.addImage(imgData, "JPEG", 32, y - 4, imgSize, imgSize, undefined, 'FAST');
         } catch (e) {
           console.error("Error drawing image in PDF:", e);
+          // Simple fallback
+          try {
+            doc.addImage(imgData, 32, y - 4, 18, 18);
+          } catch (e2) {
+            console.warn("Failed second attempt at drawing item image");
+          }
         }
       }
     }
