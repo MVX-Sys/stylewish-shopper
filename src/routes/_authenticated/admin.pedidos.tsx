@@ -230,19 +230,41 @@ function PedidosAdminPage() {
               disabled={filtered.length === 0}
               count={filtered.length}
               onExport={(format) => {
-                const dataToExport = filtered.map(p => ({
-                  ID: p.id,
-                  Data: formatDate(p.created_at),
-                  Cliente: p.cliente_nome,
-                  WhatsApp: p.cliente_whatsapp,
-                  Atendente: p.atendente?.nome || "—",
-                  Total: brl(p.total),
-                  Peças: p.itens?.reduce((acc, i) => acc + i.quantidade, 0) || 0,
-                  Status: p.status
-                }));
-                if (format === "csv") downloadTableCSV(dataToExport, "pedidos", "pedidos");
-                else if (format === "xlsx") downloadTableXLSX(dataToExport, "pedidos", "pedidos", "pedidos");
-                else downloadTablePDF(dataToExport, "pedidos", "pedidos", "pedidos");
+                const headers = ["ID", "Data", "Cliente", "WhatsApp", "Atendente", "Total", "Peças", "Status"];
+                const dataToExport = filtered.map(p => ([
+                  p.id,
+                  formatDate(p.created_at),
+                  p.cliente_nome,
+                  p.cliente_whatsapp,
+                  p.atendente?.nome || "—",
+                  brl(p.total),
+                  p.itens?.reduce((acc, i) => acc + i.quantidade, 0) || 0,
+                  p.status
+                ]));
+
+                if (format === "csv") {
+                  downloadTableCSV("pedidos", headers, dataToExport);
+                } else if (format === "xlsx") {
+                  downloadTableXLSX("pedidos", "Pedidos", headers, dataToExport);
+                } else {
+                  const columns = [
+                    { label: "Data", width: 30 },
+                    { label: "Cliente", width: 40 },
+                    { label: "Atendente", width: 30 },
+                    { label: "Total", width: 25 },
+                    { label: "Peças", width: 15 },
+                    { label: "Status", width: 20 },
+                  ];
+                  const pdfRows = filtered.map(p => [
+                    formatDate(p.created_at),
+                    p.cliente_nome,
+                    p.atendente?.nome || "—",
+                    brl(p.total),
+                    String(p.itens?.reduce((acc, i) => acc + i.quantidade, 0) || 0),
+                    p.status
+                  ]);
+                  downloadTablePDF("Relatório de Pedidos", "pedidos", columns, pdfRows);
+                }
               }}
             />
           </div>
