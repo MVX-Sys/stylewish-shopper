@@ -557,6 +557,13 @@ function AdminProductsList() {
                       </td>
                       <td className="p-3">
                         <div className="flex justify-end gap-1">
+                          <button
+                            onClick={() => setQrToView({ id: p.id, nome: p.nome })}
+                            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                            title="Ver QR Code"
+                          >
+                            <QrCode className="h-4 w-4" />
+                          </button>
                           <Link
                             to="/produto/$id"
                             params={{ id: p.id }}
