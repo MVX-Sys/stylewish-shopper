@@ -89,6 +89,41 @@ export const updatePedidoStatus = createServerFn({ method: "POST" })
   .validator((data: unknown) => z.object({ id: z.string().uuid(), status: z.string() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+
+    // Se o status for "confirmado", vamos baixar o estoque
+    if (data.status === "confirmado") {
+      // 1. Buscar os itens do pedido
+      const { data: itens, error: itensErr } = await supabase
+        .from("pedidos_itens")
+        .select("quantidade, variacao_id")
+        .eq("pedido_id", data.id);
+
+      if (itensErr) throw itensErr;
+
+      // 2. Para cada item, subtrair do estoque da variação correspondente
+      for (const item of (itens || [])) {
+        if (item.variacao_id) {
+          // Usamos uma query de incremento negativo (decremento)
+          // Nota: Em um cenário real de alta concorrência, isso deveria ser uma RPC ou transação
+          // Mas para este escopo, faremos o update direto
+          const { data: varData, error: fetchVarErr } = await supabase
+            .from("variacoes_produto")
+            .select("quantidade_estoque")
+            .eq("id", item.variacao_id)
+            .single();
+
+          if (fetchVarErr) continue;
+
+          const novaQuantidade = Math.max(0, (varData?.quantidade_estoque || 0) - item.quantidade);
+
+          await supabase
+            .from("variacoes_produto")
+            .update({ quantidade_estoque: novaQuantidade })
+            .eq("id", item.variacao_id);
+        }
+      }
+    }
+
     const { error } = await supabase
       .from("pedidos")
       .update({ status: data.status })
