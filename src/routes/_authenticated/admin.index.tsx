@@ -87,12 +87,11 @@ function AdminProductsList() {
               // Try to parse if it's JSON from our generated PDF
               const data = JSON.parse(text);
               if (data.id) {
-                setQ(data.id);
+                nav({ to: "/admin/produtos/$id", params: { id: data.id } });
                 setShowQRScanner(false);
                 toast.success("Produto localizado via QR Code!");
               }
             } catch {
-              // Fallback to raw text if not JSON
               setQ(text);
               setShowQRScanner(false);
               toast.success("Código QR lido!");
