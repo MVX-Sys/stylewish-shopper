@@ -104,11 +104,19 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
     if (imgData) {
       try {
         const imgSize = 60;
-        // Check image orientation/aspect ratio if possible, or just use a safe box
+        // Force the image into the PDF by ensuring format and using 'FAST'
+        // Using JPEG as base but jsPDF will detect the data URI type
         doc.addImage(imgData, "JPEG", 14, y, imgSize, imgSize, undefined, 'FAST');
         imageAdded = true;
       } catch (e) {
         console.error("Error adding product image to PDF:", e);
+        // Fallback attempt with explicit format if first try fails
+        try {
+          doc.addImage(imgData, 14, y, 60, 60);
+          imageAdded = true;
+        } catch (e2) {
+          console.error("Critical error adding image:", e2);
+        }
       }
     }
   }
