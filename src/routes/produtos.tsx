@@ -84,7 +84,10 @@ function Home() {
   }, [produtos, filters, cat, q, catBySlug]);
 
   const activeSlug = cat ?? filters.categoriaSlug;
-  const heading = q
+  const heading = q || "Coleção"
+  const titleText = q 
+    ? `Resultados para "${q}"`
+    : (activeSlug ? catBySlugName[activeSlug] : "Todos os Produtos");
     ? `Resultados para "${q}"`
     : activeSlug && catBySlugName[activeSlug]
     ? catBySlugName[activeSlug]
@@ -135,6 +138,15 @@ function Home() {
           {promocoes.length > 0 && !filters.promocao && !q && !activeSlug && (
             <PromoHero produtos={promocoes} />
           )}
+
+          <div className="mb-8 space-y-2">
+            <h1 className="font-display text-4xl font-black uppercase tracking-tighter text-foreground sm:text-5xl lg:text-6xl">
+              {titleText}
+            </h1>
+            <p className="text-sm text-muted-foreground uppercase tracking-[0.2em] font-bold">
+              {subheading}
+            </p>
+          </div>
 
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
