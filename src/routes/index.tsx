@@ -35,12 +35,23 @@ function Home() {
   });
 
   const { data: categorias = [] } = useQuery({
-    queryKey: ["categorias"],
-    queryFn: listCategorias,
+    queryKey: ["categorias-top-sellers"],
+    queryFn: () => getTopSellingProductsByCategory(),
   });
 
   const promoProducts = useMemo(() => produtos.filter((p) => p.ativo && p.promocao).slice(0, 4), [produtos]);
-  const latestProducts = useMemo(() => produtos.filter((p) => p.ativo).slice(0, 8), [produtos]);
+  const latestProducts = useMemo(() => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    return produtos
+      .filter((p) => p.ativo)
+      .map(p => ({
+        ...p,
+        novidade: p.novidade || new Date(p.criado_em) >= sevenDaysAgo
+      }))
+      .slice(0, 8);
+  }, [produtos]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
