@@ -9,7 +9,7 @@ import { PromoHero } from "@/components/promo-hero";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
 import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
-import { PackageSearch } from "lucide-react";
+import { PackageSearch, ShoppingBag, ArrowRight } from "lucide-react";
 
 const searchSchema = z.object({
   cat: z.string().optional(),
