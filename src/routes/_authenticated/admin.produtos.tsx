@@ -247,6 +247,7 @@ function AdminProductsList() {
           <Link
             to="/admin/produtos/novo"
             className="btn-shine group inline-flex items-center gap-2.5 rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-primary-foreground shadow-lg shadow-primary/25 ring-2 ring-primary/20 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30"
+
           >
             <span className="grid h-6 w-6 place-items-center rounded-full bg-primary-foreground/20">
               <Plus className="h-4 w-4" />
@@ -288,16 +289,22 @@ function AdminProductsList() {
         <div className="flex items-center gap-1">
           <Link 
             to="/admin" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
+            activeProps={{ className: "!text-foreground !border-primary" }}
+            activeOptions={{ exact: true }}
           >
             Dashboard
           </Link>
+
           <Link 
             to="/admin/produtos" 
-            className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
+            activeProps={{ className: "!text-foreground !border-primary" }}
+            activeOptions={{ exact: true }}
           >
             Produtos
           </Link>
+
           <Link 
             to="/admin/vendas" 
             className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
@@ -534,6 +541,7 @@ function AdminProductsList() {
               <Link
                 to="/admin/produtos/novo"
                 className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background hover:opacity-90"
+
               >
                 <Plus className="h-4 w-4" /> Adicionar produto
               </Link>
@@ -624,6 +632,7 @@ function AdminProductsList() {
                           <Link
                             to="/admin/produtos/$id"
                             params={{ id: p.id }}
+
                             className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             aria-label="Editar"
                             title="Editar"
