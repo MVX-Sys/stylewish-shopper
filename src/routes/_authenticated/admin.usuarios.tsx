@@ -151,13 +151,6 @@ function UsuariosPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link 
-            to="/admin/pedidos" 
-            className="flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-brand/30 active:scale-95"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            Gerenciar Pedidos
-          </Link>
           <button
             onClick={() => refetch()}
             disabled={isFetching}
