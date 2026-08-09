@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
 import { canAccess, hasAdminPanelAccess, type PermissionKey } from "@/lib/permissions";
-import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Calendar, LayoutDashboard } from "lucide-react";
+import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Calendar, LayoutDashboard, Store } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -69,20 +69,24 @@ function AdminLayout() {
             </div>
           </Link>
 
-          <nav className="flex gap-1 text-sm">
-            {visibleNav.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                activeProps={{ className: "!bg-foreground !text-background" }}
-                activeOptions={item.exact ? { exact: true } : undefined}
-              >
-                {item.icon}
-                <span className="hidden sm:inline">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
+          <div className="flex gap-2">
+            <Link
+              to="/"
+              className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-accent active:scale-95"
+            >
+              <Store className="h-4 w-4" />
+              <span className="hidden sm:inline">Voltar à Loja</span>
+            </Link>
+            <Link
+              to="/admin"
+              className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-accent active:scale-95"
+              activeProps={{ className: "!bg-foreground !text-background !border-foreground" }}
+              activeOptions={{ exact: true }}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </Link>
+          </div>
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
             <Link
@@ -98,13 +102,6 @@ function AdminLayout() {
             >
               <ShoppingBag className="h-4 w-4" />
               <span className="hidden lg:inline">Pedidos</span>
-            </Link>
-            <Link
-              to="/"
-              className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <ExternalLink className="h-4 w-4" />
-              <span className="hidden sm:inline">Ver loja</span>
             </Link>
             <button
               onClick={async () => {
