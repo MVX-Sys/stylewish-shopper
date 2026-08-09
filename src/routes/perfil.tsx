@@ -43,7 +43,7 @@ function ProfilePage() {
   const signOut = async () => {
     await supabase.auth.signOut();
     toast.success("Saiu da conta.");
-    nav({ to: "/" });
+    nav({ to: "/produtos" });
   };
 
   const menuItems = [
@@ -84,7 +84,7 @@ function ProfilePage() {
   return (
     <div className="min-h-screen bg-muted/30 pb-20 pt-0 md:pt-0">
       <div className="fixed top-4 left-4 z-50">
-        <Link to="/" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white shadow-lg backdrop-blur-md transition-all hover:bg-white/30 active:scale-90">
+        <Link to="/produtos" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white shadow-lg backdrop-blur-md transition-all hover:bg-white/30 active:scale-90">
           <ChevronLeft className="h-6 w-6" />
         </Link>
       </div>
@@ -137,7 +137,7 @@ function ProfilePage() {
         {/* Quick access to shop */}
         <div className="mt-8 text-center">
           <Link
-            to="/"
+            to="/produtos"
             className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
           >
             <ShoppingBag className="h-4 w-4" />
