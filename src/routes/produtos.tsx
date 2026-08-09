@@ -34,8 +34,7 @@ export const Route = createFileRoute("/produtos")({
 });
 
 function Home() {
-  const { cat, q: searchQ } = Route.useSearch();
-  const q = searchQ ?? "";
+  const { cat, q } = Route.useSearch();
   const { data: categorias = [] } = useQuery({
     queryKey: ["categorias"],
     queryFn: listCategorias,
@@ -48,7 +47,7 @@ function Home() {
   const [filters, setFilters] = useState<Filters>({
     ...defaultFilters,
     categoriaSlug: cat ?? null,
-    q: q,
+    q: q ?? "",
   });
 
   const catBySlug = useMemo(
@@ -62,9 +61,9 @@ function Home() {
 
   const filtered = useMemo(() => {
     let list = produtos.filter((p) => p.ativo);
-    const query = (filters.q || q).trim().toLowerCase();
+    const query = (q ?? filters.q).trim().toLowerCase();
     if (query) list = list.filter((p) => p.nome.toLowerCase().includes(query));
-    const slug = filters.categoriaSlug || cat;
+    const slug = cat ?? filters.categoriaSlug;
     if (slug && catBySlug[slug])
       list = list.filter((p) => p.categoria_id === catBySlug[slug]);
     if (filters.novidades) list = list.filter((p) => p.novidade);
@@ -84,13 +83,13 @@ function Home() {
     return list;
   }, [produtos, filters, cat, q, catBySlug]);
 
-  const activeSlug = filters.categoriaSlug || cat;
-  const heading = filters.q || q
+  const activeSlug = cat ?? filters.categoriaSlug;
+  const heading = q
     ? `Resultados para "${q}"`
     : activeSlug && catBySlugName[activeSlug]
     ? catBySlugName[activeSlug]
     : "Coleção";
-  const subheading = (filters.q || q)
+  const subheading = q
     ? `${filtered.length} peça${filtered.length === 1 ? "" : "s"} encontrada${filtered.length === 1 ? "" : "s"}`
     : "Peças selecionadas para o dia a dia";
 
@@ -112,18 +111,13 @@ function Home() {
       onClear: () => setFilters({ ...filters, precoMin: 0, precoMax: 500 }),
     });
 
-  const { data: allProdutos = [] } = useQuery({
-    queryKey: ["produtos"],
-    queryFn: listProdutos,
-  });
-
   const promocoes = useMemo(
     () =>
-      allProdutos
+      produtos
         .filter((p) => p.ativo && getPromoInfo(p).ativa)
         .sort((a, b) => getPromoInfo(b).percentual - getPromoInfo(a).percentual)
         .slice(0, 8),
-    [allProdutos],
+    [produtos],
   );
 
   return (
@@ -138,7 +132,7 @@ function Home() {
         />
         <section>
           {/* Promoções do dia — faixa simples integrada */}
-          {promocoes.length > 0 && !filters.promocao && !(filters.q || q) && !activeSlug && (
+          {promocoes.length > 0 && !filters.promocao && !q && !activeSlug && (
             <PromoHero produtos={promocoes} />
           )}
 
