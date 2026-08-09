@@ -34,7 +34,8 @@ export const Route = createFileRoute("/produtos")({
 });
 
 function Home() {
-  const { cat, q } = Route.useSearch();
+  const { cat, q: searchQ } = Route.useSearch();
+  const q = searchQ ?? "";
   const { data: categorias = [] } = useQuery({
     queryKey: ["categorias"],
     queryFn: listCategorias,
@@ -47,7 +48,7 @@ function Home() {
   const [filters, setFilters] = useState<Filters>({
     ...defaultFilters,
     categoriaSlug: cat ?? null,
-    q: q ?? "",
+    q: q,
   });
 
   const catBySlug = useMemo(
@@ -61,9 +62,9 @@ function Home() {
 
   const filtered = useMemo(() => {
     let list = produtos.filter((p) => p.ativo);
-    const query = (q ?? filters.q).trim().toLowerCase();
+    const query = (filters.q || q).trim().toLowerCase();
     if (query) list = list.filter((p) => p.nome.toLowerCase().includes(query));
-    const slug = cat ?? filters.categoriaSlug;
+    const slug = filters.categoriaSlug || cat;
     if (slug && catBySlug[slug])
       list = list.filter((p) => p.categoria_id === catBySlug[slug]);
     if (filters.novidades) list = list.filter((p) => p.novidade);
@@ -89,7 +90,7 @@ function Home() {
     : activeSlug && catBySlugName[activeSlug]
     ? catBySlugName[activeSlug]
     : "Coleção";
-  const subheading = q
+  const subheading = (filters.q || q)
     ? `${filtered.length} peça${filtered.length === 1 ? "" : "s"} encontrada${filtered.length === 1 ? "" : "s"}`
     : "Peças selecionadas para o dia a dia";
 
@@ -132,7 +133,7 @@ function Home() {
         />
         <section>
           {/* Promoções do dia — faixa simples integrada */}
-          {promocoes.length > 0 && !filters.promocao && !q && !activeSlug && (
+          {promocoes.length > 0 && !filters.promocao && !(filters.q || q) && !activeSlug && (
             <PromoHero produtos={promocoes} />
           )}
 
