@@ -112,13 +112,18 @@ function Home() {
       onClear: () => setFilters({ ...filters, precoMin: 0, precoMax: 500 }),
     });
 
+  const { data: allProdutos = [] } = useQuery({
+    queryKey: ["produtos"],
+    queryFn: listProdutos,
+  });
+
   const promocoes = useMemo(
     () =>
-      produtos
+      allProdutos
         .filter((p) => p.ativo && getPromoInfo(p).ativa)
         .sort((a, b) => getPromoInfo(b).percentual - getPromoInfo(a).percentual)
         .slice(0, 8),
-    [produtos],
+    [allProdutos],
   );
 
   return (
