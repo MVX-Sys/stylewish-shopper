@@ -6,6 +6,7 @@ export type CategoryWithTopProduct = {
   nome: string;
   slug: string;
   ordem: number;
+  totalSales: number;
   topProduct: {
     id: string;
     nome: string;
@@ -47,23 +48,46 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
       }
     });
 
-    // For each category, find the best selling product
+    // For each category, find the best selling product and total sales
     const categoryTopSellers = await Promise.all(
       (categories || []).map(async (cat: any) => {
         // Fetch products for this category
+        // We include variations to check stock
         const { data: products, error: prodError } = await supabase
           .from("produtos")
-          .select("id, nome, categoria_id, imagens:imagens_produto(storage_path, principal)")
+          .select(`
+            id, 
+            nome, 
+            categoria_id, 
+            variacoes:variacoes_produto(quantidade_estoque),
+            imagens:imagens_produto(storage_path, principal)
+          `)
           .eq("categoria_id", cat.id)
           .eq("ativo", true);
 
-        if (prodError || !products) return { ...cat, topProduct: null };
+        if (prodError || !products) return { ...cat, totalSales: 0, topProduct: null };
 
-        // Sort products by sales
+        // Calculate total sales for this category
+        let totalCatSales = 0;
+        products.forEach((p: any) => {
+          totalCatSales += productSales[p.id] || 0;
+        });
+
+        // Sort products by:
+        // 1. Sales (last 7 days)
+        // 2. Stock quantity (if sales are 0 or equal)
         const sortedProducts = products.sort((a: any, b: any) => {
           const salesA = productSales[a.id] || 0;
           const salesB = productSales[b.id] || 0;
-          return salesB - salesA;
+          
+          if (salesB !== salesA) {
+            return salesB - salesA;
+          }
+          
+          // Fallback to total stock if no sales
+          const stockA = (a.variacoes || []).reduce((acc: number, v: any) => acc + (v.quantidade_estoque || 0), 0);
+          const stockB = (b.variacoes || []).reduce((acc: number, v: any) => acc + (v.quantidade_estoque || 0), 0);
+          return stockB - stockA;
         });
 
         // The top product is the first one in the sorted list
@@ -72,6 +96,7 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
 
         return {
           ...cat,
+          totalSales: totalCatSales,
           topProduct: topProduct ? {
             id: topProduct.id,
             nome: topProduct.nome,
@@ -81,6 +106,7 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
       })
     );
 
-    return categoryTopSellers;
+    // Sort categories from most sold to least sold
+    return categoryTopSellers.sort((a, b) => b.totalSales - a.totalSales);
   });
 
