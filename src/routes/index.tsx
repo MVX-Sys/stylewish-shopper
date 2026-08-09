@@ -88,7 +88,7 @@ function Home() {
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categorias.slice(0, 4).map((cat: any) => (
+              {categorias.map((cat: any) => (
                 <CategoryCard key={cat.id} cat={cat} />
               ))}
             </div>
