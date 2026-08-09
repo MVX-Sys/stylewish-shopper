@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReposicoesRouteImport } from './routes/reposicoes'
+import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as DadosContaRouteImport } from './routes/dados-conta'
@@ -35,6 +36,11 @@ import { Route as AuthenticatedAdminProdutosIdRouteImport } from './routes/_auth
 const ReposicoesRoute = ReposicoesRouteImport.update({
   id: '/reposicoes',
   path: '/reposicoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosRoute = ProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/dados-conta': typeof DadosContaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/produtos': typeof ProdutosRoute
   '/reposicoes': typeof ReposicoesRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/produto/$id': typeof ProdutoIdRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/dados-conta': typeof DadosContaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/produtos': typeof ProdutosRoute
   '/reposicoes': typeof ReposicoesRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/atendentes': typeof AuthenticatedAdminAtendentesRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/dados-conta': typeof DadosContaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/produtos': typeof ProdutosRoute
   '/reposicoes': typeof ReposicoesRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/produto/$id': typeof ProdutoIdRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/dados-conta'
     | '/pedidos'
     | '/perfil'
+    | '/produtos'
     | '/reposicoes'
     | '/admin'
     | '/produto/$id'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/dados-conta'
     | '/pedidos'
     | '/perfil'
+    | '/produtos'
     | '/reposicoes'
     | '/produto/$id'
     | '/admin/atendentes'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/dados-conta'
     | '/pedidos'
     | '/perfil'
+    | '/produtos'
     | '/reposicoes'
     | '/_authenticated/admin'
     | '/produto/$id'
@@ -303,6 +315,7 @@ export interface RootRouteChildren {
   DadosContaRoute: typeof DadosContaRoute
   PedidosRoute: typeof PedidosRoute
   PerfilRoute: typeof PerfilRoute
+  ProdutosRoute: typeof ProdutosRoute
   ReposicoesRoute: typeof ReposicoesRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
 }
@@ -314,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/reposicoes'
       fullPath: '/reposicoes'
       preLoaderRoute: typeof ReposicoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos': {
+      id: '/produtos'
+      path: '/produtos'
+      fullPath: '/produtos'
+      preLoaderRoute: typeof ProdutosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -530,6 +550,7 @@ const rootRouteChildren: RootRouteChildren = {
   DadosContaRoute: DadosContaRoute,
   PedidosRoute: PedidosRoute,
   PerfilRoute: PerfilRoute,
+  ProdutosRoute: ProdutosRoute,
   ReposicoesRoute: ReposicoesRoute,
   ProdutoIdRoute: ProdutoIdRoute,
 }

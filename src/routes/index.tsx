@@ -1,212 +1,218 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { listCategorias, listProdutos } from "@/lib/products";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ProductCard } from "@/components/product-card";
 import { CartDrawer } from "@/components/cart-drawer";
-import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
-import { PromoHero } from "@/components/promo-hero";
-import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
-import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
-import { z } from "zod";
-import { PackageSearch } from "lucide-react";
-
-const searchSchema = z.object({
-  cat: z.string().optional(),
-  q: z.string().optional(),
-});
+import { ArrowRight, ShoppingBag, ChevronRight, MessageCircle, Instagram } from "lucide-react";
+import { BRAND, WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from "@/lib/config";
+import { useMemo } from "react";
 
 export const Route = createFileRoute("/")({
-  validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "ACHAEBUSCA — Moda masculina urbana" },
+      { title: "ACHAEBUSCA — Moda Masculina Premium" },
       {
         name: "description",
-        content:
-          "Camisas, bermudas, calças e acessórios selecionados. Peça direto pelo WhatsApp.",
+        content: "A melhor seleção de moda masculina urbana e atacado. Camisas, bermudas e acessórios premium.",
       },
-      { property: "og:title", content: "ACHAEBUSCA — Catálogo" },
-      { property: "og:description", content: "Moda urbana, atendimento próximo, pedidos via WhatsApp." },
     ],
   }),
-  component: Home,
+  component: HomePage,
 });
 
-function Home() {
-  const { cat, q } = Route.useSearch();
+function HomePage() {
   const { data: categorias = [] } = useQuery({
     queryKey: ["categorias"],
     queryFn: listCategorias,
   });
-  const { data: produtos = [], isLoading } = useQuery({
+
+  const { data: produtos = [] } = useQuery({
     queryKey: ["produtos"],
     queryFn: listProdutos,
   });
 
-  const [filters, setFilters] = useState<Filters>({
-    ...defaultFilters,
-    categoriaSlug: cat ?? null,
-    q: q ?? "",
-  });
-
-  const catBySlug = useMemo(
-    () => Object.fromEntries(categorias.map((c) => [c.slug, c.id])),
-    [categorias],
-  );
-  const catBySlugName = useMemo(
-    () => Object.fromEntries(categorias.map((c) => [c.slug, c.nome])),
-    [categorias],
-  );
-
-  const filtered = useMemo(() => {
-    let list = produtos.filter((p) => p.ativo);
-    const query = (q ?? filters.q).trim().toLowerCase();
-    if (query) list = list.filter((p) => p.nome.toLowerCase().includes(query));
-    const slug = cat ?? filters.categoriaSlug;
-    if (slug && catBySlug[slug])
-      list = list.filter((p) => p.categoria_id === catBySlug[slug]);
-    if (filters.novidades) list = list.filter((p) => p.novidade);
-    if (filters.promocao) list = list.filter((p) => p.promocao);
-    list = list.filter((p) => p.preco <= filters.precoMax);
-    switch (filters.ordem) {
-      case "menor-preco":
-        list = [...list].sort((a, b) => a.preco - b.preco);
-        break;
-      case "maior-preco":
-        list = [...list].sort((a, b) => b.preco - a.preco);
-        break;
-      case "nome":
-        list = [...list].sort((a, b) => a.nome.localeCompare(b.nome));
-        break;
-    }
-    return list;
-  }, [produtos, filters, cat, q, catBySlug]);
-
-  const activeSlug = cat ?? filters.categoriaSlug;
-  const heading = q
-    ? `Resultados para "${q}"`
-    : activeSlug && catBySlugName[activeSlug]
-    ? catBySlugName[activeSlug]
-    : "Coleção";
-  const subheading = q
-    ? `${filtered.length} peça${filtered.length === 1 ? "" : "s"} encontrada${filtered.length === 1 ? "" : "s"}`
-    : "Peças selecionadas para o dia a dia";
-
-  const activeChips: Array<{ key: string; label: string; onClear: () => void }> = [];
-  if (activeSlug && catBySlugName[activeSlug])
-    activeChips.push({
-      key: "cat",
-      label: catBySlugName[activeSlug],
-      onClear: () => setFilters({ ...filters, categoriaSlug: null }),
-    });
-  if (filters.novidades)
-    activeChips.push({ key: "nov", label: "Novidades", onClear: () => setFilters({ ...filters, novidades: false }) });
-  if (filters.promocao)
-    activeChips.push({ key: "promo", label: "Em promoção", onClear: () => setFilters({ ...filters, promocao: false }) });
-  if (filters.precoMax < 500 || filters.precoMin > 0)
-    activeChips.push({
-      key: "preco",
-      label: `Até ${filtered.length && ""}R$ ${filters.precoMax}`,
-      onClear: () => setFilters({ ...filters, precoMin: 0, precoMax: 500 }),
-    });
-
-  const promocoes = useMemo(
-    () =>
-      produtos
-        .filter((p) => p.ativo && getPromoInfo(p).ativa)
-        .sort((a, b) => getPromoInfo(b).percentual - getPromoInfo(a).percentual)
-        .slice(0, 8),
-    [produtos],
-  );
+  const featuredProducts = useMemo(() => {
+    return produtos.filter(p => p.ativo).slice(0, 4);
+  }, [produtos]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-[#FF5500] selection:text-white dark">
       <SiteHeader />
 
-      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[240px_1fr] md:gap-10 md:py-12 lg:grid-cols-[260px_1fr]">
-        <FilterSidebar
-          categorias={categorias}
-          filters={filters}
-          onChange={setFilters}
-        />
-        <section>
-          {/* Promoções do dia — faixa simples integrada */}
-          {promocoes.length > 0 && !filters.promocao && !q && !activeSlug && (
-            <PromoHero produtos={promocoes} />
-          )}
-
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              {isLoading
-                ? "Carregando…"
-                : (
-                    <>
-                      <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
-                      produto{filtered.length === 1 ? "" : "s"}
-                    </>
-                  )}
-            </p>
-            {activeChips.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5">
-                {activeChips.map((c) => (
-                  <button
-                    key={c.key}
-                    onClick={c.onClear}
-                    className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
-                  >
-                    {c.label}
-                    <span className="text-muted-foreground group-hover:text-primary">×</span>
-                  </button>
-                ))}
-              </div>
-            )}
+      <main>
+        {/* Hero Section */}
+        <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden px-4 py-20 lg:py-32">
+          {/* Ambient Background */}
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,85,0,0.15),transparent_70%)]" />
+            <div className="absolute inset-0 bg-[#0A0A0A]/60" />
+            <img 
+              src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&q=80&w=2070"
+              alt="Hero Background"
+              className="h-full w-full object-cover opacity-40 grayscale"
+            />
           </div>
 
-          {isLoading ? (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
+          <div className="relative z-10 mx-auto max-w-5xl text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md">
+              <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">Nova Coleção Disponível</span>
+            </div>
+            
+            <h1 className="font-display text-5xl font-black uppercase leading-[0.9] tracking-tighter text-white sm:text-7xl md:text-8xl lg:text-9xl">
+              Estilo <span className="text-primary">Urbano</span><br />
+              Sem Limites
+            </h1>
+            
+            <p className="mx-auto mt-8 max-w-xl text-lg text-white/60 md:text-xl">
+              Peças exclusivas desenhadas para quem não aceita o comum. Qualidade premium com a atitude que você procura.
+            </p>
+
+            <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                to="/produtos"
+                className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-primary px-10 py-5 text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-105 hover:bg-primary/90 active:scale-95"
+              >
+                Ver todos os produtos
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-20">
+            <div className="h-10 w-6 rounded-full border-2 border-white" />
+          </div>
+        </section>
+
+        {/* Categories Section */}
+        <section className="bg-[#0D0D0D] px-4 py-24 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-16 flex flex-col items-end justify-between gap-6 md:flex-row">
+              <div className="max-w-xl">
+                <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl lg:text-6xl">
+                  Categorias em <span className="text-primary">Destaque</span>
+                </h2>
+              </div>
+              <Link 
+                to="/produtos" 
+                className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white"
+              >
+                Explorar todas <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+              {categorias.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to="/produtos"
+                  search={{ cat: cat.slug } as never}
+                  className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#1A1A1A] ring-1 ring-white/5 transition-all hover:ring-primary/50"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-4 text-center">
+                    <span className="block font-display text-sm font-black uppercase tracking-widest text-white transition-transform group-hover:-translate-y-1">
+                      {cat.nome}
+                    </span>
+                  </div>
+                  {/* Category placeholder images or icons could go here */}
+                  <div className="flex h-full w-full items-center justify-center opacity-20 transition-opacity group-hover:opacity-40">
+                    <ShoppingBag className="h-12 w-12" />
+                  </div>
+                </Link>
               ))}
             </div>
-          ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card px-6 py-24 text-center shadow-soft">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10 ring-4 ring-primary/5">
-                <PackageSearch className="h-7 w-7 text-primary" />
+          </div>
+        </section>
+
+        {/* Featured Products */}
+        {featuredProducts.length > 0 && (
+          <section className="px-4 py-24 md:py-32">
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-16 text-center">
+                <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl lg:text-6xl">
+                  Os Mais <span className="text-primary">Vendidos</span>
+                </h2>
+                <p className="mt-4 text-white/40 uppercase tracking-[0.3em] text-[10px] font-bold">Best Sellers da Semana</p>
               </div>
-              <h3 className="mt-5 font-display text-lg font-bold">
-                Nenhum produto encontrado
-              </h3>
-              <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
-                Tente ajustar os filtros ou buscar por outro termo.
-              </p>
-              <button
-                onClick={() => setFilters(defaultFilters)}
-                className="btn-shine mt-6 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-premium transition-transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Limpar filtros
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
-              {filtered.map((p, idx) => (
-                <div
-                  key={p.id}
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${Math.min(idx * 40, 400)}ms` }}
+
+              <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+                {featuredProducts.map((p) => (
+                  <div key={p.id} className="dark">
+                    <ProductCard p={p} />
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-20 text-center">
+                <Link
+                  to="/produtos"
+                  className="inline-flex items-center gap-4 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10"
                 >
-                  <ProductCard p={p} />
+                  Ver Catálogo Completo
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Brand Philosophy Section */}
+        <section className="relative overflow-hidden bg-primary px-4 py-24 md:py-32">
+          <div className="absolute right-0 top-0 -translate-y-1/2 translate-x-1/2 opacity-10">
+             <ShoppingBag className="h-[600px] w-[600px] text-white" />
+          </div>
+          
+          <div className="relative z-10 mx-auto max-w-4xl text-center">
+            <h2 className="font-display text-4xl font-black uppercase leading-none tracking-tighter text-white sm:text-6xl md:text-7xl">
+              Qualidade que você sente,<br />estilo que você vive.
+            </h2>
+            <div className="mt-12 flex flex-wrap justify-center gap-8 md:gap-16">
+              {[
+                { label: "Envio Rápido", sub: "Brasil todo" },
+                { label: "Premium", sub: "Material selecionado" },
+                { label: "Atacado", sub: "Melhores preços" }
+              ].map(item => (
+                <div key={item.label} className="text-center">
+                  <div className="text-xl font-black uppercase tracking-tighter text-white">{item.label}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/60">{item.sub}</div>
                 </div>
               ))}
             </div>
-          )}
+          </div>
         </section>
       </main>
-      <SiteFooter />
+
+      {/* Simple Footer for Home */}
+      <footer className="border-t border-white/5 bg-[#0A0A0A] py-16 text-white/60">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="flex flex-col items-center justify-between gap-10 md:flex-row md:gap-0">
+            <div className="text-center md:text-left">
+              <h3 className="font-display text-2xl font-black uppercase tracking-tighter text-white">
+                acha<span className="text-primary">&</span>busca
+              </h3>
+              <p className="mt-2 text-sm max-w-xs">A moda urbana que define seu estilo. Qualidade e atitude em cada peça.</p>
+            </div>
+            
+            <div className="flex flex-col items-center gap-6 md:flex-row md:gap-12">
+              <div className="flex gap-6">
+                <a href="#" className="hover:text-primary transition-colors"><Instagram className="h-5 w-5" /></a>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} className="hover:text-primary transition-colors"><MessageCircle className="h-5 w-5" /></a>
+              </div>
+              <div className="text-center md:text-right">
+                <div className="text-xs font-bold uppercase tracking-widest text-white">{WHATSAPP_DISPLAY}</div>
+                <div className="mt-1 text-[10px] uppercase tracking-widest">Atendimento Personalizado</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-16 text-center text-[10px] uppercase tracking-[0.3em] font-bold border-t border-white/5 pt-8">
+            © {new Date().getFullYear()} {BRAND}. FEITO PELA MVX SISTEMAS
+          </div>
+        </div>
+      </footer>
+      
       <CartDrawer />
     </div>
   );
 }
-
-
-

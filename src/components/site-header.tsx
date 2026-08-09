@@ -28,7 +28,7 @@ export function SiteHeader() {
 
   const doSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    nav({ to: "/", search: { q } as never });
+    nav({ to: "/produtos", search: { q } as never });
   };
 
   return (
@@ -42,9 +42,9 @@ export function SiteHeader() {
           />
 
           <div className="hidden min-w-0 flex-col leading-none sm:flex">
-            <h1 className="truncate font-display text-2xl font-extrabold tracking-tighter text-white md:text-3xl">
+            <div className="truncate font-display text-2xl font-extrabold tracking-tighter text-white md:text-3xl">
               acha<span className="mx-[1px] font-bold text-white/60">&amp;</span>busca
-            </h1>
+            </div>
             <div className="mt-1.5 flex items-center gap-2">
               <span className="h-px w-5 bg-white/40" />
               <span className="font-display text-[10px] font-bold uppercase tracking-[0.35em] text-white/90">
@@ -144,10 +144,10 @@ export function SiteHeader() {
             style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
           >
             <Link
-              to="/"
+              to="/produtos"
               search={{} as never}
               className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors sm:px-5 sm:text-xs sm:tracking-[0.18em] ${
-                currentPath === "/" && !currentSearch?.cat
+                currentPath === "/produtos" && !currentSearch?.cat
                   ? "bg-white text-primary"
                   : "text-white/85 hover:bg-white/15 hover:text-white"
               }`}
@@ -159,7 +159,7 @@ export function SiteHeader() {
               return (
                 <Link
                   key={c.id}
-                  to="/"
+                  to="/produtos"
                   search={{ cat: c.slug } as never}
                   className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors sm:px-5 sm:text-xs sm:tracking-[0.18em] ${
                     active

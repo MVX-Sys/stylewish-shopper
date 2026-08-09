@@ -65,7 +65,7 @@ function OrdersPage() {
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Package className="mb-4 h-12 w-12 text-muted-foreground opacity-20" />
             <p className="text-muted-foreground">Você ainda não realizou nenhum pedido.</p>
-            <Link to="/" className="mt-4 font-semibold text-primary hover:underline">
+            <Link to="/produtos" className="mt-4 font-semibold text-primary hover:underline">
               Ir para a loja
             </Link>
           </div>
