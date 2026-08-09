@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { listCategorias, listProdutos, getPromoInfo } from "@/lib/products";
+import { listCategorias, listProdutos, getPromoInfo, isEsgotado } from "@/lib/products";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ProductCard } from "@/components/product-card";
