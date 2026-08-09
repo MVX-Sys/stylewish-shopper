@@ -112,3 +112,52 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
       .sort((a, b) => b.totalSales - a.totalSales);
   });
 
+export const getMonthlyTopSellers = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const { data: sales, error: salesError } = await supabase
+      .from("pedidos_itens")
+      .select(`
+        produto_id,
+        quantidade,
+        pedidos!inner(criado_em)
+      `)
+      .gte("pedidos.criado_em", oneMonthAgo.toISOString());
+
+    if (salesError) throw salesError;
+
+    const productSales: Record<string, number> = {};
+    (sales || []).forEach((item: any) => {
+      if (item.produto_id) {
+        productSales[item.produto_id] = (productSales[item.produto_id] || 0) + item.quantidade;
+      }
+    });
+
+    const topProductIds = Object.entries(productSales)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 8)
+      .map(([id]) => id);
+
+    if (topProductIds.length === 0) return [];
+
+    const { data: products, error: productsError } = await supabase
+      .from("produtos")
+      .select(`
+        *,
+        variacoes:variacoes_produto(quantidade_estoque),
+        imagens:imagens_produto(storage_path, principal)
+      `)
+      .in("id", topProductIds)
+      .eq("ativo", true);
+
+    if (productsError) throw productsError;
+
+    return (products || [])
+      .map(p => ({
+        ...p,
+        totalSales: productSales[p.id] || 0
+      }))
+      .sort((a, b) => b.totalSales - a.totalSales);
+  });
