@@ -38,7 +38,7 @@ function HomePage() {
   }, [produtos]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-primary selection:text-white">
+    <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-[#FF5500] selection:text-white dark">
       <SiteHeader />
 
       <main>
