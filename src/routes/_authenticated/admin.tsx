@@ -18,7 +18,7 @@ function AdminLayout() {
   const allowed = hasAdminPanelAccess(roleKind, permissions);
 
   useEffect(() => {
-    if (!loading && session && !allowed) nav({ to: "/" });
+    if (!loading && session && !allowed) nav({ to: "/produtos" });
   }, [allowed, loading, session, nav]);
 
   if (loading || !allowed) {
@@ -59,7 +59,7 @@ function AdminLayout() {
               <span className="hidden sm:inline">Dashboard</span>
             </Link>
             <Link
-              to="/"
+              to="/produtos"
               className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-accent active:scale-95"
             >
               <Store className="h-4 w-4" />
