@@ -84,8 +84,8 @@ function Home() {
     return list;
   }, [produtos, filters, cat, q, catBySlug]);
 
-  const activeSlug = cat ?? filters.categoriaSlug;
-  const heading = q
+  const activeSlug = filters.categoriaSlug || cat;
+  const heading = filters.q || q
     ? `Resultados para "${q}"`
     : activeSlug && catBySlugName[activeSlug]
     ? catBySlugName[activeSlug]
