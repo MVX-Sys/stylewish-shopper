@@ -42,9 +42,9 @@ export function SiteHeader() {
           />
 
           <div className="hidden min-w-0 flex-col leading-none sm:flex">
-            <h1 className="truncate font-display text-2xl font-extrabold tracking-tighter text-white md:text-3xl">
+            <div className="truncate font-display text-2xl font-extrabold tracking-tighter text-white md:text-3xl">
               acha<span className="mx-[1px] font-bold text-white/60">&amp;</span>busca
-            </h1>
+            </div>
             <div className="mt-1.5 flex items-center gap-2">
               <span className="h-px w-5 bg-white/40" />
               <span className="font-display text-[10px] font-bold uppercase tracking-[0.35em] text-white/90">
