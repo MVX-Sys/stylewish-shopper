@@ -107,7 +107,12 @@ function Home() {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-10">Nenhuma novidade no momento.</p>
+              <div className="bg-muted/30 rounded-2xl p-12 text-center">
+                <p className="text-muted-foreground font-medium">Não há novidades com estoque no momento.</p>
+                <Link to="/loja" className="text-brand text-sm font-bold hover:underline mt-2 inline-block">
+                  Ver catálogo completo
+                </Link>
+              </div>
             )}
           </section>
 
@@ -127,24 +132,30 @@ function Home() {
           </section>
 
           {/* Destaques (Top Monthly) */}
-          {destaques.length > 0 && (
-            <section className="space-y-8">
-              <div className="flex items-end justify-between">
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-display font-black">Destaques</h2>
-                  <p className="text-muted-foreground">Os produtos mais vendidos do mês</p>
-                </div>
+          <section className="space-y-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-display font-black">Destaques</h2>
+                <p className="text-muted-foreground">Os produtos mais vendidos do mês</p>
+              </div>
+              {destaques.length > 0 && (
                 <Link to="/loja" className="text-brand font-bold text-sm hover:underline inline-flex items-center gap-1">
                   Ver tudo <ArrowRight className="w-4 h-4" />
                 </Link>
-              </div>
+              )}
+            </div>
+            {destaques.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
                 {destaques.map((p: any) => (
                   <ProductCard key={p.id} p={p} />
                 ))}
               </div>
-            </section>
-          )}
+            ) : (
+              <div className="bg-muted/30 rounded-2xl p-12 text-center">
+                <p className="text-muted-foreground font-medium">Ainda não há vendas registradas este mês.</p>
+              </div>
+            )}
+          </section>
 
           {/* Promo Section */}
           {promoProducts.length > 0 && (
