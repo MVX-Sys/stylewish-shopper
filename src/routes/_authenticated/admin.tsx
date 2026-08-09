@@ -1,35 +1,16 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
-import { ShoppingBag } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
-import { canAccess, hasAdminPanelAccess, type PermissionKey } from "@/lib/permissions";
-import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Calendar, LayoutDashboard, Store } from "lucide-react";
+import { hasAdminPanelAccess } from "@/lib/permissions";
+import { LogOut, Loader2, LayoutDashboard, Store } from "lucide-react";
+import { SiteFooter } from "@/components/site-footer";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-type NavItem = {
-  to: string;
-  label: string;
-  icon: React.ReactNode;
-  perm: PermissionKey;
-  exact?: boolean;
-};
-
-const NAV_ITEMS: NavItem[] = [
-  { to: "/admin", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" />, perm: "produtos.manage", exact: true },
-  { to: "/admin/produtos", label: "Produtos", icon: <Package className="h-4 w-4" />, perm: "produtos.manage" },
-  { to: "/admin/atendentes", label: "Atendentes", icon: <UserPlus className="h-4 w-4" />, perm: "usuarios.manage" },
-  { to: "/admin/vendas", label: "Vendas", icon: <TrendingUp className="h-4 w-4" />, perm: "pedidos.view" },
-  { to: "/admin/solicitacoes", label: "Reposições", icon: <Bell className="h-4 w-4" />, perm: "solicitacoes.manage" },
-  { to: "/admin/usuarios", label: "Usuários", icon: <Users className="h-4 w-4" />, perm: "usuarios.manage" },
-  { to: "/admin/backup", label: "Backup", icon: <Database className="h-4 w-4" />, perm: "backup.manage" },
-  { to: "/admin/auditoria", label: "Auditoria", icon: <History className="h-4 w-4" />, perm: "auditoria.view" },
-  { to: "/admin/eventos", label: "Eventos", icon: <Calendar className="h-4 w-4" />, perm: "produtos.manage" },
-];
 
 function AdminLayout() {
   const { roleKind, permissions, loading, session } = useAuth();
@@ -51,10 +32,8 @@ function AdminLayout() {
     );
   }
 
-  const visibleNav = NAV_ITEMS.filter((n) => canAccess(roleKind, permissions, n.perm));
-
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="flex min-h-screen flex-col bg-muted/30">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:gap-4 sm:px-4 md:gap-8">
           <Link to="/admin" className="flex items-center gap-2.5">
@@ -102,9 +81,10 @@ function AdminLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-4 sm:py-8">
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   );
 }
