@@ -139,6 +139,12 @@ function AtendentesPage() {
             to="/admin" 
             className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
           >
+            Dashboard
+          </Link>
+          <Link 
+            to="/admin/produtos" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
             Produtos
           </Link>
           <Link 
@@ -152,6 +158,12 @@ function AtendentesPage() {
             className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
           >
             Usuários
+          </Link>
+          <Link 
+            to="/admin/eventos" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Eventos
           </Link>
         </div>
       </div>

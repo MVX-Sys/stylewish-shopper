@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { BRAND } from "@/lib/config";
 import { Calendar } from "lucide-react";
 
