@@ -111,4 +111,54 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
       .filter((cat) => cat.nome.toLowerCase() !== "geral")
       .sort((a, b) => b.totalSales - a.totalSales);
   });
+114: 
+115: export const getMonthlyTopSellers = createServerFn({ method: "GET" })
+116:   .handler(async () => {
+117:     const oneMonthAgo = new Date();
+118:     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+119: 
+120:     const { data: sales, error: salesError } = await supabase
+121:       .from("pedidos_itens")
+122:       .select(`
+123:         produto_id,
+124:         quantidade,
+125:         pedidos!inner(criado_em)
+126:       `)
+127:       .gte("pedidos.criado_em", oneMonthAgo.toISOString());
+128: 
+129:     if (salesError) throw salesError;
+130: 
+131:     const productSales: Record<string, number> = {};
+132:     (sales || []).forEach((item: any) => {
+133:       if (item.produto_id) {
+134:         productSales[item.produto_id] = (productSales[item.produto_id] || 0) + item.quantidade;
+135:       }
+136:     });
+137: 
+138:     const topProductIds = Object.entries(productSales)
+139:       .sort(([, a], [, b]) => b - a)
+140:       .slice(0, 8)
+141:       .map(([id]) => id);
+142: 
+143:     if (topProductIds.length === 0) return [];
+144: 
+145:     const { data: products, error: productsError } = await supabase
+146:       .from("produtos")
+147:       .select(`
+148:         *,
+149:         variacoes:variacoes_produto(quantidade_estoque),
+150:         imagens:imagens_produto(storage_path, principal)
+151:       `)
+152:       .in("id", topProductIds)
+153:       .eq("ativo", true);
+154: 
+155:     if (productsError) throw productsError;
+156: 
+157:     return products
+158:       .map(p => ({
+159:         ...p,
+160:         totalSales: productSales[p.id] || 0
+161:       }))
+162:       .sort((a, b) => b.totalSales - a.totalSales);
+163:   });
 
