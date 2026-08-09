@@ -88,10 +88,6 @@ function Home() {
   const titleText = q 
     ? `Resultados para "${q}"`
     : (activeSlug ? catBySlugName[activeSlug] : "Todos os Produtos");
-    ? `Resultados para "${q}"`
-    : activeSlug && catBySlugName[activeSlug]
-    ? catBySlugName[activeSlug]
-    : "Coleção";
   const subheading = q
     ? `${filtered.length} peça${filtered.length === 1 ? "" : "s"} encontrada${filtered.length === 1 ? "" : "s"}`
     : "Peças selecionadas para o dia a dia";
