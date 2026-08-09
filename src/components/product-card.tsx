@@ -84,9 +84,9 @@ export function ProductCard({ p }: { p: ProductListItem }) {
                 {brl(promo.precoOriginal)}
               </p>
             </div>
-            {promo.expiresAt && (
+            {promo.validoAte && (
               <p className="text-[9px] font-bold uppercase tracking-wider text-primary/80">
-                Termina em {Math.ceil((new Date(promo.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dias
+                Termina em {Math.ceil((new Date(promo.validoAte).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dias
               </p>
             )}
           </div>

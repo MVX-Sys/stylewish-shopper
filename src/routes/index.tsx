@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { listCategorias, listProdutos } from "@/lib/products";
+import { listCategorias, listProdutos, getPromoInfo } from "@/lib/products";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ProductCard } from "@/components/product-card";
@@ -45,12 +45,8 @@ function HomePage() {
     return produtos
       .filter(p => {
         if (!p.ativo) return false;
-        const now = new Date();
-        const start = p.promocao_inicio ? new Date(p.promocao_inicio) : null;
-        const end = p.promocao_fim ? new Date(p.promocao_fim) : null;
-        const hasDiscount = (p.desconto_percentual || 0) > 0;
-        const isWithinRange = (!start || now >= start) && (!end || now <= end);
-        return hasDiscount && isWithinRange;
+        const promo = getPromoInfo(p);
+        return promo.ativa;
       })
       .slice(0, 4);
   }, [produtos]);
