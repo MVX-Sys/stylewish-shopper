@@ -1,10 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+
+export type CategoryWithTopProduct = {
+  id: string;
+  nome: string;
+  slug: string;
+  ordem: number;
+  topProduct: {
+    id: string;
+    nome: string;
+    imagem: string | null;
+  } | null;
+};
 
 export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
-  .handler(async ({ context }) => {
-    const { supabase } = context;
-
+  .handler(async (): Promise<CategoryWithTopProduct[]> => {
     // Get categories first
     const { data: categories, error: catError } = await supabase
       .from("categorias")
@@ -17,6 +27,7 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     // Get sales in the last 7 days
+    // We join with pedidos to filter by date
     const { data: sales, error: salesError } = await supabase
       .from("pedidos_itens")
       .select(`
@@ -30,7 +41,7 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
 
     // Aggregate sales by product_id
     const productSales: Record<string, number> = {};
-    sales?.forEach((item) => {
+    (sales || []).forEach((item: any) => {
       if (item.produto_id) {
         productSales[item.produto_id] = (productSales[item.produto_id] || 0) + item.quantidade;
       }
@@ -38,7 +49,7 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
 
     // For each category, find the best selling product
     const categoryTopSellers = await Promise.all(
-      categories.map(async (cat) => {
+      (categories || []).map(async (cat: any) => {
         // Fetch products for this category
         const { data: products, error: prodError } = await supabase
           .from("produtos")
@@ -49,22 +60,22 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
         if (prodError || !products) return { ...cat, topProduct: null };
 
         // Sort products by sales
-        const sortedProducts = products.sort((a, b) => {
+        const sortedProducts = products.sort((a: any, b: any) => {
           const salesA = productSales[a.id] || 0;
           const salesB = productSales[b.id] || 0;
           return salesB - salesA;
         });
 
         // The top product is the first one in the sorted list
-        // If no sales, it will just be the first active product
         const topProduct = sortedProducts[0] || null;
+        const mainImg = topProduct?.imagens?.find((img: any) => img.principal) || topProduct?.imagens?.[0];
 
         return {
           ...cat,
           topProduct: topProduct ? {
             id: topProduct.id,
             nome: topProduct.nome,
-            imagem: topProduct.imagens.find(img => img.principal)?.storage_path || topProduct.imagens[0]?.storage_path || null
+            imagem: mainImg?.storage_path || null
           } : null
         };
       })
@@ -72,3 +83,4 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
 
     return categoryTopSellers;
   });
+
