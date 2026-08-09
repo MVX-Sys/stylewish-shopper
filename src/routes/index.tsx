@@ -4,10 +4,12 @@ import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ArrowRight, Flame } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { listProdutos, listCategorias } from "@/lib/products";
+import { listProdutos } from "@/lib/products";
 import { PromoHero } from "@/components/promo-hero";
 import { ProductCard } from "@/components/product-card";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
+import { getTopSellingProductsByCategory } from "@/lib/home.functions";
+import { getImageUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,12 +34,24 @@ function Home() {
   });
 
   const { data: categorias = [] } = useQuery({
-    queryKey: ["categorias"],
-    queryFn: listCategorias,
+    queryKey: ["categorias-top-sellers"],
+    queryFn: () => getTopSellingProductsByCategory(),
   });
 
   const promoProducts = useMemo(() => produtos.filter((p) => p.ativo && p.promocao).slice(0, 4), [produtos]);
-  const latestProducts = useMemo(() => produtos.filter((p) => p.ativo).slice(0, 8), [produtos]);
+  
+  const latestProducts = useMemo(() => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    return produtos
+      .filter((p) => p.ativo)
+      .map(p => ({
+        ...p,
+        novidade: p.novidade || new Date(p.criado_em) >= sevenDaysAgo
+      }))
+      .slice(0, 8);
+  }, [produtos]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -65,7 +79,7 @@ function Home() {
             </div>
           </section>
 
-          {/* Categories Grid (Reference: image-46.png) */}
+          {/* Categories Grid */}
           <section className="space-y-8">
             <div className="flex items-end justify-between">
               <div>
@@ -74,30 +88,13 @@ function Home() {
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categorias.slice(0, 4).map((cat) => (
-                <Link
-                  key={cat.id}
-                  to="/loja"
-                  search={{ cat: cat.slug }}
-                  className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted"
-                >
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20 p-4 text-center">
-                    <span className="text-white font-display font-black text-lg md:text-xl uppercase tracking-wider mb-4">
-                      {cat.nome}
-                    </span>
-                    <div className="border border-white text-white px-6 py-2 rounded-sm text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                      Confira
-                    </div>
-                  </div>
-                  {/* Category Image Placeholder or specific logic if available */}
-                  <div className="w-full h-full bg-navy/10 group-hover:scale-110 transition-transform duration-700" />
-                </Link>
+              {categorias.slice(0, 4).map((cat: any) => (
+                <CategoryCard key={cat.id} cat={cat} />
               ))}
             </div>
           </section>
 
-          {/* Promo Section (Reference: image-47.png) */}
+          {/* Promo Section */}
           {promoProducts.length > 0 && (
             <section className="space-y-8">
               <div className="flex items-center gap-3">
@@ -138,3 +135,44 @@ function Home() {
   );
 }
 
+function CategoryCard({ cat }: { cat: any }) {
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (cat.topProduct?.imagem) {
+      getImageUrl(cat.topProduct.imagem).then(setImgUrl);
+    }
+  }, [cat.topProduct?.imagem]);
+
+  return (
+    <Link
+      to="/loja"
+      search={{ cat: cat.slug }}
+      className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted shadow-soft ring-1 ring-black/5"
+    >
+      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-20 p-4 text-center">
+        <span className="text-white font-display font-black text-lg md:text-xl uppercase tracking-wider mb-1">
+          {cat.nome}
+        </span>
+        {cat.topProduct && (
+          <span className="text-white/80 text-[9px] uppercase font-bold tracking-[0.2em] mb-4 block max-w-full truncate px-2">
+            Top: {cat.topProduct.nome}
+          </span>
+        )}
+        <div className="border border-white/50 text-white px-5 py-2 rounded-sm text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+          Confira
+        </div>
+      </div>
+      {imgUrl ? (
+        <img 
+          src={imgUrl} 
+          alt={cat.nome} 
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1200ms] ease-out" 
+        />
+      ) : (
+        <div className="w-full h-full bg-navy/10 group-hover:scale-110 transition-transform duration-700" />
+      )}
+    </Link>
+  );
+}
