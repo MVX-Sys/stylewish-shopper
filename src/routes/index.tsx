@@ -70,7 +70,7 @@ function Home() {
             <div className="flex items-end justify-between">
               <div>
                 <h2 className="text-2xl md:text-3xl font-display font-black">Categorias</h2>
-                <p className="text-muted-foreground">Explore nossos departamentos</p>
+                <p className="text-muted-foreground">Explore todos os tipos de produtos vendidos</p>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
