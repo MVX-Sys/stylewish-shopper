@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReposicoesRouteImport } from './routes/reposicoes'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PedidosRouteImport } from './routes/pedidos'
-import { Route as LojaRouteImport } from './routes/loja'
 import { Route as DadosContaRouteImport } from './routes/dados-conta'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -46,11 +45,6 @@ const PerfilRoute = PerfilRouteImport.update({
 const PedidosRoute = PedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LojaRoute = LojaRouteImport.update({
-  id: '/loja',
-  path: '/loja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DadosContaRoute = DadosContaRouteImport.update({
@@ -164,7 +158,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/dados-conta': typeof DadosContaRoute
-  '/loja': typeof LojaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
   '/reposicoes': typeof ReposicoesRoute
@@ -188,7 +181,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/dados-conta': typeof DadosContaRoute
-  '/loja': typeof LojaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
   '/reposicoes': typeof ReposicoesRoute
@@ -213,7 +205,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/dados-conta': typeof DadosContaRoute
-  '/loja': typeof LojaRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
   '/reposicoes': typeof ReposicoesRoute
@@ -239,7 +230,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/dados-conta'
-    | '/loja'
     | '/pedidos'
     | '/perfil'
     | '/reposicoes'
@@ -263,7 +253,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/dados-conta'
-    | '/loja'
     | '/pedidos'
     | '/perfil'
     | '/reposicoes'
@@ -287,7 +276,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/dados-conta'
-    | '/loja'
     | '/pedidos'
     | '/perfil'
     | '/reposicoes'
@@ -313,7 +301,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   DadosContaRoute: typeof DadosContaRoute
-  LojaRoute: typeof LojaRoute
   PedidosRoute: typeof PedidosRoute
   PerfilRoute: typeof PerfilRoute
   ReposicoesRoute: typeof ReposicoesRoute
@@ -341,13 +328,6 @@ declare module '@tanstack/react-router' {
       path: '/pedidos'
       fullPath: '/pedidos'
       preLoaderRoute: typeof PedidosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/loja': {
-      id: '/loja'
-      path: '/loja'
-      fullPath: '/loja'
-      preLoaderRoute: typeof LojaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dados-conta': {
@@ -548,7 +528,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   DadosContaRoute: DadosContaRoute,
-  LojaRoute: LojaRoute,
   PedidosRoute: PedidosRoute,
   PerfilRoute: PerfilRoute,
   ReposicoesRoute: ReposicoesRoute,

@@ -14,7 +14,6 @@ export type Produto = {
   preco_promocional: number | null;
   promocao_ate: string | null;
   ativo: boolean;
-  criado_em: string;
 };
 
 export type ImagemProduto = {
