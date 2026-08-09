@@ -106,7 +106,9 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
       })
     );
 
-    // Sort categories from most sold to least sold
-    return categoryTopSellers.sort((a, b) => b.totalSales - a.totalSales);
+    // Sort categories from most sold to least sold and remove "Geral"
+    return categoryTopSellers
+      .filter((cat) => cat.nome.toLowerCase() !== "geral")
+      .sort((a, b) => b.totalSales - a.totalSales);
   });
 
