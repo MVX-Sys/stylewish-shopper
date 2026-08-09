@@ -52,13 +52,14 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
     const categoryTopSellers = await Promise.all(
       (categories || []).map(async (cat: any) => {
         // Fetch products for this category
+        // We include variations to check stock
         const { data: products, error: prodError } = await supabase
           .from("produtos")
           .select(`
             id, 
             nome, 
             categoria_id, 
-            estoque,
+            variacoes:variacoes_produto(quantidade_estoque),
             imagens:imagens_produto(storage_path, principal)
           `)
           .eq("categoria_id", cat.id)
@@ -83,9 +84,9 @@ export const getTopSellingProductsByCategory = createServerFn({ method: "GET" })
             return salesB - salesA;
           }
           
-          // Fallback to stock if no sales
-          const stockA = a.estoque || 0;
-          const stockB = b.estoque || 0;
+          // Fallback to total stock if no sales
+          const stockA = (a.variacoes || []).reduce((acc: number, v: any) => acc + (v.quantidade_estoque || 0), 0);
+          const stockB = (b.variacoes || []).reduce((acc: number, v: any) => acc + (v.quantidade_estoque || 0), 0);
           return stockB - stockA;
         });
 
