@@ -71,13 +71,6 @@ function AdminLayout() {
 
           <div className="flex gap-2">
             <Link
-              to="/"
-              className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-accent active:scale-95"
-            >
-              <Store className="h-4 w-4" />
-              <span className="hidden sm:inline">Voltar à Loja</span>
-            </Link>
-            <Link
               to="/admin"
               className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-accent active:scale-95"
               activeProps={{ className: "!bg-foreground !text-background !border-foreground" }}
@@ -85,6 +78,21 @@ function AdminLayout() {
             >
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
+            </Link>
+            <Link
+              to="/admin/eventos"
+              className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-accent active:scale-95"
+              activeProps={{ className: "!bg-foreground !text-background !border-foreground" }}
+            >
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Eventos</span>
+            </Link>
+            <Link
+              to="/"
+              className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-accent active:scale-95"
+            >
+              <Store className="h-4 w-4" />
+              <span className="hidden sm:inline">Voltar à Loja</span>
             </Link>
           </div>
 
