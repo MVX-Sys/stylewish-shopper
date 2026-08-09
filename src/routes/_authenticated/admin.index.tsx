@@ -144,17 +144,6 @@ function AdminDashboard() {
         ))}
       </div>
 
-      <div className="rounded-3xl bg-muted/50 p-8 text-center sm:p-12">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-brand/10 text-brand">
-          <LayoutDashboard className="h-8 w-8" />
-        </div>
-        <h2 className="mt-6 font-display text-2xl font-bold tracking-tight">
-          Navegação Unificada
-        </h2>
-        <p className="mx-auto mt-2 max-w-lg text-muted-foreground">
-          Utilize o menu acima ou os atalhos no topo da página para navegar rapidamente entre as diferentes seções do painel.
-        </p>
-      </div>
     </div>
   );
 }
