@@ -97,20 +97,6 @@ function AdminLayout() {
           </div>
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            <Link
-              to="/admin/eventos"
-              className="flex items-center gap-2 rounded-full bg-brand/10 px-4 py-2 text-sm font-bold uppercase tracking-wide text-brand transition-all hover:bg-brand/20 active:scale-95"
-            >
-              <Calendar className="h-4 w-4" />
-              <span className="hidden lg:inline">Eventos</span>
-            </Link>
-            <Link
-              to="/admin/pedidos"
-              className="flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-brand/30 active:scale-95"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              <span className="hidden lg:inline">Pedidos</span>
-            </Link>
             <button
               onClick={async () => {
                 await supabase.auth.signOut();
