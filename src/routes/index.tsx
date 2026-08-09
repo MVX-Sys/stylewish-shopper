@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { ArrowRight, Flame, TrendingUp } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { listProdutos, listCategorias } from "@/lib/products";
 import { PromoHero } from "@/components/promo-hero";
 import { ProductCard } from "@/components/product-card";
+import { useMemo } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -137,4 +138,3 @@ function Home() {
   );
 }
 
-import { useMemo } from "react";
