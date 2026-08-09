@@ -12,7 +12,7 @@ import { logAudit } from "@/lib/audit";
 import { downloadProductsCSV, downloadProductsPDF, downloadProductsXLSX } from "@/lib/pdf";
 import { ExportMenu } from "@/components/export-menu";
 
-export const Route = createFileRoute("/_authenticated/admin/")({
+export const Route = createFileRoute("/_authenticated/admin/produtos")({
   component: AdminProductsList,
 });
 
