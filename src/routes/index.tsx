@@ -8,7 +8,7 @@ import { listProdutos } from "@/lib/products";
 import { PromoHero } from "@/components/promo-hero";
 import { ProductCard } from "@/components/product-card";
 import { useMemo, useEffect, useState } from "react";
-import { getTopSellingProductsByCategory } from "@/lib/home.functions";
+import { getTopSellingProductsByCategory, getMonthlyTopSellers } from "@/lib/home.functions";
 import { getImageUrl } from "@/lib/storage";
 
 export const Route = createFileRoute("/")({
@@ -38,6 +38,11 @@ function Home() {
     queryFn: () => getTopSellingProductsByCategory(),
   });
 
+  const { data: destaques = [] } = useQuery({
+    queryKey: ["destaques-mensais"],
+    queryFn: () => getMonthlyTopSellers(),
+  });
+
   const promoProducts = useMemo(() => produtos.filter((p) => p.ativo && p.promocao).slice(0, 4), [produtos]);
   
   const latestProducts = useMemo(() => {
@@ -45,11 +50,16 @@ function Home() {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
     return produtos
-      .filter((p) => p.ativo)
+      .filter((p) => {
+        if (!p.ativo) return false;
+        const hasStock = p.variacoes?.some(v => (v.quantidade_estoque || 0) > 0);
+        return hasStock;
+      })
       .map(p => ({
         ...p,
         novidade: p.novidade || new Date(p.criado_em) >= sevenDaysAgo
       }))
+      .filter(p => p.novidade)
       .slice(0, 8);
   }, [produtos]);
 
@@ -79,6 +89,28 @@ function Home() {
             </div>
           </section>
 
+          {/* Latest Products Grid (Novidades) */}
+          <section className="space-y-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-display font-black">Novidades</h2>
+                <p className="text-muted-foreground">As últimas novidades para o seu estilo</p>
+              </div>
+              <Link to="/loja" className="text-brand font-bold text-sm hover:underline inline-flex items-center gap-1">
+                Ver tudo <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            {latestProducts.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
+                {latestProducts.map((p) => (
+                  <ProductCard key={p.id} p={p} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-10">Nenhuma novidade no momento.</p>
+            )}
+          </section>
+
           {/* Categories Grid */}
           <section className="space-y-8">
             <div className="flex items-end justify-between">
@@ -94,6 +126,26 @@ function Home() {
             </div>
           </section>
 
+          {/* Destaques (Top Monthly) */}
+          {destaques.length > 0 && (
+            <section className="space-y-8">
+              <div className="flex items-end justify-between">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-display font-black">Destaques</h2>
+                  <p className="text-muted-foreground">Os produtos mais vendidos do mês</p>
+                </div>
+                <Link to="/loja" className="text-brand font-bold text-sm hover:underline inline-flex items-center gap-1">
+                  Ver tudo <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
+                {destaques.map((p: any) => (
+                  <ProductCard key={p.id} p={p} />
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Promo Section */}
           {promoProducts.length > 0 && (
             <section className="space-y-8">
@@ -108,24 +160,6 @@ function Home() {
               <PromoHero produtos={promoProducts} />
             </section>
           )}
-
-          {/* Latest Products Grid */}
-          <section className="space-y-8">
-            <div className="flex items-end justify-between">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-display font-black">Lançamentos</h2>
-                <p className="text-muted-foreground">As últimas novidades para o seu estilo</p>
-              </div>
-              <Link to="/loja" className="text-brand font-bold text-sm hover:underline inline-flex items-center gap-1">
-                Ver tudo <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
-              {latestProducts.map((p) => (
-                <ProductCard key={p.id} p={p} />
-              ))}
-            </div>
-          </section>
         </div>
       </main>
 
