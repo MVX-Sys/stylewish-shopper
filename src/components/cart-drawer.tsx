@@ -67,10 +67,13 @@ export function CartDrawer() {
                 Adicione peças ao carrinho para finalizar o pedido pelo WhatsApp.
               </p>
               <button
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  nav({ to: "/produtos" });
+                }}
                 className="mt-6 rounded-full border border-border px-5 py-2 text-sm font-medium transition-colors hover:bg-accent"
               >
-                Continuar comprando
+                Ver produtos
               </button>
             </div>
           ) : (
@@ -173,10 +176,13 @@ export function CartDrawer() {
             </p>
             <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
               <button
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  nav({ to: "/produtos" });
+                }}
                 className="underline-offset-4 hover:text-foreground hover:underline"
               >
-                Continuar comprando
+                Ver mais produtos
               </button>
               <button
                 onClick={clear}
