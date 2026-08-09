@@ -295,6 +295,12 @@ function AdminProductsList() {
         <div className="flex items-center gap-1">
           <Link 
             to="/admin" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Dashboard
+          </Link>
+          <Link 
+            to="/admin/produtos" 
             className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
           >
             Produtos
