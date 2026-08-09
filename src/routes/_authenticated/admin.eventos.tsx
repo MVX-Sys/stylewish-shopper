@@ -23,6 +23,42 @@ function AdminEventosPage() {
         </p>
       </div>
 
+      {/* Navigation Tabs */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-1 mb-8">
+        <div className="flex items-center gap-1">
+          <Link 
+            to="/admin" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Dashboard
+          </Link>
+          <Link 
+            to="/admin/produtos" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Produtos
+          </Link>
+          <Link 
+            to="/admin/vendas" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Vendas
+          </Link>
+          <Link 
+            to="/admin/usuarios" 
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
+          >
+            Usuários
+          </Link>
+          <Link 
+            to="/admin/eventos" 
+            className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
+          >
+            Eventos
+          </Link>
+        </div>
+      </div>
+
       <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/30 p-8 text-center">
         <div className="grid h-16 w-16 place-items-center rounded-full bg-muted text-muted-foreground">
           <Calendar className="h-8 w-8" />
