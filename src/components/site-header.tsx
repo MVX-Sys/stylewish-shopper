@@ -91,9 +91,9 @@ export function SiteHeader() {
               {canSeePanel && (
                 <Link
                   to="/admin"
-                  className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15 sm:flex"
+                  className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-white hover:bg-white/15"
                 >
-                  <span className="md:inline">Painel</span>
+                  <span>Painel</span>
                 </Link>
               )}
 
