@@ -53,31 +53,28 @@ function Home() {
       <HeroSection />
 
       <main>
-        {novidades.length > 0 && (
-          <ProductSection 
-            title={["Novidades", ""]} 
-            highlightIndex={0} 
-            products={novidades} 
-          />
-        )}
+        <ProductSection 
+          title={["Novidades", ""]} 
+          highlightIndex={0} 
+          products={novidades} 
+          emptyMessage="Não há novidades disponíveis no momento"
+        />
 
-        {melhoresOfertas.length > 0 && (
-          <ProductSection 
-            title={["Melhores", "Ofertas"]} 
-            highlightIndex={1} 
-            products={melhoresOfertas} 
-            isPromo
-          />
-        )}
+        <ProductSection 
+          title={["Melhores", "Ofertas"]} 
+          highlightIndex={1} 
+          products={melhoresOfertas} 
+          isPromo
+          emptyMessage="Não há ofertas disponíveis no momento"
+        />
 
-        {maisVendidos.length > 0 && (
-          <ProductSection 
-            title={["Os Mais", "Vendidos"]} 
-            highlightIndex={1} 
-            products={maisVendidos} 
-            subtitle="Best Sellers da Semana"
-          />
-        )}
+        <ProductSection 
+          title={["Os Mais", "Vendidos"]} 
+          highlightIndex={1} 
+          products={maisVendidos} 
+          subtitle="Best Sellers da Semana"
+          emptyMessage="Não há produtos mais vendidos disponíveis no momento"
+        />
 
         <CategoriesSection categorias={categorias.filter(c => c.slug !== "geral")} />
       </main>
