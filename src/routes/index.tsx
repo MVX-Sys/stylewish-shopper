@@ -42,6 +42,20 @@ function Home() {
       .slice(0, 4),
   [produtos]);
 
+  return (
+    <div className="min-h-screen bg-background font-body">
+      <SiteHeader />
+      
+      <HeroSection />
+
+      <main>
+        <ProductSection 
+          title={["Novidades", ""]} 
+          highlightIndex={0} 
+          products={novidades} 
+          emptyMessage="Não há novidades disponíveis no momento"
+        />
+
         <ProductSection 
           title={["Melhores", "Ofertas"]} 
           highlightIndex={1} 
