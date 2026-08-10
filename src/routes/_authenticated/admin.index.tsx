@@ -320,10 +320,10 @@ function AdminProductsList() {
           </Link>
           <button 
             onClick={() => setShowConfig(true)}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors flex items-center gap-2"
+            className="flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-navy/20 transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 ml-2"
           >
             <Settings className="h-4 w-4" />
-            Configurações
+            Configurar Home
           </button>
         </div>
 
