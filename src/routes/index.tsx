@@ -6,8 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard } from "@/components/product-card";
 import { listCategorias, listProdutos, getPromoInfo, isEsgotado, type ProductListItem, type Categoria } from "@/lib/products";
-import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
-import { getImageUrl } from "@/lib/storage";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,14 +42,12 @@ function Home() {
       .slice(0, 4),
   [produtos]);
 
-  // For "Mais Vendidos", we'll just take the top 4 active non-exhausted products as a placeholder for actual sales logic
   const maisVendidos = useMemo(() => 
-    produtos.filter(p => p.ativo && !isEsgotado(p)).slice(0, 4),
+    produtos.filter(p => p.ativo && !isEsgotado(p)).slice(4, 8),
   [produtos]);
 
   return (
     <div className="min-h-screen bg-background font-body">
-      {/* DEBUG: {produtos.length} products loaded */}
       <SiteHeader />
       
       <HeroSection />
@@ -94,7 +91,6 @@ function Home() {
 function HeroSection() {
   return (
     <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden">
-      {/* Background with overlay */}
       <div className="absolute inset-0 z-0 bg-navy grayscale opacity-60">
         <div 
           className="absolute inset-0 z-10 opacity-40"
