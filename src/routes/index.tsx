@@ -113,7 +113,7 @@ function HeroSection({ config }: { config?: any }) {
       
       <div className="relative z-20 flex h-full flex-col items-center justify-center px-4 text-center">
         <h1 className="max-w-4xl font-display text-5xl font-black uppercase tracking-tighter text-white md:text-7xl lg:text-8xl">
-          {title.split(' ').map((word, i, arr) => (
+          {title.split(' ').map((word: string, i: number, arr: string[]) => (
             <span key={i} className={i >= arr.length - 2 ? "text-primary" : ""}>
               {word}{" "}
             </span>
