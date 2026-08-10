@@ -45,7 +45,7 @@ function Home() {
 
   // For "Mais Vendidos", we'll just take the top 4 active non-exhausted products as a placeholder for actual sales logic
   const maisVendidos = useMemo(() => 
-    produtos.filter(p => p.ativo && !isEsgotado(p)).slice(4, 8),
+    produtos.filter(p => p.ativo && !isEsgotado(p)).slice(0, 4),
   [produtos]);
 
   return (
