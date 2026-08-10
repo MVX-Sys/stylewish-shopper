@@ -253,7 +253,6 @@ function AdminProductsList() {
             </span>
             Adicionar novo produto
           </Link>
-
         </div>
       </div>
 
@@ -289,22 +288,16 @@ function AdminProductsList() {
         <div className="flex items-center gap-1">
           <Link 
             to="/admin" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
-            activeProps={{ className: "!text-foreground !border-primary" }}
-            activeOptions={{ exact: true }}
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
           >
             Dashboard
           </Link>
-
           <Link 
             to="/admin/produtos" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
-            activeProps={{ className: "!text-foreground !border-primary" }}
-            activeOptions={{ exact: true }}
+            className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
           >
             Produtos
           </Link>
-
           <Link 
             to="/admin/vendas" 
             className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
@@ -541,7 +534,6 @@ function AdminProductsList() {
               <Link
                 to="/admin/produtos/novo"
                 className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background hover:opacity-90"
-
               >
                 <Plus className="h-4 w-4" /> Adicionar produto
               </Link>
@@ -632,14 +624,12 @@ function AdminProductsList() {
                           <Link
                             to="/admin/produtos/$id"
                             params={{ id: p.id }}
-                            className="flex items-center gap-1 rounded-full bg-accent/50 px-3 py-1.5 text-xs font-semibold text-foreground transition-all hover:bg-accent hover:scale-[1.02]"
+                            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             aria-label="Editar"
-                            title="Editar Produto"
+                            title="Editar"
                           >
-                            <Pencil className="h-3.5 w-3.5" />
-                            Editar
+                            <Pencil className="h-4 w-4" />
                           </Link>
-
                           <button
                             onClick={() => del(p.id)}
                             className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"

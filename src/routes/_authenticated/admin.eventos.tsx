@@ -28,49 +28,34 @@ function AdminEventosPage() {
         <div className="flex items-center gap-1">
           <Link 
             to="/admin" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
-            activeProps={{ className: "!text-foreground !border-primary" }}
-            activeOptions={{ exact: true }}
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
           >
             Dashboard
           </Link>
-
           <Link 
             to="/admin/produtos" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
-            activeProps={{ className: "!text-foreground !border-primary" }}
-            activeOptions={{ exact: true }}
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
           >
             Produtos
           </Link>
-
           <Link 
             to="/admin/vendas" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
-            activeProps={{ className: "!text-foreground !border-primary" }}
-            activeOptions={{ exact: true }}
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
           >
             Vendas
           </Link>
-
           <Link 
             to="/admin/usuarios" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
-            activeProps={{ className: "!text-foreground !border-primary" }}
-            activeOptions={{ exact: true }}
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
           >
             Usuários
           </Link>
-
           <Link 
             to="/admin/eventos" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent transition-colors"
-            activeProps={{ className: "!text-foreground !border-primary" }}
-            activeOptions={{ exact: true }}
+            className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
           >
             Eventos
           </Link>
-
         </div>
       </div>
 

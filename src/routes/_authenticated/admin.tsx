@@ -36,7 +36,7 @@ function AdminLayout() {
     <div className="flex min-h-screen flex-col bg-muted/30">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:gap-4 sm:px-4 md:gap-8">
-          <Link to="/admin" className="flex items-center gap-2.5" activeOptions={{ exact: true }}>
+          <Link to="/admin" className="flex items-center gap-2.5">
             <span className="grid h-9 w-9 place-items-center rounded-full bg-foreground text-background font-display font-semibold">
               A
             </span>
@@ -47,7 +47,6 @@ function AdminLayout() {
               </p>
             </div>
           </Link>
-
 
           <div className="flex gap-2">
             <Link

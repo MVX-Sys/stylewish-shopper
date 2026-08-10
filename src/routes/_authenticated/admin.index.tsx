@@ -32,7 +32,7 @@ const MENU_OPTIONS: MenuOption[] = [
   { 
     to: "/admin/produtos", 
     label: "Produtos", 
-    description: "Gerencie o catálogo, preços, estoque e variações.",
+    description: "Gerencie o catálogo de produtos e variações.",
     icon: <Package className="h-6 w-6" />, 
     perm: "produtos.manage",
     color: "bg-blue-500"

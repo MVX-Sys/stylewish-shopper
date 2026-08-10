@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { listCategorias, listProdutos, getPromoInfo, isEsgotado } from "@/lib/products";
+import { listCategorias, listProdutos, getPromoInfo } from "@/lib/products";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ProductCard } from "@/components/product-card";
 import { CartDrawer } from "@/components/cart-drawer";
-import { ArrowLeft, ArrowRight, ShoppingBag, ChevronLeft, ChevronRight, MessageCircle, Instagram } from "lucide-react";
+import { ArrowRight, ShoppingBag, ChevronRight, MessageCircle, Instagram } from "lucide-react";
 import { BRAND, WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from "@/lib/config";
 import { useMemo } from "react";
 
@@ -34,17 +34,17 @@ function HomePage() {
   });
 
   const featuredProducts = useMemo(() => {
-    return produtos.filter(p => p.ativo && !isEsgotado(p)).slice(0, 4);
+    return produtos.filter(p => p.ativo).slice(0, 4);
   }, [produtos]);
 
   const novidades = useMemo(() => {
-    return produtos.filter(p => p.ativo && p.novidade && !isEsgotado(p)).slice(0, 4);
+    return produtos.filter(p => p.ativo && p.novidade).slice(0, 4);
   }, [produtos]);
 
   const ofertas = useMemo(() => {
     return produtos
       .filter(p => {
-        if (!p.ativo || isEsgotado(p)) return false;
+        if (!p.ativo) return false;
         const promo = getPromoInfo(p);
         return promo.ativa;
       })
@@ -95,6 +95,47 @@ function HomePage() {
 
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-20">
             <div className="h-10 w-6 rounded-full border-2 border-white" />
+          </div>
+        </section>
+
+        {/* Categories Section */}
+        <section className="bg-[#0D0D0D] px-4 py-24 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-16 flex flex-col items-end justify-between gap-6 md:flex-row">
+              <div className="max-w-xl">
+                <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl lg:text-6xl">
+                  Categorias em <span className="text-primary">Destaque</span>
+                </h2>
+              </div>
+              <Link 
+                to="/produtos" 
+                className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white"
+              >
+                Explorar todas <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+              {categorias.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to="/produtos"
+                  search={{ cat: cat.slug } as never}
+                  className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#1A1A1A] ring-1 ring-white/5 transition-all hover:ring-primary/50"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-4 text-center">
+                    <span className="block font-display text-sm font-black uppercase tracking-widest text-white transition-transform group-hover:-translate-y-1">
+                      {cat.nome}
+                    </span>
+                  </div>
+                  {/* Category placeholder images or icons could go here */}
+                  <div className="flex h-full w-full items-center justify-center opacity-20 transition-opacity group-hover:opacity-40">
+                    <ShoppingBag className="h-12 w-12" />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -190,65 +231,6 @@ function HomePage() {
             </div>
           </section>
         )}
-
-        {/* Categories Section */}
-        <section className="bg-[#0D0D0D] px-4 py-24 md:py-32 overflow-hidden">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-12 flex flex-col items-center justify-between gap-6 md:flex-row">
-              <div className="max-w-xl">
-                <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl lg:text-6xl">
-                  <span className="text-primary">Categorias</span>
-                </h2>
-              </div>
-              
-              <div className="hidden md:flex items-center gap-3">
-                <button 
-                  onClick={() => {
-                    const el = document.getElementById('cat-carousel');
-                    if (el) el.scrollBy({ left: -300, behavior: 'smooth' });
-                  }}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-all hover:bg-white/20 active:scale-90"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button 
-                  onClick={() => {
-                    const el = document.getElementById('cat-carousel');
-                    if (el) el.scrollBy({ left: 300, behavior: 'smooth' });
-                  }}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-all hover:bg-white/20 active:scale-90"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-
-            <div 
-              id="cat-carousel"
-              className="flex gap-4 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory cursor-grab active:cursor-grabbing"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {categorias.map((cat) => (
-                <Link
-                  key={cat.id}
-                  to="/produtos"
-                  search={{ cat: cat.slug } as never}
-                  className="group relative h-48 w-40 flex-shrink-0 overflow-hidden rounded-2xl bg-[#1A1A1A] ring-1 ring-white/5 transition-all hover:ring-primary/50 snap-start"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-4 text-center">
-                    <span className="block font-display text-xs font-black uppercase tracking-widest text-white transition-transform group-hover:-translate-y-1">
-                      {cat.nome}
-                    </span>
-                  </div>
-                  <div className="flex h-full w-full items-center justify-center opacity-10 transition-opacity group-hover:opacity-30">
-                    <ShoppingBag className="h-8 w-8 text-primary" />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Simple Footer for Home */}
