@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { listCategorias, listProdutos, getPromoInfo } from "@/lib/products";
+import { listCategorias, listProdutos } from "@/lib/products";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ProductCard } from "@/components/product-card";
@@ -37,20 +37,6 @@ function HomePage() {
     return produtos.filter(p => p.ativo).slice(0, 4);
   }, [produtos]);
 
-  const novidades = useMemo(() => {
-    return produtos.filter(p => p.ativo && p.novidade).slice(0, 4);
-  }, [produtos]);
-
-  const ofertas = useMemo(() => {
-    return produtos
-      .filter(p => {
-        if (!p.ativo) return false;
-        const promo = getPromoInfo(p);
-        return promo.ativa;
-      })
-      .slice(0, 4);
-  }, [produtos]);
-
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-[#FF5500] selection:text-white dark">
       <SiteHeader />
@@ -80,7 +66,9 @@ function HomePage() {
               Sem Limites
             </h1>
             
-            <div className="mt-8" />
+            <p className="mx-auto mt-8 max-w-xl text-lg text-white/60 md:text-xl">
+              Peças exclusivas desenhadas para quem não aceita o comum. Qualidade premium com a atitude que você procura.
+            </p>
 
             <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -139,68 +127,6 @@ function HomePage() {
           </div>
         </section>
 
-        {/* New Arrivals */}
-        {novidades.length > 0 && (
-          <section className="px-4 py-24 md:py-32">
-            <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center">
-                <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl lg:text-6xl">
-                  Novidades <span className="text-primary">Recentes</span>
-                </h2>
-                <p className="mt-4 text-white/40 uppercase tracking-[0.3em] text-[10px] font-bold">Estilo que acaba de chegar</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-                {novidades.map((p) => (
-                  <div key={p.id} className="dark">
-                    <ProductCard p={p} />
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-20 text-center">
-                <Link
-                  to="/produtos"
-                  className="inline-flex items-center gap-4 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10"
-                >
-                  Ver Todas as Novidades
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Best Offers */}
-        {ofertas.length > 0 && (
-          <section className="bg-[#0D0D0D] px-4 py-24 md:py-32">
-            <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center">
-                <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl lg:text-6xl">
-                  Melhores <span className="text-primary">Ofertas</span>
-                </h2>
-                <p className="mt-4 text-white/40 uppercase tracking-[0.3em] text-[10px] font-bold">Oportunidades Limitadas</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-                {ofertas.map((p) => (
-                  <div key={p.id} className="dark">
-                    <ProductCard p={p} />
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-20 text-center">
-                <Link
-                  to="/produtos"
-                  className="inline-flex items-center gap-4 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10"
-                >
-                  Ver Todas as Ofertas
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Featured Products */}
         {featuredProducts.length > 0 && (
           <section className="px-4 py-24 md:py-32">
@@ -231,6 +157,31 @@ function HomePage() {
             </div>
           </section>
         )}
+
+        {/* Brand Philosophy Section */}
+        <section className="relative overflow-hidden bg-primary px-4 py-24 md:py-32">
+          <div className="absolute right-0 top-0 -translate-y-1/2 translate-x-1/2 opacity-10">
+             <ShoppingBag className="h-[600px] w-[600px] text-white" />
+          </div>
+          
+          <div className="relative z-10 mx-auto max-w-4xl text-center">
+            <h2 className="font-display text-4xl font-black uppercase leading-none tracking-tighter text-white sm:text-6xl md:text-7xl">
+              Qualidade que você sente,<br />estilo que você vive.
+            </h2>
+            <div className="mt-12 flex flex-wrap justify-center gap-8 md:gap-16">
+              {[
+                { label: "Envio Rápido", sub: "Brasil todo" },
+                { label: "Premium", sub: "Material selecionado" },
+                { label: "Atacado", sub: "Melhores preços" }
+              ].map(item => (
+                <div key={item.label} className="text-center">
+                  <div className="text-xl font-black uppercase tracking-tighter text-white">{item.label}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/60">{item.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Simple Footer for Home */}

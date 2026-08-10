@@ -75,20 +75,13 @@ export function ProductCard({ p }: { p: ProductListItem }) {
           {p.nome}
         </h3>
         {promo.ativa && !esgotado ? (
-          <div className="space-y-0.5">
-            <div className="flex items-baseline gap-2">
-              <p className="font-display text-base font-extrabold tabular-nums text-primary">
-                {brl(promo.precoFinal)}
-              </p>
-              <p className="text-[10px] font-medium tabular-nums text-muted-foreground line-through opacity-70">
-                {brl(promo.precoOriginal)}
-              </p>
-            </div>
-            {promo.validoAte && (
-              <p className="text-[9px] font-bold uppercase tracking-wider text-primary/80">
-                Termina em {Math.ceil((new Date(promo.validoAte).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dias
-              </p>
-            )}
+          <div className="flex items-baseline gap-2">
+            <p className="font-display text-base font-extrabold tabular-nums text-primary">
+              {brl(promo.precoFinal)}
+            </p>
+            <p className="text-xs font-medium tabular-nums text-muted-foreground line-through">
+              {brl(promo.precoOriginal)}
+            </p>
           </div>
         ) : (
           <p className={`font-display text-base font-extrabold tabular-nums ${esgotado ? "text-muted-foreground line-through" : "text-foreground"}`}>
