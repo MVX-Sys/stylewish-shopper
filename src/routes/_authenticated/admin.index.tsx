@@ -5,12 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
 import { downloadProductsCSV, downloadProductsPDF, downloadProductsXLSX } from "@/lib/pdf";
 import { ExportMenu } from "@/components/export-menu";
+import { getSiteConfig, updateSiteConfig } from "@/lib/config-site";
+import { uploadImage } from "@/lib/storage";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminProductsList,
@@ -53,6 +55,11 @@ function AdminProductsList() {
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [qrToView, setQrToView] = useState<{ id: string; nome: string } | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [showConfig, setShowConfig] = useState(false);
+  const { data: config, refetch: refetchConfig } = useQuery({
+    queryKey: ["site-config"],
+    queryFn: getSiteConfig,
+  });
   const nav = useNavigate();
 
   useEffect(() => {
@@ -311,6 +318,13 @@ function AdminProductsList() {
           >
             Usuários
           </Link>
+          <button 
+            onClick={() => setShowConfig(true)}
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Configurações
+          </button>
         </div>
 
       </div>
@@ -404,6 +418,97 @@ function AdminProductsList() {
               </p>
             </div>
           </div>
+
+          {showConfig && config && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+              <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-background shadow-2xl">
+                <div className="flex items-center justify-between border-b border-border p-4">
+                  <h3 className="font-display font-semibold flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configurar Página Inicial
+                  </h3>
+                  <button onClick={() => setShowConfig(false)} className="rounded-full p-1 hover:bg-accent">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Type className="h-4 w-4" /> Título do Hero
+                    </label>
+                    <input 
+                      type="text" 
+                      defaultValue={config.hero_title}
+                      onBlur={(e) => updateSiteConfig({ hero_title: e.target.value }).then(() => {
+                        toast.success("Título atualizado");
+                        refetchConfig();
+                      })}
+                      className="w-full rounded-lg border border-input bg-background p-2 text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-sm font-medium">Tipo de Fundo</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: 'gradient', label: 'Gradiente', icon: SlidersHorizontal },
+                        { id: 'image', label: 'Imagem', icon: ImageIcon },
+                        { id: 'video', label: 'Vídeo', icon: Video },
+                      ].map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => updateSiteConfig({ hero_type: t.id as any }).then(() => {
+                            toast.success(`Modo ${t.label} ativado`);
+                            refetchConfig();
+                          })}
+                          className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${config.hero_type === t.id ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:bg-accent'}`}
+                        >
+                          <t.icon className="h-6 w-6" />
+                          <span className="text-xs font-bold uppercase">{t.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {config.hero_type !== 'gradient' && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        {config.hero_type === 'video' ? <Video className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}
+                        Upload de {config.hero_type === 'video' ? 'Vídeo' : 'Imagem'}
+                      </label>
+                      <input 
+                        type="file" 
+                        accept={config.hero_type === 'video' ? "video/*" : "image/*"}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const loadingToast = toast.loading("Enviando mídia...");
+                          try {
+                            const path = await uploadImage(file);
+                            const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(path);
+                            await updateSiteConfig({ hero_media_url: publicUrl });
+                            toast.success("Mídia atualizada!", { id: loadingToast });
+                            refetchConfig();
+                          } catch (err: any) {
+                            toast.error(err.message, { id: loadingToast });
+                          }
+                        }}
+                        className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                      />
+                      {config.hero_media_url && (
+                        <p className="text-[10px] text-muted-foreground break-all">Atual: {config.hero_media_url}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 border-t border-border flex justify-end">
+                  <button onClick={() => setShowConfig(false)} className="rounded-full bg-foreground text-background px-6 py-2 text-sm font-bold uppercase tracking-wide">
+                    Fechar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {showFilters && (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
