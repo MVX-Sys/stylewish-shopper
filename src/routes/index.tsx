@@ -119,6 +119,7 @@ interface ProductSectionProps {
   products: ProductListItem[];
   subtitle?: string;
   isPromo?: boolean;
+  emptyMessage?: string;
 }
 
 function ProductSection({ title, highlightIndex, products, subtitle, isPromo }: ProductSectionProps) {
