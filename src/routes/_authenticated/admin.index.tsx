@@ -485,7 +485,7 @@ function AdminProductsList() {
                           const loadingToast = toast.loading("Enviando mídia...");
                           try {
                             const path = await uploadImage(file);
-                            // Get signed URL instead of public URL for private bucket
+                            // The uploadImage function uses "product-images" bucket
                             const { data, error } = await supabase.storage.from('product-images').createSignedUrl(path, 60 * 60 * 24 * 365);
                             if (error) throw error;
                             await updateSiteConfig({ hero_media_url: data.signedUrl });
