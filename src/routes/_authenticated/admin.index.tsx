@@ -485,8 +485,10 @@ function AdminProductsList() {
                           const loadingToast = toast.loading("Enviando mídia...");
                           try {
                             const path = await uploadImage(file);
-                            const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(path);
-                            await updateSiteConfig({ hero_media_url: publicUrl });
+                            // Get signed URL instead of public URL for private bucket
+                            const { data, error } = await supabase.storage.from('product-images').createSignedUrl(path, 60 * 60 * 24 * 365);
+                            if (error) throw error;
+                            await updateSiteConfig({ hero_media_url: data.signedUrl });
                             toast.success("Mídia atualizada!", { id: loadingToast });
                             refetchConfig();
                           } catch (err: any) {
