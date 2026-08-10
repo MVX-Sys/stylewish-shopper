@@ -79,7 +79,7 @@ function Home() {
           />
         )}
 
-        <CategoriesSection categorias={categorias} />
+        <CategoriesSection categorias={categorias.filter(c => c.slug !== "geral")} />
       </main>
 
       <SiteFooter />
