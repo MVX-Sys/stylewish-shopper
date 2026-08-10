@@ -65,7 +65,7 @@ function RestocksPage() {
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Bell className="mb-4 h-12 w-12 text-muted-foreground opacity-20" />
             <p className="text-muted-foreground">Você não possui avisos de reposição ativos.</p>
-            <Link to="/produtos" className="mt-4 font-semibold text-primary hover:underline">
+            <Link to="/" className="mt-4 font-semibold text-primary hover:underline">
               Explorar produtos
             </Link>
           </div>

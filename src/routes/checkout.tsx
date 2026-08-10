@@ -206,7 +206,7 @@ function CheckoutPage() {
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-4 py-8 md:py-12">
         <Link
-          to="/produtos"
+          to="/"
           className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" /> Continuar comprando
