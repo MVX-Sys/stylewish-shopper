@@ -122,7 +122,7 @@ interface ProductSectionProps {
   emptyMessage?: string;
 }
 
-function ProductSection({ title, highlightIndex, products, subtitle, isPromo }: ProductSectionProps) {
+function ProductSection({ title, highlightIndex, products, subtitle, isPromo, emptyMessage }: ProductSectionProps) {
   return (
     <section className="py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4">
@@ -141,21 +141,31 @@ function ProductSection({ title, highlightIndex, products, subtitle, isPromo }: 
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-8">
-          {products.map((p) => (
-            <ProductCard key={p.id} p={p} />
-          ))}
-        </div>
+        {products.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-8">
+              {products.map((p) => (
+                <ProductCard key={p.id} p={p} />
+              ))}
+            </div>
 
-        <div className="mt-16 text-center">
-          <Link
-            to="/produtos"
-            className="inline-flex items-center gap-2 font-display text-sm font-black uppercase tracking-widest text-foreground transition-colors hover:text-primary"
-          >
-            {subtitle ? "Ver Catálogo Completo" : "Ver todos"}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+            <div className="mt-16 text-center">
+              <Link
+                to="/produtos"
+                className="inline-flex items-center gap-2 font-display text-sm font-black uppercase tracking-widest text-foreground transition-colors hover:text-primary"
+              >
+                {subtitle ? "Ver Catálogo Completo" : "Ver todos"}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="py-12 text-center">
+            <p className="text-muted-foreground italic">
+              {emptyMessage || "Não há produtos disponíveis no momento"}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
