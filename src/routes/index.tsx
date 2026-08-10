@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard } from "@/components/product-card";
 import { listCategorias, listProdutos, getPromoInfo, isEsgotado, type ProductListItem, type Categoria } from "@/lib/products";
+import { getSiteConfig } from "@/lib/config-site";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -23,6 +24,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const { data: config } = useQuery({
+    queryKey: ["site-config"],
+    queryFn: getSiteConfig,
+  });
   const { data: categorias = [] } = useQuery({
     queryKey: ["categorias"],
     queryFn: listCategorias,
@@ -46,7 +51,7 @@ function Home() {
     <div className="min-h-screen bg-background font-body">
       <SiteHeader />
       
-      <HeroSection />
+      <HeroSection config={config} />
 
       <main>
         <ProductSection 
@@ -73,21 +78,46 @@ function Home() {
   );
 }
 
-function HeroSection() {
+function HeroSection({ config }: { config?: any }) {
+  const mediaUrl = config?.hero_media_url;
+  const heroType = config?.hero_type || 'gradient';
+  const title = config?.hero_title || 'Estilo Urbano Sem Limites';
+
   return (
     <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden">
-      <div className="absolute inset-0 z-0 bg-navy grayscale opacity-60">
-        <div 
-          className="absolute inset-0 z-10 opacity-40"
-          style={{
-            backgroundImage: "radial-gradient(circle at center, var(--primary), transparent 70%)"
-          }}
+      {heroType === 'video' && mediaUrl ? (
+        <video 
+          src={mediaUrl} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
         />
-      </div>
+      ) : heroType === 'image' && mediaUrl ? (
+        <img 
+          src={mediaUrl} 
+          alt="Hero background" 
+          className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
+        />
+      ) : (
+        <div className="absolute inset-0 z-0 bg-navy grayscale opacity-60">
+          <div 
+            className="absolute inset-0 z-10 opacity-40"
+            style={{
+              backgroundImage: "radial-gradient(circle at center, var(--primary), transparent 70%)"
+            }}
+          />
+        </div>
+      )}
       
       <div className="relative z-20 flex h-full flex-col items-center justify-center px-4 text-center">
         <h1 className="max-w-4xl font-display text-5xl font-black uppercase tracking-tighter text-white md:text-7xl lg:text-8xl">
-          Estilo Urbano <span className="text-primary">Sem Limites</span>
+          {title.split(' ').map((word: string, i: number, arr: string[]) => (
+            <span key={i} className={i >= arr.length - 2 ? "text-primary" : ""}>
+              {word}{" "}
+            </span>
+          ))}
         </h1>
         
         <Link

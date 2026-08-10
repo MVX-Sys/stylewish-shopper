@@ -19,6 +19,16 @@ export async function getImageUrls(paths: (string | null | undefined)[]): Promis
   return Promise.all(paths.map((p) => getImageUrl(p)));
 }
 
+export async function uploadImage(file: File): Promise<string> {
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const path = `uploads/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage
+    .from("product-images")
+    .upload(path, file, { upsert: false });
+  if (error) throw error;
+  return path;
+}
+
 function sanitize(name: string) {
   return name
     .normalize("NFD")

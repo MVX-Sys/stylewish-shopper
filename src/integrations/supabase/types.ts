@@ -297,6 +297,30 @@ export type Database = {
           },
         ]
       }
+      site_config: {
+        Row: {
+          hero_media_url: string | null
+          hero_title: string | null
+          hero_type: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          hero_media_url?: string | null
+          hero_title?: string | null
+          hero_type?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          hero_media_url?: string | null
+          hero_title?: string | null
+          hero_type?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       solicitacoes_reposicao: {
         Row: {
           atualizado_em: string
