@@ -28,7 +28,7 @@ export function SiteHeader() {
 
   const doSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    nav({ to: "/produtos", search: { q } as never });
+    nav({ to: "/", search: { q } as never });
   };
 
   return (
@@ -144,10 +144,10 @@ export function SiteHeader() {
             style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
           >
             <Link
-              to="/produtos"
+              to="/"
               search={{} as never}
               className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors sm:px-5 sm:text-xs sm:tracking-[0.18em] ${
-                currentPath === "/produtos" && !currentSearch?.cat
+                currentPath === "/" && !currentSearch?.cat
                   ? "bg-white text-primary"
                   : "text-white/85 hover:bg-white/15 hover:text-white"
               }`}
@@ -159,7 +159,7 @@ export function SiteHeader() {
               return (
                 <Link
                   key={c.id}
-                  to="/produtos"
+                  to="/"
                   search={{ cat: c.slug } as never}
                   className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors sm:px-5 sm:text-xs sm:tracking-[0.18em] ${
                     active

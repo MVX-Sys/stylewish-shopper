@@ -1,11 +1,10 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
-import { ShoppingBag } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
 import { canAccess, hasAdminPanelAccess, type PermissionKey } from "@/lib/permissions";
-import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Calendar } from "lucide-react";
+import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -27,7 +26,6 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/admin/usuarios", label: "Usuários", icon: <Users className="h-4 w-4" />, perm: "usuarios.manage" },
   { to: "/admin/backup", label: "Backup", icon: <Database className="h-4 w-4" />, perm: "backup.manage" },
   { to: "/admin/auditoria", label: "Auditoria", icon: <History className="h-4 w-4" />, perm: "auditoria.view" },
-  { to: "/admin/eventos", label: "Eventos", icon: <Calendar className="h-4 w-4" />, perm: "produtos.manage" },
 ];
 
 function AdminLayout() {
@@ -83,21 +81,7 @@ function AdminLayout() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            <Link
-              to="/admin/eventos"
-              className="flex items-center gap-2 rounded-full bg-brand/10 px-4 py-2 text-sm font-bold uppercase tracking-wide text-brand transition-all hover:bg-brand/20 active:scale-95"
-            >
-              <Calendar className="h-4 w-4" />
-              <span className="hidden lg:inline">Eventos</span>
-            </Link>
-            <Link
-              to="/admin/pedidos"
-              className="flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-brand/30 active:scale-95"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              <span className="hidden lg:inline">Pedidos</span>
-            </Link>
+          <div className="ml-auto flex items-center gap-1">
             <Link
               to="/"
               className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
