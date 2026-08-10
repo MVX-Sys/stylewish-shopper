@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
-import { PromoHero } from "@/components/promo-hero";
+// PromoHero removed
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
 import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
 import { z } from "zod";
@@ -111,14 +111,7 @@ function Home() {
       onClear: () => setFilters({ ...filters, precoMin: 0, precoMax: 500 }),
     });
 
-  const promocoes = useMemo(
-    () =>
-      produtos
-        .filter((p) => p.ativo && getPromoInfo(p).ativa)
-        .sort((a, b) => getPromoInfo(b).percentual - getPromoInfo(a).percentual)
-        .slice(0, 8),
-    [produtos],
-  );
+  // Removed promotional carousel from listing page as per new home structure
 
   return (
     <div className="min-h-screen bg-background">
@@ -132,9 +125,7 @@ function Home() {
         />
         <section>
           {/* Promoções do dia — faixa simples integrada */}
-          {promocoes.length > 0 && !filters.promocao && !q && !activeSlug && (
-            <PromoHero produtos={promocoes} />
-          )}
+          {/* PromoHero removed from catalog */}
 
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
