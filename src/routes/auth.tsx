@@ -205,6 +205,8 @@ function AuthPage() {
                   : "Cadastre-se para realizar pedidos e salvar seu histórico."}
               </p>
 
+              <div id="auth-error-display" className="mt-4 hidden rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20 animate-fade-in-up"></div>
+
               <form onSubmit={submit} className="mt-8 space-y-4">
                 <label className="block">
                   <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
