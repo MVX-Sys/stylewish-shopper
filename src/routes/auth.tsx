@@ -149,7 +149,7 @@ function AuthPage() {
           ) : (
             <>
               <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight">
-                {mode === "signin" ? "Continuam sem entrar" : "Criar sua conta"}
+                {mode === "signin" ? "Acessar Painel" : "Criar sua conta"}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 {mode === "signin"

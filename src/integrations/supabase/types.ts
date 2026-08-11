@@ -454,12 +454,12 @@ export type Database = {
     }
     Functions: {
       has_permission: {
-        Args: { _perm: string; _user_id: string }
+        Args: { _perm_to_check: string; _user_id: string }
         Returns: boolean
       }
       has_role: {
         Args: {
-          _role: Database["public"]["Enums"]["app_role"]
+          _role_to_check: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
