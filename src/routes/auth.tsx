@@ -44,22 +44,17 @@ function AuthPage() {
           password,
           options: { emailRedirectTo: window.location.origin },
         });
-        if (error) {
-          if (error.message.includes("weak_password") || error.message.includes("easy to guess")) {
-            throw new Error("Sua senha é muito fraca ou comum. Por favor, escolha uma senha mais forte (ex: misture letras, números e símbolos).");
-          }
-          throw error;
-        }
+        if (error) throw error;
         toast.success("Cadastro criado! Você já pode entrar.");
         setMode("signin");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Bem-vindo!");
+        // The useEffect will handle redirection
       }
     } catch (err: unknown) {
-      console.error("Erro detalhado de auth:", err);
-      toast.error(err instanceof Error ? err.message : "Erro inesperado");
+      toast.error(err instanceof Error ? err.message : "Erro");
     } finally {
       setLoading(false);
     }
@@ -154,10 +149,9 @@ function AuthPage() {
           ) : (
             <>
               <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight">
-                {mode === "signin" ? "Entrar na sua conta" : "Criar sua conta"}
+                {mode === "signin" ? "Bem-vindo de volta" : "Criar sua conta"}
               </h1>
-              {/* Acesso administrativo removido conforme solicitação */}
-              <p className="mt-4 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground">
                 {mode === "signin"
                   ? "Entre para acompanhar seus pedidos."
                   : "Cadastre-se para realizar pedidos e salvar seu histórico."}

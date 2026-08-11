@@ -87,23 +87,21 @@ function HeroSection({ config }: { config?: any }) {
     <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden">
       {heroType === 'video' && mediaUrl ? (
         <video 
-          key={mediaUrl}
           src={mediaUrl} 
           autoPlay 
           loop 
           muted 
           playsInline 
-          className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+          className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
         />
       ) : heroType === 'image' && mediaUrl ? (
         <img 
-          key={mediaUrl}
           src={mediaUrl} 
           alt="Hero background" 
-          className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+          className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
         />
       ) : (
-        <div className="absolute inset-0 z-0 bg-navy opacity-60">
+        <div className="absolute inset-0 z-0 bg-navy grayscale opacity-60">
           <div 
             className="absolute inset-0 z-10 opacity-40"
             style={{

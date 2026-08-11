@@ -320,10 +320,10 @@ function AdminProductsList() {
           </Link>
           <button 
             onClick={() => setShowConfig(true)}
-            className="flex items-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-navy/20 transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 ml-2"
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors flex items-center gap-2"
           >
             <Settings className="h-4 w-4" />
-            Configurar Home
+            Configurações
           </button>
         </div>
 
@@ -485,10 +485,8 @@ function AdminProductsList() {
                           const loadingToast = toast.loading("Enviando mídia...");
                           try {
                             const path = await uploadImage(file);
-                            // The uploadImage function uses "product-images" bucket
-                            const { data, error } = await supabase.storage.from('product-images').createSignedUrl(path, 60 * 60 * 24 * 365);
-                            if (error) throw error;
-                            await updateSiteConfig({ hero_media_url: data.signedUrl });
+                            const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(path);
+                            await updateSiteConfig({ hero_media_url: publicUrl });
                             toast.success("Mídia atualizada!", { id: loadingToast });
                             refetchConfig();
                           } catch (err: any) {
