@@ -283,9 +283,9 @@ function PedidosAdminPage() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        {/* Table - Mobile friendly scroll */}
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-border">
+          <table className="w-full text-left text-sm min-w-[700px]">
             <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-semibold">Data / ID</th>
