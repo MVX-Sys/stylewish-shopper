@@ -100,6 +100,13 @@ function AuthPage() {
       // Fallback para exibir o erro diretamente na UI se o Toaster falhar
       console.log("SURFACING ERROR:", message);
       toast.error(message);
+      // Fallback garantido se o Sonner estiver com problemas de portal
+      const errDisplay = document.getElementById("auth-error-display");
+      if (errDisplay) {
+        errDisplay.innerText = message;
+        errDisplay.classList.remove("hidden");
+        setTimeout(() => errDisplay.classList.add("hidden"), 8000);
+      }
     } finally {
       setLoading(false);
     }
