@@ -69,6 +69,7 @@ function UsuariosPage() {
   const fetchUsers = useServerFn(listAdminUsers);
   const changeRole = useServerFn(setUserRole);
   const changePerms = useServerFn(setUserPermissions);
+  const removeUser = useServerFn(deleteUserAccess);
   const qc = useQueryClient();
 
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
