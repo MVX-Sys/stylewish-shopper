@@ -44,17 +44,22 @@ function AuthPage() {
           password,
           options: { emailRedirectTo: window.location.origin },
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes("weak_password") || error.message.includes("easy to guess")) {
+            throw new Error("Sua senha é muito fraca ou comum. Por favor, escolha uma senha mais forte (ex: misture letras, números e símbolos).");
+          }
+          throw error;
+        }
         toast.success("Cadastro criado! Você já pode entrar.");
         setMode("signin");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Bem-vindo!");
-        // The useEffect will handle redirection
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erro");
+      console.error("Erro detalhado de auth:", err);
+      toast.error(err instanceof Error ? err.message : "Erro inesperado");
     } finally {
       setLoading(false);
     }
