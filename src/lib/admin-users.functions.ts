@@ -167,19 +167,18 @@ export const setUserRole = createServerFn({ method: "POST" })
       );
     }
 
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    // Admin RLS policies allow managing roles/permissions — no service key needed
+    const db = context.supabase;
 
     // Remove all existing app_role rows for the user
-    const { error: delErr } = await supabaseAdmin
+    const { error: delErr } = await db
       .from("user_roles")
       .delete()
       .eq("user_id", data.userId);
     if (delErr) throw new Error(delErr.message);
 
     if (data.role === "admin" || data.role === "funcionario") {
-      const { error: insErr } = await supabaseAdmin
+      const { error: insErr } = await db
         .from("user_roles")
         .insert({ user_id: data.userId, role: data.role });
       if (insErr) throw new Error(insErr.message);
@@ -187,7 +186,7 @@ export const setUserRole = createServerFn({ method: "POST" })
 
     // Clear permissions when moving away from funcionario
     if (data.role !== "funcionario") {
-      const { error: permErr } = await supabaseAdmin
+      const { error: permErr } = await db
         .from("user_permissions")
         .delete()
         .eq("user_id", data.userId);
