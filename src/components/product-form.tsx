@@ -485,9 +485,12 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                   <input
                     type="number"
                     step="0.01"
-                    min={0}
+                    min="0"
                     value={preco}
-                    onChange={(e) => setPreco(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setPreco(isNaN(val) ? 0 : Math.max(0, val));
+                    }}
                     required
                     className="input pl-9"
                   />
