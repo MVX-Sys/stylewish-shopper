@@ -51,13 +51,6 @@ function Home() {
     <div className="min-h-screen bg-background font-body">
       <SiteHeader />
       
-      {/* Script temporário para garantir a criação do admin se necessário */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        // Este script será executado no cliente para tentar garantir o admin
-        // No mundo ideal isso seria uma seed, mas aqui ajuda a garantir o fluxo
-        console.log("Admin setup script ready");
-      `}} />
-      
       <HeroSection config={config} />
 
       <main>
