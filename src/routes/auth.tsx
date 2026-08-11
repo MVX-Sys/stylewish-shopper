@@ -39,22 +39,33 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { 
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              email: email
+            }
+          },
         });
         if (error) throw error;
-        toast.success("Cadastro criado! Você já pode entrar.");
+        
+        toast.success("Cadastro realizado com sucesso! Verifique seu e-mail ou tente entrar.");
         setMode("signin");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            throw new Error("E-mail ou senha incorretos.");
+          }
+          throw error;
+        }
         toast.success("Bem-vindo!");
-        // The useEffect will handle redirection
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erro");
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      toast.error(err.message || "Ocorreu um erro na autenticação.");
     } finally {
       setLoading(false);
     }
