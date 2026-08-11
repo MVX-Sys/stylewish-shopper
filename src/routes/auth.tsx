@@ -149,7 +149,7 @@ function AuthPage() {
           ) : (
             <>
               <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight">
-                {mode === "signin" ? "Bem-vindo de volta" : "Criar sua conta"}
+                {mode === "signin" ? "Nenhum dos 3 usuários estão entrando corrija este erro" : "Criar sua conta"}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 {mode === "signin"
