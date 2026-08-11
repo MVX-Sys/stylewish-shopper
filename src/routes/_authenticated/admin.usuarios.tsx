@@ -135,6 +135,33 @@ function UsuariosPage() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (userId: string) => removeUser({ data: { userId } }),
+    onSuccess: (res: any) => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setEditing(null);
+      toast.success(
+        res?.accountDeleted
+          ? "Usuário excluído com sucesso."
+          : "Acesso do funcionário removido (conta convertida em cliente).",
+      );
+    },
+    onError: (err: any) =>
+      toast.error(err?.message ?? "Não foi possível excluir o usuário."),
+  });
+
+  function confirmDelete(u: AdminUserRow) {
+    const label = u.email ?? u.id;
+    if (
+      window.confirm(
+        `Excluir ${label}? Todos os acessos e permissões serão removidos.`,
+      )
+    ) {
+      deleteMutation.mutate(u.id);
+    }
+  }
+
+
   if (!isAdmin) {
     return (
       <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
