@@ -26,23 +26,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPermissions([]);
       return;
     }
-    try {
-      const [rolesRes, permsRes] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", uid),
-        supabase.from("user_permissions").select("permission").eq("user_id", uid),
-      ]);
-      
-      if (rolesRes.error) {
-        console.warn("Error fetching roles:", rolesRes.error);
-      }
-      
-      const roles = (rolesRes.data ?? []).map((r) => r.role as string);
-      setRoleKind(classifyRole(roles));
-      setPermissions((permsRes.data ?? []).map((p) => p.permission as string));
-    } catch (err) {
-      console.error("Critical error checking roles:", err);
-      setRoleKind("cliente");
-    }
+    const [rolesRes, permsRes] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", uid),
+      supabase.from("user_permissions").select("permission").eq("user_id", uid),
+    ]);
+    const roles = (rolesRes.data ?? []).map((r) => r.role as string);
+    setRoleKind(classifyRole(roles));
+    setPermissions((permsRes.data ?? []).map((p) => p.permission as string));
   };
 
   useEffect(() => {
