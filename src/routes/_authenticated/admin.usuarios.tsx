@@ -13,11 +13,14 @@ import {
   Check,
   UserPlus,
   ShoppingBag,
+  Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   listAdminUsers,
   setUserRole,
   setUserPermissions,
+  deleteUserAccess,
   type AdminUserRow,
 } from "@/lib/admin-users.functions";
 import { BRAND } from "@/lib/config";
