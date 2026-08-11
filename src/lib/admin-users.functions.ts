@@ -237,3 +237,49 @@ export const setUserPermissions = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+export const deleteUserAccess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { userId: string }) => {
+    if (!data?.userId || typeof data.userId !== "string")
+      throw new Error("userId inválido");
+    return data;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+
+    if (data.userId === context.userId) {
+      throw new Response("Você não pode excluir a sua própria conta.", {
+        status: 400,
+      });
+    }
+
+    // Revoke role + permissions (works with RLS as an admin)
+    const { error: permErr } = await context.supabase
+      .from("user_permissions")
+      .delete()
+      .eq("user_id", data.userId);
+    if (permErr) throw new Error(permErr.message);
+
+    const { error: roleErr } = await context.supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.userId);
+    if (roleErr) throw new Error(roleErr.message);
+
+    // Best-effort: remove the login account entirely when the service key exists
+    let accountDeleted = false;
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const { supabaseAdmin } = await import(
+          "@/integrations/supabase/client.server"
+        );
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+        accountDeleted = !error;
+      } catch {
+        accountDeleted = false;
+      }
+    }
+
+    return { ok: true, accountDeleted };
+  });

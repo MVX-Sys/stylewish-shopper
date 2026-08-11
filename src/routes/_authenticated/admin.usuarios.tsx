@@ -13,11 +13,14 @@ import {
   Check,
   UserPlus,
   ShoppingBag,
+  Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   listAdminUsers,
   setUserRole,
   setUserPermissions,
+  deleteUserAccess,
   type AdminUserRow,
 } from "@/lib/admin-users.functions";
 import { BRAND } from "@/lib/config";
@@ -66,6 +69,7 @@ function UsuariosPage() {
   const fetchUsers = useServerFn(listAdminUsers);
   const changeRole = useServerFn(setUserRole);
   const changePerms = useServerFn(setUserPermissions);
+  const removeUser = useServerFn(deleteUserAccess);
   const qc = useQueryClient();
 
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
@@ -130,6 +134,33 @@ function UsuariosPage() {
       setEditing(null);
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (userId: string) => removeUser({ data: { userId } }),
+    onSuccess: (res: any) => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setEditing(null);
+      toast.success(
+        res?.accountDeleted
+          ? "Usuário excluído com sucesso."
+          : "Acesso do funcionário removido (conta convertida em cliente).",
+      );
+    },
+    onError: (err: any) =>
+      toast.error(err?.message ?? "Não foi possível excluir o usuário."),
+  });
+
+  function confirmDelete(u: AdminUserRow) {
+    const label = u.email ?? u.id;
+    if (
+      window.confirm(
+        `Excluir ${label}? Todos os acessos e permissões serão removidos.`,
+      )
+    ) {
+      deleteMutation.mutate(u.id);
+    }
+  }
+
 
   if (!isAdmin) {
     return (
@@ -348,12 +379,25 @@ function UsuariosPage() {
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={() => setEditing(u)}
-                    className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-accent"
-                  >
-                    Gerenciar acesso
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setEditing(u)}
+                      className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-accent"
+                    >
+                      Gerenciar acesso
+                    </button>
+                    {!isSelf && (
+                      <button
+                        onClick={() => confirmDelete(u)}
+                        disabled={deleteMutation.isPending}
+                        title="Excluir usuário"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Excluir
+                      </button>
+                    )}
+                  </div>
                 </li>
               );
             })}
