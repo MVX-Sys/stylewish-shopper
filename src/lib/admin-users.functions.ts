@@ -213,11 +213,9 @@ export const setUserPermissions = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const db = context.supabase;
 
-    const { error: delErr } = await supabaseAdmin
+    const { error: delErr } = await db
       .from("user_permissions")
       .delete()
       .eq("user_id", data.userId);
@@ -228,7 +226,7 @@ export const setUserPermissions = createServerFn({ method: "POST" })
         user_id: data.userId,
         permission: p,
       }));
-      const { error: insErr } = await supabaseAdmin
+      const { error: insErr } = await db
         .from("user_permissions")
         .insert(rows);
       if (insErr) throw new Error(insErr.message);
