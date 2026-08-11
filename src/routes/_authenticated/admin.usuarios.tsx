@@ -379,12 +379,25 @@ function UsuariosPage() {
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={() => setEditing(u)}
-                    className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-accent"
-                  >
-                    Gerenciar acesso
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setEditing(u)}
+                      className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-accent"
+                    >
+                      Gerenciar acesso
+                    </button>
+                    {!isSelf && (
+                      <button
+                        onClick={() => confirmDelete(u)}
+                        disabled={deleteMutation.isPending}
+                        title="Excluir usuário"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Excluir
+                      </button>
+                    )}
+                  </div>
                 </li>
               );
             })}
