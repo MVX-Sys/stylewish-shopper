@@ -149,9 +149,18 @@ function AuthPage() {
           ) : (
             <>
               <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight">
-                {mode === "signin" ? "Bem-vindo de volta" : "Criar sua conta"}
+                {mode === "signin" ? "Entrar na sua conta" : "Criar sua conta"}
               </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
+              {mode === "signin" && (
+                <div className="mt-4 rounded-lg bg-primary/10 p-4 border border-primary/20">
+                  <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Acesso Administrativo</p>
+                  <p className="text-sm text-foreground">
+                    <span className="font-semibold">Email:</span> mvxsistemas@hotmail.com<br/>
+                    <span className="font-semibold">Senha:</span> mateus0209
+                  </p>
+                </div>
+              )}
+              <p className="mt-4 text-sm text-muted-foreground">
                 {mode === "signin"
                   ? "Entre para acompanhar seus pedidos."
                   : "Cadastre-se para realizar pedidos e salvar seu histórico."}

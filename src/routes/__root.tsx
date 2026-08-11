@@ -15,6 +15,7 @@ import { CartProvider } from "@/lib/cart";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "sonner";
+import { AdminSetup } from "@/components/admin-setup";
 
 function NotFoundComponent() {
   return (
@@ -120,6 +121,7 @@ function RootComponent() {
         <AuthProvider>
           <CartProvider>
             <Outlet />
+            <AdminSetup />
             <Toaster position="top-right" richColors theme="system" />
           </CartProvider>
         </AuthProvider>
