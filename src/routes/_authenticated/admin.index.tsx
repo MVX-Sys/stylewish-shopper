@@ -640,8 +640,8 @@ function AdminProductsList() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-border">
+            <table className="w-full text-sm min-w-[800px]">
               <thead className="bg-muted/40 text-left">
                 <tr className="text-xs uppercase tracking-wider text-muted-foreground">
                   <th className="p-4 font-semibold">Produto</th>
