@@ -120,7 +120,13 @@ function RootComponent() {
         <AuthProvider>
           <CartProvider>
             <Outlet />
-            <Toaster position="top-right" richColors theme="system" />
+            <Toaster 
+              position="top-right" 
+              richColors 
+              theme="system" 
+              visibleToasts={9} 
+              closeButton
+            />
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>
