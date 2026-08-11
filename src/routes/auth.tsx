@@ -72,14 +72,45 @@ function AuthPage() {
         toast.success("Bem-vindo!");
       }
     } catch (err: any) {
-      console.error("Auth error:", err);
-      const message = err?.message || (typeof err === "object" ? JSON.stringify(err) : String(err));
-      toast.error(message === "{}" ? "Erro desconhecido na autenticação" : message);
+      console.error("Auth error caught in handler:", err);
+      
+      let message = "Erro desconhecido na autenticação";
+      
+      if (err?.message) {
+        message = err.message;
+      } else if (err?.error_description) {
+        message = err.error_description;
+      } else if (typeof err === "string") {
+        message = err;
+      } else if (err && typeof err === "object") {
+        try {
+          // Tenta extrair a mensagem do erro AuthError do Supabase
+          const errorMsg = err.message || (err.error && err.error.message);
+          if (errorMsg) {
+            message = errorMsg;
+          } else {
+            const stringified = JSON.stringify(err);
+            if (stringified !== "{}") {
+              message = stringified;
+            }
+          }
+        } catch (e) {}
+      }
+      
+      // Fallback para exibir o erro diretamente na UI se o Toaster falhar
+      console.log("SURFACING ERROR:", message);
+      toast.error(message);
+      // Fallback garantido se o Sonner estiver com problemas de portal
+      const errDisplay = document.getElementById("auth-error-display");
+      if (errDisplay) {
+        errDisplay.innerText = message;
+        errDisplay.classList.remove("hidden");
+        setTimeout(() => errDisplay.classList.add("hidden"), 8000);
+      }
     } finally {
       setLoading(false);
     }
   };
-
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -103,12 +134,10 @@ function AuthPage() {
           <p className="mt-3 max-w-md text-sm leading-relaxed opacity-70">
             Acesse sua conta para gerenciar seus pedidos, acompanhar entregas e receber ofertas exclusivas.
           </p>
-
         </div>
         <p className="text-xs uppercase tracking-widest opacity-50">
           Acesso Seguro
         </p>
-
       </div>
 
       {/* Right form panel */}
@@ -151,12 +180,11 @@ function AuthPage() {
                     </div>
                     <Link
                       to="/perfil"
-                      className="btn-shine w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                      className="btn-perfil w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                     >
                       Acessar meu perfil
                     </Link>
                   </div>
-
                 </div>
               )}
               <button
@@ -175,8 +203,9 @@ function AuthPage() {
                 {mode === "signin"
                   ? "Entre para acompanhar seus pedidos."
                   : "Cadastre-se para realizar pedidos e salvar seu histórico."}
-
               </p>
+
+              <div id="auth-error-display" className="mt-4 hidden rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20 animate-fade-in-up"></div>
 
               <form onSubmit={submit} className="mt-8 space-y-4">
                 <label className="block">
