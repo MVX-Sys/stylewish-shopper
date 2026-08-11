@@ -453,6 +453,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_user_role_simple: {
+        Args: { _role_text: string; _user_id: string }
+        Returns: boolean
+      }
       has_permission: {
         Args: { _perm: string; _user_id: string }
         Returns: boolean
