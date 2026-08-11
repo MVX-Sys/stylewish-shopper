@@ -185,13 +185,6 @@ function ProductSection({ title, highlightIndex, products, subtitle, isPromo, em
             </p>
           </div>
         )}
-        ) : (
-          <div className="py-12 text-center">
-            <p className="text-muted-foreground italic">
-              {emptyMessage || "Não há produtos disponíveis no momento"}
-            </p>
-          </div>
-        )}
       </div>
     </section>
   );
