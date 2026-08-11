@@ -179,6 +179,13 @@ function ProductSection({ title, highlightIndex, products, subtitle, isPromo, em
             </div>
           </>
         ) : (
+          <div className="flex flex-col items-center justify-center py-10 text-center opacity-60">
+            <p className="font-display text-lg font-medium text-muted-foreground italic">
+              {emptyMessage}
+            </p>
+          </div>
+        )}
+        ) : (
           <div className="py-12 text-center">
             <p className="text-muted-foreground italic">
               {emptyMessage || "Não há produtos disponíveis no momento"}
