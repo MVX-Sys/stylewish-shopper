@@ -31,6 +31,20 @@ export const createOrder = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    // 0. Verificar estoque antes de criar o pedido
+    for (const item of data.itens) {
+      const { data: varData, error: varErr } = await supabase
+        .from("variacoes_produto")
+        .select("quantidade_estoque, nome_cor, tamanho")
+        .eq("id", item.variacao_id)
+        .single();
+      
+      if (varErr) throw new Error(`Erro ao verificar estoque do produto ${item.nome}`);
+      if (!varData || varData.quantidade_estoque < item.quantidade) {
+        throw new Error(`Estoque insuficiente para ${item.nome} (${varData?.nome_cor || item.cor}, ${varData?.tamanho || item.tamanho}). Disponível: ${varData?.quantidade_estoque || 0}`);
+      }
+    }
+
     // 1. Inserir o pedido principal
     const { data: order, error: orderErr } = await supabase
       .from("pedidos")
@@ -45,8 +59,6 @@ export const createOrder = createServerFn({ method: "POST" })
         atendente_id: data.atendente_id as any,
         cliente_nome: data.cliente_nome as any,
         cliente_whatsapp: data.cliente_whatsapp as any,
-
-
       })
       .select()
       .single();

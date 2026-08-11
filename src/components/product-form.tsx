@@ -485,9 +485,12 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                   <input
                     type="number"
                     step="0.01"
-                    min={0}
+                    min="0"
                     value={preco}
-                    onChange={(e) => setPreco(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setPreco(isNaN(val) ? 0 : Math.max(0, val));
+                    }}
                     required
                     className="input pl-9"
                   />
@@ -636,7 +639,10 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                                 type="number"
                                 min={0}
                                 value={v.quantidade_estoque}
-                                onChange={(e) => setEstoque(c.nome, v.tamanho, Number(e.target.value))}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  setEstoque(c.nome, v.tamanho, isNaN(val) ? 0 : Math.max(0, val));
+                                }}
                                 className="w-16 rounded-lg border border-input bg-background px-2 py-1.5 text-center text-sm tabular-nums outline-none focus:border-foreground"
                               />
                               <button
@@ -759,7 +765,10 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                       step="0.01"
                       min={0}
                       value={precoPromocional}
-                      onChange={(e) => setPrecoPromocional(e.target.value)}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        setPrecoPromocional(isNaN(val) ? "" : Math.max(0, val).toString());
+                      }}
                       placeholder="0,00"
                       className="input pl-9"
                     />

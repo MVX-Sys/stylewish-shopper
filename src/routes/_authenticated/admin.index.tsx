@@ -330,8 +330,8 @@ function AdminProductsList() {
       </div>
 
 
-      {/* Table */}
-      <div className="rounded-xl border border-border bg-card">
+      {/* Table - Responsive optimized */}
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="flex flex-col gap-3 border-b border-border p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:max-w-xs">
@@ -640,8 +640,8 @@ function AdminProductsList() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-border">
+            <table className="w-full text-sm min-w-[800px]">
               <thead className="bg-muted/40 text-left">
                 <tr className="text-xs uppercase tracking-wider text-muted-foreground">
                   <th className="p-4 font-semibold">Produto</th>

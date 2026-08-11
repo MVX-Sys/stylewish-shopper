@@ -90,9 +90,28 @@ export const updatePedidoStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
 
-    // Se o status for "confirmado", vamos baixar o estoque
+    // Se o status for "confirmado", vamos baixar o estoque, mas APENAS se não estava confirmado antes
     if (data.status === "confirmado") {
-      // 1. Buscar os itens do pedido
+      // 1. Verificar status atual para evitar baixas duplicadas
+      const { data: pedidoAtual, error: pedidoErr } = await supabase
+        .from("pedidos")
+        .select("status")
+        .eq("id", data.id)
+        .single();
+      
+      if (pedidoErr) throw pedidoErr;
+      
+      // Se já estava confirmado, não fazemos nada com o estoque
+      if (pedidoAtual.status === "confirmado") {
+        const { error } = await supabase
+          .from("pedidos")
+          .update({ status: data.status })
+          .eq("id", data.id);
+        if (error) throw error;
+        return { success: true };
+      }
+
+      // 2. Buscar os itens do pedido
       const { data: itens, error: itensErr } = await supabase
         .from("pedidos_itens")
         .select("quantidade, variacao_id")
@@ -100,12 +119,13 @@ export const updatePedidoStatus = createServerFn({ method: "POST" })
 
       if (itensErr) throw itensErr;
 
-      // 2. Para cada item, subtrair do estoque da variação correspondente
+      // 3. Para cada item, subtrair do estoque da variação correspondente
       for (const item of (itens || [])) {
         if (item.variacao_id) {
-          // Usamos uma query de incremento negativo (decremento)
-          // Nota: Em um cenário real de alta concorrência, isso deveria ser uma RPC ou transação
-          // Mas para este escopo, faremos o update direto
+          // Usamos uma query de incremento negativo (decremento) via RPC se disponível, 
+          // ou garantimos a atomicidade via transação se possível. 
+          // Como estamos no worker, faremos um select for update se a lib suportasse, 
+          // mas vamos usar a lógica de verificação de estoque mínima.
           const { data: varData, error: fetchVarErr } = await supabase
             .from("variacoes_produto")
             .select("quantidade_estoque")

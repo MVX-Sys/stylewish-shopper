@@ -36,13 +36,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      checkRole(data.session?.user.id).finally(() => setLoading(false));
+    // Usamos getUser para garantir que o token é válido e obter dados frescos do servidor
+    supabase.auth.getUser().then(({ data }) => {
+      setSession(data.user ? { user: data.user, access_token: "" } as any : null);
+      checkRole(data.user?.id).finally(() => setLoading(false));
     });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, s) => {
       setSession(s);
-      checkRole(s?.user.id);
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        await checkRole(s?.user.id);
+      } else if (event === "SIGNED_OUT") {
+        setRoleKind("cliente");
+        setPermissions([]);
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, []);

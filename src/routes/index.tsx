@@ -99,6 +99,7 @@ function HeroSection({ config }: { config?: any }) {
           src={mediaUrl} 
           alt="Hero background" 
           className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
+          {...({ fetchPriority: "high" } as any)}
         />
       ) : (
         <div className="absolute inset-0 z-0 bg-navy grayscale opacity-60">
@@ -178,9 +179,9 @@ function ProductSection({ title, highlightIndex, products, subtitle, isPromo, em
             </div>
           </>
         ) : (
-          <div className="py-12 text-center">
-            <p className="text-muted-foreground italic">
-              {emptyMessage || "Não há produtos disponíveis no momento"}
+          <div className="flex flex-col items-center justify-center py-10 text-center opacity-60">
+            <p className="font-display text-lg font-medium text-muted-foreground italic">
+              {emptyMessage}
             </p>
           </div>
         )}
