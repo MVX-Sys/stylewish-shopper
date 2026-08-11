@@ -104,7 +104,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="font-sans antialiased">[anexo]
+      <body className="font-sans antialiased">Retire totalmente a autenticação de e-mail. Deixe apenas o login e senha normal
         {children}
         <Scripts />
       </body>
