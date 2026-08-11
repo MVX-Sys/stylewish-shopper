@@ -453,6 +453,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          email_confirmed_at: string
+          id: string
+          last_sign_in_at: string
+          phone: string
+        }[]
+      }
       has_permission: {
         Args: { _perm: string; _user_id: string }
         Returns: boolean
