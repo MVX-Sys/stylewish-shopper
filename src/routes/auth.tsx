@@ -39,22 +39,42 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin },
         });
-        if (error) throw error;
+        
+        if (signUpError) throw signUpError;
+
+        if (signUpData.user) {
+          // Tentar atribuir o papel de admin se for o primeiro usuário
+          const { data: adminExists } = await supabase
+            .from("user_roles")
+            .select("id")
+            .eq("role", "admin")
+            .limit(1)
+            .maybeSingle();
+
+          if (!adminExists) {
+            await supabase.from("user_roles").insert({
+              user_id: signUpData.user.id,
+              role: "admin"
+            });
+          }
+        }
+
         toast.success("Cadastro criado! Você já pode entrar.");
         setMode("signin");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Bem-vindo!");
-        // The useEffect will handle redirection
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erro");
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      const message = err?.message || (typeof err === "object" ? JSON.stringify(err) : String(err));
+      toast.error(message === "{}" ? "Erro desconhecido na autenticação" : message);
     } finally {
       setLoading(false);
     }
