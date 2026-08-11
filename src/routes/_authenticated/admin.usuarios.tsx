@@ -476,9 +476,9 @@ function EditRoleModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
-        <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/50 p-4">
+      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="min-w-0">
             <h2 className="font-display text-lg font-semibold">Gerenciar acesso</h2>
             <p className="truncate text-xs text-muted-foreground">
@@ -493,7 +493,7 @@ function EditRoleModal({
           </button>
         </div>
 
-        <div className="space-y-5 px-5 py-4">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4">
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Papel
@@ -568,7 +568,7 @@ function EditRoleModal({
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-border px-5 py-4 bg-muted/20">
+        <div className="flex shrink-0 items-center justify-end gap-3 border-t border-border bg-muted/20 px-5 py-4">
           <button
             onClick={onClose}
             className="rounded-full px-4 py-2 text-xs font-semibold transition-colors hover:bg-accent"
