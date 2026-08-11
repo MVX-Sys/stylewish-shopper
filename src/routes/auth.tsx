@@ -84,7 +84,7 @@ function AuthPage() {
         message = err;
       } else if (err && typeof err === "object") {
         try {
-          // Extrai a mensagem de erro se o objeto tiver uma propriedade message oculta ou formatada
+          // Tenta extrair a mensagem do erro AuthError do Supabase
           const errorMsg = err.message || (err.error && err.error.message);
           if (errorMsg) {
             message = errorMsg;
@@ -97,9 +97,9 @@ function AuthPage() {
         } catch (e) {}
       }
       
-      toast.error(message, {
-        duration: 5000,
-      });
+      // Fallback para exibir o erro diretamente na UI se o Toaster falhar
+      console.log("SURFACING ERROR:", message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
