@@ -93,12 +93,14 @@ function HeroSection({ config }: { config?: any }) {
           muted 
           playsInline 
           className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
+          priority="true"
         />
       ) : heroType === 'image' && mediaUrl ? (
         <img 
           src={mediaUrl} 
           alt="Hero background" 
           className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
+          fetchPriority="high"
         />
       ) : (
         <div className="absolute inset-0 z-0 bg-navy grayscale opacity-60">
