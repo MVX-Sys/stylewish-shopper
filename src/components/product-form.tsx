@@ -446,7 +446,13 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       qc.invalidateQueries({ queryKey: ["produto"] });
       nav({ to: "/admin" });
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erro ao salvar.");
+      const msg =
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" && err !== null && "message" in err
+            ? String((err as { message: unknown }).message)
+            : "Erro ao salvar.";
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
