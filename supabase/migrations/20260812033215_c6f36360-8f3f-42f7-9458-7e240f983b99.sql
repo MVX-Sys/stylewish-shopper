@@ -1,0 +1,3 @@
+CREATE POLICY "staff insere imagens produto" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'product-images' AND public.is_staff(auth.uid()));
+CREATE POLICY "staff atualiza imagens produto" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'product-images' AND public.is_staff(auth.uid())) WITH CHECK (bucket_id = 'product-images' AND public.is_staff(auth.uid()));
+CREATE POLICY "staff remove imagens produto" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'product-images' AND public.is_staff(auth.uid()));
