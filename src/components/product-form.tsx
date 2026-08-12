@@ -453,7 +453,6 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
             ? String((err as { message: unknown }).message)
             : "Erro ao salvar.";
       toast.error(msg);
-    }
     } finally {
       setSaving(false);
     }
