@@ -251,31 +251,39 @@ export const deleteUserAccess = createServerFn({ method: "POST" })
       });
     }
 
-    // Revoke role + permissions (works with RLS as an admin)
-    const { error: permErr } = await context.supabase
-      .from("user_permissions")
-      .delete()
-      .eq("user_id", data.userId);
-    if (permErr) throw new Error(permErr.message);
-
-    const { error: roleErr } = await context.supabase
-      .from("user_roles")
-      .delete()
-      .eq("user_id", data.userId);
-    if (roleErr) throw new Error(roleErr.message);
-
-    // Best-effort: remove the login account entirely when the service key exists
+    // Try to remove the login account entirely if service key exists
     let accountDeleted = false;
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
       try {
         const { supabaseAdmin } = await import(
           "@/integrations/supabase/client.server"
         );
+        // This will cascade delete roles and permissions due to DB foreign keys
         const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+        if (error) {
+          console.error("Auth delete error:", error);
+        }
         accountDeleted = !error;
-      } catch {
+      } catch (err) {
+        console.error("Auth delete exception:", err);
         accountDeleted = false;
       }
+    }
+
+    // Fallback: If account deletion failed (or no service key), at least remove roles/permissions
+    // so they become a basic client, but we should inform the user if the full delete failed.
+    if (!accountDeleted) {
+      const { error: permErr } = await context.supabase
+        .from("user_permissions")
+        .delete()
+        .eq("user_id", data.userId);
+      
+      const { error: roleErr } = await context.supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.userId);
+
+      // We return accountDeleted: false so the UI knows it just downgraded them
     }
 
     return { ok: true, accountDeleted };

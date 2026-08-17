@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
@@ -118,155 +118,162 @@ function AuthPage() {
   };
 
   return (
-    <div className="grid min-h-screen bg-background md:grid-cols-2">
-      {/* Left brand panel */}
-      <div className="relative hidden overflow-hidden bg-foreground p-10 text-background md:flex md:flex-col md:justify-between">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm opacity-80 transition-opacity hover:opacity-100">
-          <ArrowLeft className="h-4 w-4" /> Voltar à loja
-        </Link>
-        <div>
-          <div className="grid h-14 w-14 place-items-center rounded-full bg-background text-foreground font-display text-2xl font-semibold">
-            A
+    <Suspense fallback={
+      <div className="grid min-h-screen bg-background md:grid-cols-2 animate-pulse">
+        <div className="hidden bg-foreground md:block"></div>
+        <div className="flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+      </div>
+    }>
+      <div className="grid min-h-screen bg-background md:grid-cols-2">
+        {/* Left brand panel */}
+        <div className="relative hidden overflow-hidden bg-foreground p-10 text-background md:flex md:flex-col md:justify-between">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm opacity-80 transition-opacity hover:opacity-100">
+            <ArrowLeft className="h-4 w-4" /> Voltar à loja
+          </Link>
+          <div>
+            <div className="grid h-14 w-14 place-items-center rounded-full bg-background text-foreground font-display text-2xl font-semibold">
+              A
+            </div>
+            <h2 className="mt-6 max-w-md font-display text-4xl font-semibold leading-tight tracking-tight">
+              {BRAND}
+            </h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed opacity-70">
+              Acesse sua conta para gerenciar seus pedidos, acompanhar entregas e receber ofertas exclusivas.
+            </p>
           </div>
-          <h2 className="mt-6 max-w-md font-display text-4xl font-semibold leading-tight tracking-tight">
-            {BRAND}
-          </h2>
-          <p className="mt-3 max-w-md text-sm leading-relaxed opacity-70">
-            Acesse sua conta para gerenciar seus pedidos, acompanhar entregas e receber ofertas exclusivas.
+          <p className="text-xs uppercase tracking-widest opacity-50">
+            Acesso Seguro
           </p>
         </div>
-        <p className="text-xs uppercase tracking-widest opacity-50">
-          Acesso Seguro
-        </p>
-      </div>
 
-      {/* Right form panel */}
-      <div className="flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-sm">
-          <Link
-            to="/"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
-          >
-            <ArrowLeft className="h-4 w-4" /> Voltar
-          </Link>
+        {/* Right form panel */}
+        <div className="flex items-center justify-center px-4 py-10">
+          <div className="w-full max-w-sm">
+            <Link
+              to="/"
+              className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
+            >
+              <ArrowLeft className="h-4 w-4" /> Voltar
+            </Link>
 
-          {session ? (
-            <div className="space-y-5">
-              <div>
-                <h1 className="font-display text-2xl font-semibold">
-                  Você já está conectado
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {session.user.email}
-                </p>
-              </div>
-
-              {isAdmin ? (
-                <Link
-                  to="/admin"
-                  className="btn-shine block w-full rounded-full bg-foreground py-3 text-center text-sm font-semibold text-background transition-opacity hover:opacity-90"
-                >
-                  Ir para o painel admin
-                </Link>
-              ) : (
-                <div className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex flex-col items-center text-center gap-3">
-                    <ShieldCheck className="h-10 w-10 text-primary" />
-                    <div>
-                      <p className="text-sm font-semibold">Conta de Cliente</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Sua conta está ativa. Você pode visualizar seus pedidos e gerenciar seus dados no seu perfil.
-                      </p>
-                    </div>
-                    <Link
-                      to="/perfil"
-                      className="btn-perfil w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                    >
-                      Acessar meu perfil
-                    </Link>
-                  </div>
+            {session ? (
+              <div className="space-y-5">
+                <div>
+                  <h1 className="font-display text-2xl font-semibold">
+                    Você já está conectado
+                  </h1>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {session.user.email}
+                  </p>
                 </div>
-              )}
-              <button
-                onClick={signOut}
-                className="block w-full text-center text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-              >
-                Sair da conta
-              </button>
-            </div>
-          ) : (
-            <>
-              <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight">
-                {mode === "signin" ? "Bem-vindo de volta" : "Criar sua conta"}
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {mode === "signin"
-                  ? "Entre para acompanhar seus pedidos."
-                  : "Cadastre-se para realizar pedidos e salvar seu histórico."}
-              </p>
 
-              <div id="auth-error-display" className="mt-4 hidden rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20 animate-fade-in-up"></div>
-
-              <form onSubmit={submit} className="mt-8 space-y-4">
-                <label className="block">
-                  <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Email
-                  </span>
-                  <input
-                    type="email"
-                    required
-                    placeholder="voce@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-foreground"
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Senha
-                  </span>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    placeholder="Mínimo 6 caracteres"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-foreground"
-                  />
-                </label>
+                {isAdmin ? (
+                  <Link
+                    to="/admin"
+                    className="btn-shine block w-full rounded-full bg-foreground py-3 text-center text-sm font-semibold text-background transition-opacity hover:opacity-90"
+                  >
+                    Ir para o painel admin
+                  </Link>
+                ) : (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="flex flex-col items-center text-center gap-3">
+                      <ShieldCheck className="h-10 w-10 text-primary" />
+                      <div>
+                        <p className="text-sm font-semibold">Conta de Cliente</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Sua conta está ativa. Você pode visualizar seus pedidos e gerenciar seus dados no seu perfil.
+                        </p>
+                      </div>
+                      <Link
+                        to="/perfil"
+                        className="btn-perfil w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                      >
+                        Acessar meu perfil
+                      </Link>
+                    </div>
+                  </div>
+                )}
                 <button
-                  disabled={loading}
-                  className="btn-shine flex w-full items-center justify-center rounded-full bg-foreground py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+                  onClick={signOut}
+                  className="block w-full text-center text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : mode === "signin" ? (
-                    "Entrar"
+                  Sair da conta
+                </button>
+              </div>
+            ) : (
+              <>
+                <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight">
+                  {mode === "signin" ? "Bem-vindo de volta" : "Criar sua conta"}
+                </h1>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {mode === "signin"
+                    ? "Entre para acompanhar seus pedidos."
+                    : "Cadastre-se para realizar pedidos e salvar seu histórico."}
+                </p>
+
+                <div id="auth-error-display" className="mt-4 hidden rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20 animate-fade-in-up"></div>
+
+                <form onSubmit={submit} className="mt-8 space-y-4">
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Email
+                    </span>
+                    <input
+                      type="email"
+                      required
+                      placeholder="voce@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-foreground"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Senha
+                    </span>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      placeholder="Mínimo 6 caracteres"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-foreground"
+                    />
+                  </label>
+                  <button
+                    disabled={loading}
+                    className="btn-shine flex w-full items-center justify-center rounded-full bg-foreground py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : mode === "signin" ? (
+                      "Entrar"
+                    ) : (
+                      "Cadastrar"
+                    )}
+                  </button>
+                </form>
+
+                <button
+                  onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+                  className="mt-5 block w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {mode === "signin" ? (
+                    <>
+                      Não tem conta? <span className="font-semibold underline underline-offset-4">Cadastre-se</span>
+                    </>
                   ) : (
-                    "Cadastrar"
+                    <>
+                      Já tem conta? <span className="font-semibold underline underline-offset-4">Entrar</span>
+                    </>
                   )}
                 </button>
-              </form>
-
-              <button
-                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-                className="mt-5 block w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {mode === "signin" ? (
-                  <>
-                    Não tem conta? <span className="font-semibold underline underline-offset-4">Cadastre-se</span>
-                  </>
-                ) : (
-                  <>
-                    Já tem conta? <span className="font-semibold underline underline-offset-4">Entrar</span>
-                  </>
-                )}
-              </button>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 }
