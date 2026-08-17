@@ -424,9 +424,10 @@ Baixar PDF
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Details (Right) */}
-              <div className="space-y-7">
+            {/* Details (Right) */}
+            <div className="space-y-7">
                 <div>
                   <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-[32px]">
                     {p.nome}
