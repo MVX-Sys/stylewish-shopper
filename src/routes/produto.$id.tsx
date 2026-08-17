@@ -266,15 +266,13 @@ function ProductPage() {
         </nav>
 
         {isLoading || !p ? (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px]">
-            <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-              <div className="hidden lg:block">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="skeleton mb-2 aspect-square h-20 w-20 rounded-lg" />
-                ))}
-              </div>
-              <div className="skeleton flex-1 aspect-square rounded-lg" />
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[88px_1fr_1fr]">
+            <div className="hidden lg:block">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="skeleton mb-2 aspect-square rounded-lg" />
+              ))}
             </div>
+            <div className="skeleton aspect-square rounded-lg" />
             <div className="space-y-4">
               <div className="skeleton h-8 w-3/4 rounded" />
               <div className="skeleton h-4 w-full rounded" />
@@ -291,29 +289,27 @@ function ProductPage() {
               <ChevronLeft className="h-4 w-4" /> Continuar comprando
             </Link>
 
-            <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[1fr_400px] lg:gap-10">
-              {/* Product Visuals (Left) */}
-              <div className="order-1 flex flex-col gap-6 lg:flex-row lg:gap-8">
-                {/* Thumbnails */}
-                <div className="flex flex-row flex-wrap gap-2 lg:flex-col lg:flex-nowrap">
-                  {imgs.map((u, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setMainIdx(i)}
-                      className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-20 sm:w-20 ${
-                        i === mainIdx
-                          ? "border-foreground ring-2 ring-foreground/10"
-                          : "border-border opacity-70 hover:opacity-100"
-                      }`}
-                    >
-                      <img src={u} alt="" className="h-full w-full object-cover" />
-                    </button>
-                  ))}
-                </div>
+            <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[88px_1fr_1fr] lg:gap-10">
+              {/* Thumbnails */}
+              <div className="order-2 flex flex-row flex-wrap gap-2 lg:order-1 lg:flex-col lg:flex-nowrap">
+                {imgs.map((u, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setMainIdx(i)}
+                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-20 sm:w-20 ${
+                      i === mainIdx
+                        ? "border-foreground ring-2 ring-foreground/10"
+                        : "border-border opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={u} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
 
-                {/* Main image */}
-                <div className="flex-1">
-                  <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted">
+              {/* Main image */}
+              <div className="order-1 lg:order-2">
+                <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted">
                   {imgs[mainIdx] ? (
                     <img
                       src={imgs[mainIdx]}
@@ -424,10 +420,9 @@ Baixar PDF
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Details (Right) */}
-            <div className="space-y-7">
+              {/* Details */}
+              <div className="order-3 space-y-7">
                 <div>
                   <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-[32px]">
                     {p.nome}
@@ -624,6 +619,9 @@ Baixar PDF
                     Adicionar
                   </button>
                 </div>
+
+
+
               </div>
             </div>
           </>
