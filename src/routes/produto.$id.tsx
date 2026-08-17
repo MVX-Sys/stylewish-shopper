@@ -289,7 +289,7 @@ function ProductPage() {
               <ChevronLeft className="h-4 w-4" /> Continuar comprando
             </Link>
 
-            <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[88px_1fr] lg:gap-10">
+            <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[88px_1fr_1fr] lg:gap-10">
               {/* Thumbnails */}
               <div className="order-2 flex flex-row flex-wrap gap-2 lg:order-1 lg:flex-col lg:flex-nowrap">
                 {imgs.map((u, i) => (
@@ -422,7 +422,7 @@ Baixar PDF
               </div>
 
               {/* Details */}
-              <div className="order-3 space-y-7 lg:col-start-2">
+              <div className="order-3 space-y-7">
                 <div>
                   <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-[32px]">
                     {p.nome}
