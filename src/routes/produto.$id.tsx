@@ -266,13 +266,15 @@ function ProductPage() {
         </nav>
 
         {isLoading || !p ? (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[88px_1fr_1fr]">
-            <div className="hidden lg:block">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="skeleton mb-2 aspect-square rounded-lg" />
-              ))}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px]">
+            <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+              <div className="hidden lg:block">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="skeleton mb-2 aspect-square h-20 w-20 rounded-lg" />
+                ))}
+              </div>
+              <div className="skeleton flex-1 aspect-square rounded-lg" />
             </div>
-            <div className="skeleton aspect-square rounded-lg" />
             <div className="space-y-4">
               <div className="skeleton h-8 w-3/4 rounded" />
               <div className="skeleton h-4 w-full rounded" />
