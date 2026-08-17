@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
@@ -118,7 +118,8 @@ function AuthPage() {
   };
 
   return (
-    <div className="grid min-h-screen bg-background md:grid-cols-2">
+    <Suspense>
+      <div className="grid min-h-screen bg-background md:grid-cols-2">
       {/* Left brand panel */}
       <div className="relative hidden overflow-hidden bg-foreground p-10 text-background md:flex md:flex-col md:justify-between">
         <Link to="/" className="inline-flex items-center gap-2 text-sm opacity-80 transition-opacity hover:opacity-100">
@@ -267,6 +268,6 @@ function AuthPage() {
           )}
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 }
