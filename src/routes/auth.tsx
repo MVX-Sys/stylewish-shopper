@@ -120,6 +120,13 @@ function AuthPage() {
   return (
     <Suspense>
       <div className="grid min-h-screen bg-background md:grid-cols-2">
+      </div>
+    </Suspense>
+  );
+}
+
+const Placeholder = () => (
+  <div className="grid min-h-screen bg-background md:grid-cols-2">
       {/* Left brand panel */}
       <div className="relative hidden overflow-hidden bg-foreground p-10 text-background md:flex md:flex-col md:justify-between">
         <Link to="/" className="inline-flex items-center gap-2 text-sm opacity-80 transition-opacity hover:opacity-100">
