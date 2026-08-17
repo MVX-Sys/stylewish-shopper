@@ -479,7 +479,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                 onChange={(e) => setDescricao(e.target.value)}
                 rows={4}
                 placeholder="Detalhes de tecido, caimento, ocasião…"
-                className="input resize-none"
+                className="input min-h-[120px] resize-y"
               />
             </Field>
             <div className="grid grid-cols-2 gap-3">

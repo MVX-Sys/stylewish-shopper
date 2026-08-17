@@ -169,9 +169,20 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   const desc = p.descricao?.trim() || "Sem descrição cadastrada.";
-  const descLines = doc.splitTextToSize(desc, 182);
-  doc.text(descLines, 14, y);
-  y += descLines.length * 5 + 6;
+  // Preserva quebras de linha substituindo \n por um marcador ou tratando cada linha
+  const lines = desc.split(/\r?\n/);
+  for (const line of lines) {
+    const splitLines = doc.splitTextToSize(line, 182);
+    if (y + splitLines.length * 5 > 280) {
+      footer(doc);
+      doc.addPage();
+      header(doc, "Ficha do produto");
+      y = 32;
+    }
+    doc.text(splitLines, 14, y);
+    y += splitLines.length * 5;
+  }
+  y += 6;
 
   if (p.variacoes.length > 0) {
     doc.setFont("helvetica", "bold");
@@ -368,8 +379,19 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     y += 6;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    const obs = doc.splitTextToSize(order.observacoes, 182);
-    doc.text(obs, 14, y);
+    const obsLines = doc.splitTextToSize(order.observacoes, 182);
+    const splitObs = order.observacoes.split(/\r?\n/);
+    for (const line of splitObs) {
+      const splitLines = doc.splitTextToSize(line, 182);
+      if (y + splitLines.length * 5 > 280) {
+        footer(doc);
+        doc.addPage();
+        header(doc, "Resumo do pedido");
+        y = 32;
+      }
+      doc.text(splitLines, 14, y);
+      y += splitLines.length * 5;
+    }
   }
 
   footer(doc);

@@ -468,9 +468,9 @@ Baixar PDF
                     </>
                   )}
                   {p.descricao && (
-                    <p className="mt-6 border-l-2 border-primary/40 pl-4 text-sm leading-relaxed text-muted-foreground">
+                    <div className="mt-6 border-l-2 border-primary/40 pl-4 text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                       {p.descricao}
-                    </p>
+                    </div>
                   )}
                 </div>
 
