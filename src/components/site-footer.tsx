@@ -3,7 +3,7 @@ import { MessageCircle, Instagram } from "lucide-react";
 import logoUrl from "@/assets/acha-busca-icon.png";
 
 const MVX_INSTAGRAM = "https://www.instagram.com/mvx_sistemas/";
-const MVX_WHATSAPP_1 = { display: "(87) 99168-6116", link: "5587991686116" };
+const MVX_WHATSAPP_1 = { display: "(81) 99168-6116", link: "5581991686116" };
 const MVX_WHATSAPP_2 = { display: "(87) 99748-0691", link: "5587997480691" };
 
 export function SiteFooter() {
