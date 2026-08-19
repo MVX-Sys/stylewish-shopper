@@ -65,33 +65,33 @@ function Home() {
   });
 
   const catBySlug = useMemo(
-    () => Object.fromEntries(categorias.map((c) => [c.slug, c.id])),
+    () => Object.fromEntries(categorias.map((c: Categoria) => [c.slug, c.id])),
     [categorias],
   );
   const catBySlugName = useMemo(
-    () => Object.fromEntries(categorias.map((c) => [c.slug, c.nome])),
+    () => Object.fromEntries(categorias.map((c: Categoria) => [c.slug, c.nome])),
     [categorias],
   );
 
   const filtered = useMemo(() => {
-    let list = produtos.filter((p) => p.ativo);
+    let list = produtos.filter((p: ProductListItem) => p.ativo);
     const query = (q ?? filters.q).trim().toLowerCase();
-    if (query) list = list.filter((p) => p.nome.toLowerCase().includes(query));
+    if (query) list = list.filter((p: ProductListItem) => p.nome.toLowerCase().includes(query));
     const slug = cat ?? filters.categoriaSlug;
     if (slug && catBySlug[slug])
-      list = list.filter((p) => p.categoria_id === catBySlug[slug]);
-    if (filters.novidades) list = list.filter((p) => p.novidade);
-    if (filters.promocao) list = list.filter((p) => p.promocao);
-    list = list.filter((p) => p.preco <= filters.precoMax);
+      list = list.filter((p: ProductListItem) => p.categoria_id === catBySlug[slug]);
+    if (filters.novidades) list = list.filter((p: ProductListItem) => p.novidade);
+    if (filters.promocao) list = list.filter((p: ProductListItem) => p.promocao);
+    list = list.filter((p: ProductListItem) => p.preco <= filters.precoMax);
     switch (filters.ordem) {
       case "menor-preco":
-        list = [...list].sort((a, b) => a.preco - b.preco);
+        list = [...list].sort((a: ProductListItem, b: ProductListItem) => a.preco - b.preco);
         break;
       case "maior-preco":
-        list = [...list].sort((a, b) => b.preco - a.preco);
+        list = [...list].sort((a: ProductListItem, b: ProductListItem) => b.preco - a.preco);
         break;
       case "nome":
-        list = [...list].sort((a, b) => a.nome.localeCompare(b.nome));
+        list = [...list].sort((a: ProductListItem, b: ProductListItem) => a.nome.localeCompare(b.nome));
         break;
     }
     return list;
@@ -162,7 +162,7 @@ function Home() {
             )}
           </div>
 
-          {isLoading ? (
+          {!produtos.length ? (
             <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
@@ -188,7 +188,7 @@ function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
-              {filtered.map((p, idx) => (
+              {filtered.map((p: ProductListItem, idx: number) => (
                 <div
                   key={p.id}
                   className="animate-fade-in-up"

@@ -172,7 +172,7 @@ function ProductPage() {
 
   const subtotal = useMemo(() => {
     if (!p) return 0;
-    return Object.entries(qtys).reduce((s, [, q]) => s + q * precoEfetivo, 0);
+    return Object.entries(qtys).reduce((s, [, q]) => s + (q as number) * precoEfetivo, 0);
   }, [qtys, p, precoEfetivo]);
 
   const totalItens = Object.values(qtys).reduce((s, q) => s + q, 0);
