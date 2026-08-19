@@ -126,7 +126,7 @@ function ProductPage() {
   useEffect(() => {
     if (!p) return;
     const paths = [...p.imagens]
-      .sort((a, b) => (b.principal ? 1 : 0) - (a.principal ? 1 : 0) || a.ordem - b.ordem)
+      .sort((a: any, b: any) => (b.principal ? 1 : 0) - (a.principal ? 1 : 0) || a.ordem - b.ordem)
       .map((i) => i.storage_path);
     Promise.all(paths.map(p => getImageUrl(p, { width: 800, quality: 85 }))).then(setImgs);
   }, [p]);
@@ -135,9 +135,9 @@ function ProductPage() {
     if (!p) return { cores: [], tamanhos: [] as string[] };
     const coresMap = new Map<string, { nome: string; hex: string }>();
     const tamanhos = new Set<string>();
-    for (const v of p.variacoes) {
-      coresMap.set(v.nome_cor, { nome: v.nome_cor, hex: v.hex_cor });
-      tamanhos.add(v.tamanho);
+    for (const v of (p?.variacoes || [])) {
+      coresMap.set((v as VariacaoProduto).nome_cor, { nome: (v as VariacaoProduto).nome_cor, hex: (v as VariacaoProduto).hex_cor });
+      tamanhos.add((v as VariacaoProduto).tamanho);
     }
     const catSlug = p.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id)?.slug?.toLowerCase() || "" : "";
     const isFootwear = ["chinelos", "tenis", "botas"].some(slug => catSlug.includes(slug));
