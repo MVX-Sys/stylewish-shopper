@@ -6,7 +6,7 @@ export interface ImageOptions {
   width?: number;
   height?: number;
   quality?: number;
-  format?: 'webp' | 'origin';
+  format?: 'origin';
   resize?: 'cover' | 'contain' | 'fill';
 }
 
