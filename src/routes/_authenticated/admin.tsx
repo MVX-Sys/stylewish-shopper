@@ -1,10 +1,17 @@
-import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
 import { canAccess, hasAdminPanelAccess, type PermissionKey } from "@/lib/permissions";
-import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp } from "lucide-react";
+import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Menu } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -31,6 +38,7 @@ const NAV_ITEMS: NavItem[] = [
 function AdminLayout() {
   const { roleKind, permissions, loading, session } = useAuth();
   const nav = useNavigate();
+  const location = useLocation();
   const allowed = hasAdminPanelAccess(roleKind, permissions);
 
   useEffect(() => {
@@ -66,20 +74,27 @@ function AdminLayout() {
             </div>
           </Link>
 
-          <nav className="flex gap-1 text-sm">
-            {visibleNav.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="flex items-center gap-1.5 rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                activeProps={{ className: "!bg-foreground !text-background" }}
-                activeOptions={item.exact ? { exact: true } : undefined}
-              >
-                {item.icon}
-                <span className="hidden sm:inline">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
+          <div className="flex items-center gap-2 overflow-hidden sm:gap-4">
+            <Select
+              value={location.pathname}
+              onValueChange={(value) => nav({ to: value })}
+            >
+              <SelectTrigger className="h-9 min-w-[140px] max-w-[200px] rounded-full bg-accent/50 border-none shadow-none focus:ring-1 focus:ring-primary/20">
+                <Menu className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Menu" />
+              </SelectTrigger>
+              <SelectContent>
+                {visibleNav.map((item) => (
+                  <SelectItem key={item.to} value={item.to}>
+                    <div className="flex items-center gap-2">
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="ml-auto flex items-center gap-1">
             <Link
