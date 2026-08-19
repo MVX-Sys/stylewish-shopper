@@ -27,14 +27,17 @@ function Home() {
   const { data: config } = useQuery({
     queryKey: ["site-config"],
     queryFn: getSiteConfig,
+    staleTime: 1000 * 60 * 60, // Config changes rarely
   });
   const { data: categorias = [] } = useQuery({
     queryKey: ["categorias"],
     queryFn: listCategorias,
+    staleTime: 1000 * 60 * 30, // Categories change rarely
   });
   const { data: produtos = [] } = useQuery({
     queryKey: ["produtos"],
     queryFn: listProdutos,
+    staleTime: 1000 * 60 * 5, // Products can stay stale for a few minutes
   });
 
   const novidades = useMemo(() => 
