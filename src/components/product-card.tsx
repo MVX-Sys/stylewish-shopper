@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { brl } from "@/lib/format";
 import { getImageUrl } from "@/lib/storage";
 import { getPromoInfo, isEsgotado, type ProductListItem } from "@/lib/products";
 
-export function ProductCard({ p }: { p: ProductListItem }) {
+export const ProductCard = memo(function ProductCard({ p }: { p: ProductListItem }) {
   const [img, setImg] = useState<string>("");
   const esgotado = isEsgotado(p);
   const promo = getPromoInfo(p);
@@ -13,7 +13,9 @@ export function ProductCard({ p }: { p: ProductListItem }) {
     [...p.imagens].sort((a, b) => a.ordem - b.ordem)[0];
 
   useEffect(() => {
-    if (principal) getImageUrl(principal.storage_path).then(setImg);
+    if (principal) {
+      getImageUrl(principal.storage_path, { width: 400, quality: 80 }).then(setImg);
+    }
   }, [principal]);
 
   return (
@@ -96,7 +98,7 @@ export function ProductCard({ p }: { p: ProductListItem }) {
       </div>
     </Link>
   );
-}
+});
 
 
 
