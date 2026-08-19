@@ -24,13 +24,13 @@ export const ProductCard = memo(function ProductCard({ p }: { p: ProductListItem
       params={{ id: p.id }}
       className="group block focus:outline-none"
     >
-      <div className="card-hover relative aspect-[4/5] overflow-hidden rounded-2xl bg-primary/50 shadow-soft ring-1 ring-black/5">
+      <div className="card-hover relative aspect-[4/5] overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-black/5">
         {img ? (
           <img
             src={img}
             alt={p.nome}
             loading="lazy"
-            className="h-full w-full object-contain p-2 transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
+            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
           />
         ) : (
           <div className="skeleton h-full w-full" />
