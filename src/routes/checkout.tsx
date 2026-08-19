@@ -33,7 +33,7 @@ export const Route = createFileRoute("/checkout")({
 
 type FormaEnvio = "ENTREGA" | "RETIRADA";
 type FormaEntrega = "TRANSPORTADORA A COMBINAR";
-type FormaPagamento = "PIX" | "DINHEIRO" | "CARTÃO DE CRÉDITO" | "CARTÃO DE DÉBITO";
+type FormaPagamento = "PIX";
 
 function CheckoutPage() {
   const { items, total, clear } = useCart();
@@ -267,25 +267,12 @@ function CheckoutPage() {
 
           {/* Removido campos de endereço conforme solicitado */}
 
-          <Field label="Forma de Pagamento:" required className="mt-4">
-            <div className="flex flex-wrap gap-2">
-              {(["PIX", "DINHEIRO", "CARTÃO DE CRÉDITO", "CARTÃO DE DÉBITO"] as FormaPagamento[]).map((op) => {
-                const active = formaPagamento === op;
-                return (
-                  <button
-                    key={op}
-                    type="button"
-                    onClick={() => setFormaPagamento(op)}
-                    className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background hover:border-primary/50 hover:bg-accent"
-                    }`}
-                  >
-                    {op}
-                  </button>
-                );
-              })}
+          <Field label="Forma de Pagamento:" className="mt-4">
+            <div className="flex items-center gap-2">
+              <div className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm">
+                PIX
+              </div>
+              <span className="text-xs text-muted-foreground italic">(Única forma aceita)</span>
             </div>
           </Field>
 
