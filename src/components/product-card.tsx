@@ -30,7 +30,7 @@ export const ProductCard = memo(function ProductCard({ p }: { p: ProductListItem
             src={img}
             alt={p.nome}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
+            className="h-full w-full object-contain p-2 transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
           />
         ) : (
           <div className="skeleton h-full w-full" />
