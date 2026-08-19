@@ -85,7 +85,7 @@ function Home() {
           emptyMessage="Não há ofertas disponíveis no momento"
         />
 
-        <CategoriesSection categorias={categorias.filter((c: Categoria) => c.slug !== "geral")} />
+        <CategoriesSection categorias={categorias} />
       </main>
 
       <SiteFooter />
