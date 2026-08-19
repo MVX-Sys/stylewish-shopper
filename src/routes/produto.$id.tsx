@@ -54,10 +54,12 @@ function ProductPage() {
   const { data: p, isLoading } = useQuery({
     queryKey: ["produto", id],
     queryFn: () => getProduto(id),
+    staleTime: 1000 * 60 * 5,
   });
   const { data: categorias = [] } = useQuery<Categoria[]>({
     queryKey: ["categorias"],
     queryFn: listCategorias,
+    staleTime: 1000 * 60 * 30,
   });
   const { add, setOpen } = useCart();
 
