@@ -181,6 +181,8 @@ export type Database = {
           cliente_nome: string | null
           cliente_whatsapp: string | null
           criado_em: string | null
+          cupom_codigo: string | null
+          desconto_cupom: number | null
           endereco: Json | null
           forma_envio: string
           forma_pagamento: string
@@ -195,6 +197,8 @@ export type Database = {
           cliente_nome?: string | null
           cliente_whatsapp?: string | null
           criado_em?: string | null
+          cupom_codigo?: string | null
+          desconto_cupom?: number | null
           endereco?: Json | null
           forma_envio: string
           forma_pagamento: string
@@ -209,6 +213,8 @@ export type Database = {
           cliente_nome?: string | null
           cliente_whatsapp?: string | null
           criado_em?: string | null
+          cupom_codigo?: string | null
+          desconto_cupom?: number | null
           endereco?: Json | null
           forma_envio?: string
           forma_pagamento?: string
