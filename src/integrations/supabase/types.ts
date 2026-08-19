@@ -104,6 +104,42 @@ export type Database = {
         }
         Relationships: []
       }
+      cupons: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          created_at: string | null
+          id: string
+          produtos_ids: string[] | null
+          quantidade_minima_itens: number
+          tipo_desconto: string
+          validade: string | null
+          valor_desconto: number
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          created_at?: string | null
+          id?: string
+          produtos_ids?: string[] | null
+          quantidade_minima_itens?: number
+          tipo_desconto?: string
+          validade?: string | null
+          valor_desconto: number
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          created_at?: string | null
+          id?: string
+          produtos_ids?: string[] | null
+          quantidade_minima_itens?: number
+          tipo_desconto?: string
+          validade?: string | null
+          valor_desconto?: number
+        }
+        Relationships: []
+      }
       imagens_produto: {
         Row: {
           criado_em: string
