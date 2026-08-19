@@ -4,7 +4,8 @@ export type PermissionKey =
   | "auditoria.view"
   | "backup.manage"
   | "usuarios.manage"
-  | "pedidos.view";
+  | "pedidos.view"
+  | "cupons.manage";
 
 export const ALL_PERMISSIONS: {
   key: PermissionKey;
@@ -40,6 +41,11 @@ export const ALL_PERMISSIONS: {
     key: "pedidos.view",
     label: "Ver Pedidos e Vendas",
     description: "Visualizar histórico de pedidos e relatórios de vendas.",
+  },
+  {
+    key: "cupons.manage",
+    label: "Gerenciar cupons",
+    description: "Criar, editar e excluir cupons de desconto.",
   },
 ];
 
