@@ -1,15 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useRef } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard } from "@/components/product-card";
-import { listCategorias, listProdutos, getPromoInfo, isEsgotado, type ProductListItem, type Categoria } from "@/lib/products";
+import { listCategoriasFn, listProdutosFn } from "@/lib/products.functions";
+import { isEsgotado, type ProductListItem, type Categoria, getPromoInfo } from "@/lib/products";
 import { getSiteConfig } from "@/lib/config-site";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["categorias"],
+        queryFn: () => listCategoriasFn(),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["produtos"],
+        queryFn: () => listProdutosFn(),
+      }),
+    ]);
+  },
   head: () => ({
     meta: [
       { title: "ACHAEBUSCA — Estilo Urbano Sem Limites" },
@@ -29,15 +42,15 @@ function Home() {
     queryFn: getSiteConfig,
     staleTime: 1000 * 60 * 60, // Config changes rarely
   });
-  const { data: categorias = [] } = useQuery({
+  const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
-    queryFn: listCategorias,
-    staleTime: 1000 * 60 * 30, // Categories change rarely
+    queryFn: () => listCategoriasFn(),
+    staleTime: 1000 * 60 * 30,
   });
-  const { data: produtos = [] } = useQuery({
+  const { data: produtos = [] } = useSuspenseQuery({
     queryKey: ["produtos"],
-    queryFn: listProdutos,
-    staleTime: 1000 * 60 * 5, // Products can stay stale for a few minutes
+    queryFn: () => listProdutosFn(),
+    staleTime: 1000 * 60 * 10,
   });
 
   const novidades = useMemo(() => 
