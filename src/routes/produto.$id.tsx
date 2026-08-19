@@ -312,7 +312,7 @@ function ProductPage() {
                     <img
                       src={imgs[mainIdx]}
                       alt={p.nome}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain p-4"
                     />
                   ) : (
                     <div className="skeleton h-full w-full" />
@@ -352,7 +352,7 @@ function ProductPage() {
                           : "border-border opacity-70 hover:opacity-100"
                       }`}
                     >
-                      <img src={u} alt="" className="h-full w-full object-cover" />
+                      <img src={u} alt="" className="h-full w-full object-contain p-1" />
                     </button>
                   ))}
                 </div>
