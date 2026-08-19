@@ -14,7 +14,7 @@ export const ProductCard = memo(function ProductCard({ p }: { p: ProductListItem
 
   useEffect(() => {
     if (principal) {
-      getImageUrl(principal.storage_path, { width: 400, quality: 80 }).then(setImg);
+      getImageUrl(principal.storage_path).then(setImg);
     }
   }, [principal]);
 

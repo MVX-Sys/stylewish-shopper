@@ -24,15 +24,7 @@ export async function getImageUrl(
   // Se houver opções, usamos a transformação do Supabase (exige plano pago, mas o SDK lida com o fallback se não disponível)
   const { data } = await supabase.storage
     .from("product-images")
-    .createSignedUrl(path, 60 * 60, options ? {
-      transform: {
-        width: options.width,
-        height: options.height,
-        quality: options.quality,
-        format: options.format,
-        resize: options.resize
-      }
-    } : undefined);
+    .createSignedUrl(path, 60 * 60);
     
   const url = data?.signedUrl ?? "";
   if (url) cache.set(cacheKey, { url, expires: now + 55 * 60_000 });
