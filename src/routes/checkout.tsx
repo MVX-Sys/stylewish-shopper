@@ -6,11 +6,12 @@ import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
-import { ChevronLeft, MessageCircle, FileText, X, User } from "lucide-react";
+import { ChevronLeft, MessageCircle, FileText, X, User, Ticket, Loader2 } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 import { createOrder } from "@/lib/orders.functions";
 import { listAtendentes } from "@/lib/atendentes.functions";
+import { validateCupon } from "@/lib/coupons.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,8 +55,16 @@ function CheckoutPage() {
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("PIX");
   const [observacoes, setObservacoes] = useState("");
   const [showAtendentes, setShowAtendentes] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
-  const valorFinal = total;
+  const discountAmount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    return (total * appliedCoupon.valor_desconto) / 100;
+  }, [total, appliedCoupon]);
+
+  const valorFinal = total - discountAmount;
   const minAtingido = useMemo(
     () => VALOR_MINIMO_COMPRA <= 0 || total >= VALOR_MINIMO_COMPRA,
     [total],
@@ -76,6 +85,7 @@ function CheckoutPage() {
 
   const fnCreateOrder = useServerFn(createOrder);
   const fetchAtendentes = useServerFn(listAtendentes);
+  const fnValidateCoupon = useServerFn(validateCupon);
   const { session } = useAuth();
 
   const { data: dbAtendentes, isLoading: loadingAtendentes } = useQuery({
@@ -103,6 +113,10 @@ function CheckoutPage() {
         formaPagamento,
         endereco: formaEnvio === "ENTREGA" ? {} : undefined,
         observacoes,
+        cupom: appliedCoupon ? {
+          codigo: appliedCoupon.codigo,
+          desconto: appliedCoupon.valor_desconto
+        } : undefined,
       }, true);
 
       console.log("Criando pedido no banco...");
@@ -115,6 +129,8 @@ function CheckoutPage() {
           cliente_whatsapp: session?.user.phone || "",
           forma_pagamento: formaPagamento,
           observacoes: observacoes,
+          cupom_codigo: appliedCoupon?.codigo,
+          desconto_cupom: discountAmount,
           endereco: formaEnvio === "ENTREGA" ? {
             formaEntrega: "TRANSPORTADORA A COMBINAR"
           } : undefined,
@@ -161,7 +177,10 @@ function CheckoutPage() {
         "*Itens*",
         ...linhas,
         "",
-        `*Total do pedido:* ${brl(valorFinal)}`,
+        `*Total dos itens:* ${brl(total)}`,
+        appliedCoupon ? `*Cupom aplicado:* ${appliedCoupon.codigo} (-${appliedCoupon.valor_desconto}%)` : "",
+        appliedCoupon ? `*Desconto:* -${brl(discountAmount)}` : "",
+        `*Total final:* ${brl(valorFinal)}`,
         "",
         `*Forma de envio:* ${formaEnvio === "ENTREGA" ? "ENTREGA (Transportadora a combinar)" : "Retirada no local"}`,
         ...enderecoLinhas,
@@ -243,10 +262,10 @@ function CheckoutPage() {
               <ReadonlyInput value={brl(total)} />
             </Field>
             <Field label="Desconto:">
-              <ReadonlyInput value="Não Aplicado" />
+              <ReadonlyInput value={appliedCoupon ? `-${appliedCoupon.valor_desconto}%` : "Não Aplicado"} />
             </Field>
             <Field label="Desconto Cupom:">
-              <ReadonlyInput value="Não Aplicado" />
+              <ReadonlyInput value={discountAmount > 0 ? `-${brl(discountAmount)}` : "Não Aplicado"} />
             </Field>
             <Field label="Valor Final:">
               <ReadonlyInput value={brl(valorFinal)} strong />
@@ -276,6 +295,63 @@ function CheckoutPage() {
             </div>
           </Field>
 
+
+          <Field label="Cupom de Desconto:" className="mt-4">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Ticket className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Tem um cupom? Digite aqui"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  disabled={!!appliedCoupon || isValidatingCoupon}
+                  className="input pl-10 uppercase font-mono"
+                />
+              </div>
+              {appliedCoupon ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppliedCoupon(null);
+                    setCouponCode("");
+                  }}
+                  className="rounded-lg bg-destructive/10 px-4 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20"
+                >
+                  Remover
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={!couponCode || isValidatingCoupon}
+                  onClick={async () => {
+                    setIsValidatingCoupon(true);
+                    try {
+                      const res = await fnValidateCoupon({ data: { codigo: couponCode } });
+                      if (res.valid && res.cupom) {
+                        const totalItens = items.reduce((s, i) => s + i.quantidade, 0);
+                        if (totalItens < res.cupom.quantidade_minima_itens) {
+                          toast.error(`Este cupom exige no mínimo ${res.cupom.quantidade_minima_itens} itens no carrinho.`);
+                        } else {
+                          setAppliedCoupon(res.cupom);
+                          toast.success("Cupom aplicado com sucesso!");
+                        }
+                      } else {
+                        toast.error(res.message || "Cupom inválido.");
+                      }
+                    } catch (err) {
+                      toast.error("Erro ao validar cupom.");
+                    } finally {
+                      setIsValidatingCoupon(false);
+                    }
+                  }}
+                  className="rounded-lg bg-primary px-6 text-xs font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 disabled:opacity-40"
+                >
+                  {isValidatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Aplicar"}
+                </button>
+              )}
+            </div>
+          </Field>
 
           <Field label="Observações:" className="mt-4">
             <textarea
