@@ -54,12 +54,12 @@ function Home() {
   });
 
   const novidades = useMemo(() => 
-    produtos.filter(p => p.ativo && p.novidade && !isEsgotado(p)).slice(0, 4),
+    produtos.filter((p: ProductListItem) => p.ativo && p.novidade && !isEsgotado(p)).slice(0, 4),
   [produtos]);
 
   const melhoresOfertas = useMemo(() => 
-    produtos.filter(p => p.ativo && getPromoInfo(p).ativa && !isEsgotado(p))
-      .sort((a, b) => getPromoInfo(b).percentual - getPromoInfo(a).percentual)
+    produtos.filter((p: ProductListItem) => p.ativo && getPromoInfo(p).ativa && !isEsgotado(p))
+      .sort((a: ProductListItem, b: ProductListItem) => getPromoInfo(b).percentual - getPromoInfo(a).percentual)
       .slice(0, 4),
   [produtos]);
 
@@ -85,7 +85,7 @@ function Home() {
           emptyMessage="Não há ofertas disponíveis no momento"
         />
 
-        <CategoriesSection categorias={categorias.filter(c => c.slug !== "geral")} />
+        <CategoriesSection categorias={categorias.filter((c: Categoria) => c.slug !== "geral")} />
       </main>
 
       <SiteFooter />

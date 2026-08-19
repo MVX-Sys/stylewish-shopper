@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { getProduto, getPromoInfo, isEsgotado, listCategorias, type Categoria } from "@/lib/products";
+import { getPromoInfo, isEsgotado, type Categoria } from "@/lib/products";
+import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
@@ -32,6 +33,18 @@ import {
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/produto/$id")({
+  loader: async ({ params, context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["produto", params.id],
+        queryFn: () => getProdutoFn({ data: params.id }),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["categorias"],
+        queryFn: () => listCategoriasFn(),
+      }),
+    ]);
+  },
   head: ({ params }) => ({
     meta: [
       { title: `Produto — ACHAEBUSCA` },
@@ -51,14 +64,14 @@ export const Route = createFileRoute("/produto/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
-  const { data: p, isLoading } = useQuery({
+  const { data: p } = useSuspenseQuery({
     queryKey: ["produto", id],
-    queryFn: () => getProduto(id),
-    staleTime: 1000 * 60 * 5,
+    queryFn: () => getProdutoFn({ data: id }),
+    staleTime: 1000 * 60 * 10,
   });
-  const { data: categorias = [] } = useQuery<Categoria[]>({
+  const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
-    queryFn: listCategorias,
+    queryFn: () => listCategoriasFn(),
     staleTime: 1000 * 60 * 30,
   });
   const { add, setOpen } = useCart();
@@ -268,17 +281,12 @@ function ProductPage() {
           <Link to="/" className="hover:text-foreground">Início</Link>
           <span>/</span>
           <span className="text-foreground">
-            {isLoading ? "Carregando…" : p?.nome ?? "Produto"}
+            {p?.nome ?? "Produto"}
           </span>
         </nav>
 
-        {isLoading || !p ? (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[88px_1fr_1fr]">
-            <div className="hidden lg:block">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="skeleton mb-2 aspect-square rounded-lg" />
-              ))}
-            </div>
+        {!p ? (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="skeleton aspect-square rounded-lg" />
             <div className="space-y-4">
               <div className="skeleton h-8 w-3/4 rounded" />

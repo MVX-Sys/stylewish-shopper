@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
-// PromoHero removed
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
-import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
+import { getPromoInfo, type ProductListItem, type Categoria } from "@/lib/products";
+import { listCategoriasFn, listProdutosFn } from "@/lib/products.functions";
 import { z } from "zod";
 import { PackageSearch } from "lucide-react";
 
@@ -30,18 +30,32 @@ export const Route = createFileRoute("/produtos")({
       { property: "og:description", content: "Moda urbana, atendimento próximo, pedidos via WhatsApp." },
     ],
   }),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["categorias"],
+        queryFn: () => listCategoriasFn(),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["produtos"],
+        queryFn: () => listProdutosFn(),
+      }),
+    ]);
+  },
   component: Home,
 });
 
 function Home() {
   const { cat, q } = Route.useSearch();
-  const { data: categorias = [] } = useQuery({
+  const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
-    queryFn: listCategorias,
+    queryFn: () => listCategoriasFn(),
+    staleTime: 1000 * 60 * 30,
   });
-  const { data: produtos = [], isLoading } = useQuery({
+  const { data: produtos = [] } = useSuspenseQuery({
     queryKey: ["produtos"],
-    queryFn: listProdutos,
+    queryFn: () => listProdutosFn(),
+    staleTime: 1000 * 60 * 10,
   });
 
   const [filters, setFilters] = useState<Filters>({
@@ -129,14 +143,8 @@ function Home() {
 
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              {isLoading
-                ? "Carregando…"
-                : (
-                    <>
-                      <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
-                      produto{filtered.length === 1 ? "" : "s"}
-                    </>
-                  )}
+              <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
+              produto{filtered.length === 1 ? "" : "s"}
             </p>
             {activeChips.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5">
