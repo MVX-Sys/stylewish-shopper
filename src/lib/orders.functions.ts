@@ -61,8 +61,8 @@ export const createOrder = createServerFn({ method: "POST" })
         atendente_id: data.atendente_id as any,
         cliente_nome: data.cliente_nome as any,
         cliente_whatsapp: data.cliente_whatsapp as any,
-        cupom_codigo: data.cupom_codigo,
-        desconto_cupom: data.desconto_cupom,
+        cupom_codigo: data.cupom_codigo as any,
+        desconto_cupom: data.desconto_cupom as any,
       })
       .select()
       .single();
