@@ -249,6 +249,10 @@ export type OrderPDFPayload = {
     referencia?: string;
   };
   observacoes?: string;
+  cupom?: {
+    codigo: string;
+    desconto: number;
+  };
 };
 
 export async function downloadOrderPDF(order: OrderPDFPayload, download = true): Promise<Blob> {
@@ -333,6 +337,13 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
   doc.text(brl(order.total), 196, y, { align: "right" });
   doc.setTextColor(...DARK);
   y += 10;
+  
+  if (order.cupom) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text(`Cupom: ${order.cupom.codigo} (-${order.cupom.desconto}%)`, 14, y);
+    y += 6;
+  }
 
   // Envio / pagamento
   doc.setFont("helvetica", "bold");
