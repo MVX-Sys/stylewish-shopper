@@ -162,7 +162,7 @@ function ProductPage() {
   }, [p]);
 
   const getVar = (cor: string, tam: string) =>
-    (p?.variacoes || []).find((v: VariacaoProduto) => v.nome_cor === cor && v.tamanho === tam);
+    (p?.variacoes || []).find((v) => (v as VariacaoProduto).nome_cor === cor && (v as VariacaoProduto).tamanho === tam);
 
   const setQ = (k: string, q: number) =>
     setQtys((prev) => ({ ...prev, [k]: Math.max(0, q) }));
