@@ -21,14 +21,8 @@ export async function getImageUrl(
   const hit = cache.get(cacheKey);
   if (hit && hit.expires > now + 60_000) return hit.url;
 
-  // Supabase Image Transformations (requires paid plan or local dev support)
-  // We include transform parameters in the URL options if they exist
-  const transform = options ? {
-    width: options.width,
-    height: options.height,
-    quality: options.quality,
-    resize: options.resize || 'cover',
-  } : undefined;
+  // Smart resizing disabled per user request to ensure full quality images
+  const transform = undefined;
 
   const { data } = await supabase.storage
     .from("product-images")
