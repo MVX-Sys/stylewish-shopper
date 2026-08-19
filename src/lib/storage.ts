@@ -2,16 +2,40 @@ import { supabase } from "@/integrations/supabase/client";
 
 const cache = new Map<string, { url: string; expires: number }>();
 
-export async function getImageUrl(path: string | null | undefined): Promise<string> {
+export interface ImageOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'webp' | 'origin';
+  resize?: 'cover' | 'contain' | 'fill';
+}
+
+export async function getImageUrl(
+  path: string | null | undefined,
+  options?: ImageOptions
+): Promise<string> {
   if (!path) return "";
+  
+  const cacheKey = options ? `${path}:${JSON.stringify(options)}` : path;
   const now = Date.now();
-  const hit = cache.get(path);
+  const hit = cache.get(cacheKey);
   if (hit && hit.expires > now + 60_000) return hit.url;
+
+  // Se houver opções, usamos a transformação do Supabase (exige plano pago, mas o SDK lida com o fallback se não disponível)
   const { data } = await supabase.storage
     .from("product-images")
-    .createSignedUrl(path, 60 * 60);
+    .createSignedUrl(path, 60 * 60, options ? {
+      transform: {
+        width: options.width,
+        height: options.height,
+        quality: options.quality,
+        format: options.format,
+        resize: options.resize
+      }
+    } : undefined);
+    
   const url = data?.signedUrl ?? "";
-  if (url) cache.set(path, { url, expires: now + 55 * 60_000 });
+  if (url) cache.set(cacheKey, { url, expires: now + 55 * 60_000 });
   return url;
 }
 

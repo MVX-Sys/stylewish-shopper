@@ -9,11 +9,15 @@ import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X, Share2, Copy, Check, QrCode } from "lucide-react";
-import { downloadProductPDF } from "@/lib/pdf";
+import React from "react";
+const downloadProductPDF = async (p: any) => {
+  const { downloadProductPDF: fn } = await import("@/lib/pdf");
+  return fn(p);
+};
 import { WHATSAPP_NUMBER, BRAND } from "@/lib/config";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import QRCode from "qrcode";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -109,7 +113,7 @@ function ProductPage() {
     const paths = [...p.imagens]
       .sort((a, b) => (b.principal ? 1 : 0) - (a.principal ? 1 : 0) || a.ordem - b.ordem)
       .map((i) => i.storage_path);
-    Promise.all(paths.map(getImageUrl)).then(setImgs);
+    Promise.all(paths.map(p => getImageUrl(p, { width: 800, quality: 85 }))).then(setImgs);
   }, [p]);
 
   const matriz = useMemo(() => {
@@ -238,6 +242,7 @@ function ProductPage() {
 
   const handleGenerateQR = async () => {
     try {
+      const QRCode = (await import("qrcode")).default;
       const url = await QRCode.toDataURL(shareUrl, {
         width: 400,
         margin: 2,
