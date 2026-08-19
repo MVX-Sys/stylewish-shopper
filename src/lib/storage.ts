@@ -21,10 +21,18 @@ export async function getImageUrl(
   const hit = cache.get(cacheKey);
   if (hit && hit.expires > now + 60_000) return hit.url;
 
-  // Se houver opções, usamos a transformação do Supabase (exige plano pago, mas o SDK lida com o fallback se não disponível)
+  // Supabase Image Transformations (requires paid plan or local dev support)
+  // We include transform parameters in the URL options if they exist
+  const transform = options ? {
+    width: options.width,
+    height: options.height,
+    quality: options.quality,
+    resize: options.resize || 'cover',
+  } : undefined;
+
   const { data } = await supabase.storage
     .from("product-images")
-    .createSignedUrl(path, 60 * 60);
+    .createSignedUrl(path, 60 * 60, { transform });
     
   const url = data?.signedUrl ?? "";
   if (url) cache.set(cacheKey, { url, expires: now + 55 * 60_000 });

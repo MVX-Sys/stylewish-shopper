@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { getProduto, getPromoInfo, isEsgotado, listCategorias, type Categoria } from "@/lib/products";
+import { getPromoInfo, isEsgotado, type Categoria, type ProductListItem, type VariacaoProduto } from "@/lib/products";
+import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
@@ -32,6 +33,18 @@ import {
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/produto/$id")({
+  loader: async ({ params, context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["produto", params.id],
+        queryFn: () => getProdutoFn({ data: params.id }),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["categorias"],
+        queryFn: () => listCategoriasFn(),
+      }),
+    ]);
+  },
   head: ({ params }) => ({
     meta: [
       { title: `Produto — ACHAEBUSCA` },
@@ -51,14 +64,14 @@ export const Route = createFileRoute("/produto/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
-  const { data: p, isLoading } = useQuery({
+  const { data: p } = useSuspenseQuery({
     queryKey: ["produto", id],
-    queryFn: () => getProduto(id),
-    staleTime: 1000 * 60 * 5,
+    queryFn: () => getProdutoFn({ data: id }),
+    staleTime: 1000 * 60 * 10,
   });
-  const { data: categorias = [] } = useQuery<Categoria[]>({
+  const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
-    queryFn: listCategorias,
+    queryFn: () => listCategoriasFn(),
     staleTime: 1000 * 60 * 30,
   });
   const { add, setOpen } = useCart();
@@ -113,7 +126,7 @@ function ProductPage() {
   useEffect(() => {
     if (!p) return;
     const paths = [...p.imagens]
-      .sort((a, b) => (b.principal ? 1 : 0) - (a.principal ? 1 : 0) || a.ordem - b.ordem)
+      .sort((a: any, b: any) => (b.principal ? 1 : 0) - (a.principal ? 1 : 0) || a.ordem - b.ordem)
       .map((i) => i.storage_path);
     Promise.all(paths.map(p => getImageUrl(p, { width: 800, quality: 85 }))).then(setImgs);
   }, [p]);
@@ -122,9 +135,9 @@ function ProductPage() {
     if (!p) return { cores: [], tamanhos: [] as string[] };
     const coresMap = new Map<string, { nome: string; hex: string }>();
     const tamanhos = new Set<string>();
-    for (const v of p.variacoes) {
-      coresMap.set(v.nome_cor, { nome: v.nome_cor, hex: v.hex_cor });
-      tamanhos.add(v.tamanho);
+    for (const v of (p?.variacoes || [])) {
+      coresMap.set((v as VariacaoProduto).nome_cor, { nome: (v as VariacaoProduto).nome_cor, hex: (v as VariacaoProduto).hex_cor });
+      tamanhos.add((v as VariacaoProduto).tamanho);
     }
     const catSlug = p.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id)?.slug?.toLowerCase() || "" : "";
     const isFootwear = ["chinelos", "tenis", "botas"].some(slug => catSlug.includes(slug));
@@ -149,7 +162,7 @@ function ProductPage() {
   }, [p]);
 
   const getVar = (cor: string, tam: string) =>
-    p?.variacoes.find((v) => v.nome_cor === cor && v.tamanho === tam);
+    (p?.variacoes || []).find((v: any) => v.nome_cor === cor && v.tamanho === tam);
 
   const setQ = (k: string, q: number) =>
     setQtys((prev) => ({ ...prev, [k]: Math.max(0, q) }));
@@ -159,7 +172,7 @@ function ProductPage() {
 
   const subtotal = useMemo(() => {
     if (!p) return 0;
-    return Object.entries(qtys).reduce((s, [, q]) => s + q * precoEfetivo, 0);
+    return Object.entries(qtys).reduce((s, [, q]) => s + (q as number) * precoEfetivo, 0);
   }, [qtys, p, precoEfetivo]);
 
   const totalItens = Object.values(qtys).reduce((s, q) => s + q, 0);
@@ -268,17 +281,12 @@ function ProductPage() {
           <Link to="/" className="hover:text-foreground">Início</Link>
           <span>/</span>
           <span className="text-foreground">
-            {isLoading ? "Carregando…" : p?.nome ?? "Produto"}
+            {p?.nome ?? "Produto"}
           </span>
         </nav>
 
-        {isLoading || !p ? (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[88px_1fr_1fr]">
-            <div className="hidden lg:block">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="skeleton mb-2 aspect-square rounded-lg" />
-              ))}
-            </div>
+        {!p ? (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="skeleton aspect-square rounded-lg" />
             <div className="space-y-4">
               <div className="skeleton h-8 w-3/4 rounded" />

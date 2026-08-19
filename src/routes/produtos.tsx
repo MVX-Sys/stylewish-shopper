@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
-// PromoHero removed
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
-import { getPromoInfo, listCategorias, listProdutos } from "@/lib/products";
+import { getPromoInfo, type ProductListItem, type Categoria } from "@/lib/products";
+import { listCategoriasFn, listProdutosFn } from "@/lib/products.functions";
 import { z } from "zod";
 import { PackageSearch } from "lucide-react";
 
@@ -30,18 +30,32 @@ export const Route = createFileRoute("/produtos")({
       { property: "og:description", content: "Moda urbana, atendimento próximo, pedidos via WhatsApp." },
     ],
   }),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["categorias"],
+        queryFn: () => listCategoriasFn(),
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: ["produtos"],
+        queryFn: () => listProdutosFn(),
+      }),
+    ]);
+  },
   component: Home,
 });
 
 function Home() {
   const { cat, q } = Route.useSearch();
-  const { data: categorias = [] } = useQuery({
+  const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
-    queryFn: listCategorias,
+    queryFn: () => listCategoriasFn(),
+    staleTime: 1000 * 60 * 30,
   });
-  const { data: produtos = [], isLoading } = useQuery({
+  const { data: produtos = [] } = useSuspenseQuery({
     queryKey: ["produtos"],
-    queryFn: listProdutos,
+    queryFn: () => listProdutosFn(),
+    staleTime: 1000 * 60 * 10,
   });
 
   const [filters, setFilters] = useState<Filters>({
@@ -51,33 +65,33 @@ function Home() {
   });
 
   const catBySlug = useMemo(
-    () => Object.fromEntries(categorias.map((c) => [c.slug, c.id])),
+    () => Object.fromEntries(categorias.map((c: Categoria) => [c.slug, c.id])),
     [categorias],
   );
   const catBySlugName = useMemo(
-    () => Object.fromEntries(categorias.map((c) => [c.slug, c.nome])),
+    () => Object.fromEntries(categorias.map((c: Categoria) => [c.slug, c.nome])),
     [categorias],
   );
 
   const filtered = useMemo(() => {
-    let list = produtos.filter((p) => p.ativo);
+    let list = produtos.filter((p: ProductListItem) => p.ativo);
     const query = (q ?? filters.q).trim().toLowerCase();
-    if (query) list = list.filter((p) => p.nome.toLowerCase().includes(query));
+    if (query) list = list.filter((p: ProductListItem) => p.nome.toLowerCase().includes(query));
     const slug = cat ?? filters.categoriaSlug;
     if (slug && catBySlug[slug])
-      list = list.filter((p) => p.categoria_id === catBySlug[slug]);
-    if (filters.novidades) list = list.filter((p) => p.novidade);
-    if (filters.promocao) list = list.filter((p) => p.promocao);
-    list = list.filter((p) => p.preco <= filters.precoMax);
+      list = list.filter((p: ProductListItem) => p.categoria_id === catBySlug[slug]);
+    if (filters.novidades) list = list.filter((p: ProductListItem) => p.novidade);
+    if (filters.promocao) list = list.filter((p: ProductListItem) => p.promocao);
+    list = list.filter((p: ProductListItem) => p.preco <= filters.precoMax);
     switch (filters.ordem) {
       case "menor-preco":
-        list = [...list].sort((a, b) => a.preco - b.preco);
+        list = [...list].sort((a: ProductListItem, b: ProductListItem) => a.preco - b.preco);
         break;
       case "maior-preco":
-        list = [...list].sort((a, b) => b.preco - a.preco);
+        list = [...list].sort((a: ProductListItem, b: ProductListItem) => b.preco - a.preco);
         break;
       case "nome":
-        list = [...list].sort((a, b) => a.nome.localeCompare(b.nome));
+        list = [...list].sort((a: ProductListItem, b: ProductListItem) => a.nome.localeCompare(b.nome));
         break;
     }
     return list;
@@ -129,14 +143,8 @@ function Home() {
 
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              {isLoading
-                ? "Carregando…"
-                : (
-                    <>
-                      <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
-                      produto{filtered.length === 1 ? "" : "s"}
-                    </>
-                  )}
+              <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
+              produto{filtered.length === 1 ? "" : "s"}
             </p>
             {activeChips.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5">
@@ -154,7 +162,7 @@ function Home() {
             )}
           </div>
 
-          {isLoading ? (
+          {!produtos.length ? (
             <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
@@ -180,7 +188,7 @@ function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
-              {filtered.map((p, idx) => (
+              {filtered.map((p: ProductListItem, idx: number) => (
                 <div
                   key={p.id}
                   className="animate-fade-in-up"
