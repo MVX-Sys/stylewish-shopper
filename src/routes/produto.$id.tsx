@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { getPromoInfo, isEsgotado, type Categoria } from "@/lib/products";
+import { getPromoInfo, isEsgotado, type Categoria, type ProductListItem, type VariacaoProduto } from "@/lib/products";
 import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
@@ -162,7 +162,7 @@ function ProductPage() {
   }, [p]);
 
   const getVar = (cor: string, tam: string) =>
-    p?.variacoes.find((v) => v.nome_cor === cor && v.tamanho === tam);
+    p?.variacoes.find((v: VariacaoProduto) => v.nome_cor === cor && v.tamanho === tam);
 
   const setQ = (k: string, q: number) =>
     setQtys((prev) => ({ ...prev, [k]: Math.max(0, q) }));
