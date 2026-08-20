@@ -82,6 +82,19 @@ export const createOrder = createServerFn({ method: "POST" })
     const { error: itemsErr } = await supabase.from("pedidos_itens").insert(orderItems);
     if (itemsErr) throw itemsErr;
 
+    // 3. Atualizar estoque (diminuir a quantidade comprada)
+    for (const item of data.itens) {
+      const { error: stockErr } = await supabase.rpc('decrement_stock', {
+        var_id: item.variacao_id,
+        amount: item.quantidade
+      });
+      if (stockErr) {
+        console.error(`Erro ao atualizar estoque para ${item.variacao_id}:`, stockErr);
+        // Não lançamos erro aqui para não travar o pedido se já foi criado, 
+        // mas em um cenário ideal usaríamos uma transação SQL.
+      }
+    }
+
     return order;
   });
 
