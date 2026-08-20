@@ -107,10 +107,7 @@ function HeroSection({ config }: { config?: any }) {
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  if (slides.length === 0) {
-    console.log("HeroSection: No slides to show", config);
-    return null;
-  }
+  if (slides.length === 0) return null;
 
   const nextSlide = () => setCurrent((prev) => (prev + 1) % slides.length);
   const prevSlide = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
