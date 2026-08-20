@@ -1,39 +1,69 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export type HeroSlide = {
+  id: string;
+  tipo: 'gradient' | 'image' | 'video';
+  media_url: string | null;
+  titulo: string;
+  subtitulo: string | null;
+  ordem: number;
+  ativo: boolean;
+};
+
 export type SiteConfig = {
   id: string;
-  hero_type: 'gradient' | 'image' | 'video';
-  hero_media_url: string | null;
-  hero_title: string;
-  hero_subtitle: string | null;
+  hero_slides: HeroSlide[];
 };
 
 export async function getSiteConfig(): Promise<SiteConfig> {
-  const { data, error } = await supabase
+  // Fetch main config
+  const { data: config, error: configError } = await supabase
     .from("site_config")
     .select("*")
     .eq("id", "current")
     .single();
   
-  if (error) {
-    console.error("Error fetching site config:", error);
-    return {
-      id: "current",
-      hero_type: 'gradient',
-      hero_media_url: null,
-      hero_title: 'Estilo Urbano Sem Limites',
-      hero_subtitle: 'O melhor da moda masculina atacado'
-    };
+  // Fetch hero slides
+  const { data: slides, error: slidesError } = await (supabase
+    .from("hero_slides") as any)
+    .select("*")
+    .order("ordem", { ascending: true });
+
+  if (configError) {
+    console.error("Error fetching site config:", configError);
   }
-  
-  return data as SiteConfig;
+
+  return {
+    id: "current",
+    hero_slides: slides || []
+  };
 }
 
-export async function updateSiteConfig(config: Partial<Omit<SiteConfig, 'id'>>) {
-  const { error } = await supabase
-    .from("site_config")
-    .update(config)
-    .eq("id", "current");
+export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide, 'id'>>) {
+  const { error } = await (supabase
+    .from("hero_slides") as any)
+    .update(slide)
+    .eq("id", id);
+  
+  if (error) throw error;
+}
+
+export async function createHeroSlide(slide: Omit<HeroSlide, 'id'>) {
+  const { data, error } = await (supabase
+    .from("hero_slides") as any)
+    .insert(slide)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteHeroSlide(id: string) {
+  const { error } = await (supabase
+    .from("hero_slides") as any)
+    .delete()
+    .eq("id", id);
   
   if (error) throw error;
 }
