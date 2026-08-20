@@ -231,28 +231,42 @@ function CuponsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1.5 block text-sm font-semibold">Desconto (%)</label>
+                  <label className="mb-1.5 block text-sm font-semibold">Tipo de Desconto</label>
+                  <select
+                    value={editing.tipo_desconto}
+                    onChange={(e) => setEditing({ ...editing, tipo_desconto: e.target.value as any })}
+                    className="input"
+                  >
+                    <option value="percentual">Percentual (%)</option>
+                    <option value="fixo">Valor Fixo (R$)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold">
+                    {editing.tipo_desconto === "fixo" ? "Valor (R$)" : "Desconto (%)"}
+                  </label>
                   <input
                     type="number"
                     required
                     min="0"
-                    max="100"
                     value={editing.valor_desconto}
                     onChange={(e) => setEditing({ ...editing, valor_desconto: Number(e.target.value) })}
                     className="input"
                   />
                 </div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-semibold">Mínimo de Itens</label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    value={editing.quantidade_minima_itens}
-                    onChange={(e) => setEditing({ ...editing, quantidade_minima_itens: Number(e.target.value) })}
-                    className="input"
-                  />
-                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold">Mínimo de Itens</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  value={editing.quantidade_minima_itens}
+                  onChange={(e) => setEditing({ ...editing, quantidade_minima_itens: Number(e.target.value) })}
+                  className="input"
+                />
+              </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 border-t border-border pt-4">
