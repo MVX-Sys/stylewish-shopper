@@ -15,9 +15,25 @@ import {
   MessageCircle,
   LogIn,
   Activity,
+  BarChart3,
+  LayoutList,
+  PieChart as PieChartIcon,
 } from "lucide-react";
 import { downloadAuditCSV, downloadAuditPDF, downloadTableXLSX } from "@/lib/pdf";
 import { ExportMenu } from "@/components/export-menu";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 
 export const Route = createFileRoute("/_authenticated/admin/auditoria")({
   component: AuditoriaPage,
@@ -86,9 +102,18 @@ function AuditoriaPage() {
     queryFn: listLogs,
   });
 
+  const { data: products = [] } = useQuery({
+    queryKey: ["admin-products-minimal"],
+    queryFn: async () => {
+      const { data } = await supabase.from("produtos").select("id, categoria_id, categorias(nome)");
+      return data ?? [];
+    },
+  });
+
   const [q, setQ] = useState("");
   const [acao, setAcao] = useState<string>("todas");
   const [entidade, setEntidade] = useState<string>("todas");
+  const [viewMode, setViewMode] = useState<"lista" | "graficos">("lista");
 
   const acoes = useMemo(() => Array.from(new Set(logs.map((l) => l.acao))).sort(), [logs]);
   const entidades = useMemo(
@@ -107,21 +132,86 @@ function AuditoriaPage() {
     });
   }, [logs, q, acao, entidade]);
 
+  // Analytics Data
+  const entityData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach((l) => {
+      counts[l.entidade] = (counts[l.entidade] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filtered]);
+
+  const userData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach((l) => {
+      const email = l.user_email ?? "Sistema";
+      counts[email] = (counts[email] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
+  }, [filtered]);
+
+  const categoryData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filtered.forEach((l) => {
+      if (l.entidade === "produtos" && l.entidade_id) {
+        const product = products.find((p) => p.id === l.entidade_id);
+        const catName = (product?.categorias as any)?.nome ?? "Sem Categoria";
+        counts[catName] = (counts[catName] || 0) + 1;
+      }
+    });
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filtered, products]);
+
+  const COLORS = ["#FF5500", "#001F3F", "#4CAF50", "#2196F3", "#9C27B0", "#FFC107"];
+
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Painel
-        </p>
-        <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-          Histórico e auditoria
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Registro imutável das ações realizadas por administradores.
-        </p>
+    <div className="space-y-8 pb-20">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Painel
+          </p>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+            Histórico e auditoria
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Registro imutável das ações realizadas por administradores.
+          </p>
+        </div>
+        <div className="flex items-center gap-1 rounded-full border border-border bg-muted/30 p-1 self-start sm:self-center">
+          <button
+            onClick={() => setViewMode("lista")}
+            className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+              viewMode === "lista"
+                ? "bg-background text-primary shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <LayoutList className="h-3.5 w-3.5" />
+            Lista
+          </button>
+          <button
+            onClick={() => setViewMode("graficos")}
+            className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+              viewMode === "graficos"
+                ? "bg-background text-primary shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <BarChart3 className="h-3.5 w-3.5" />
+            Gráficos
+          </button>
+        </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
           <div className="relative w-full sm:max-w-xs">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -197,6 +287,106 @@ function AuditoriaPage() {
             <p className="mt-1 max-w-sm text-sm text-muted-foreground">
               As ações administrativas aparecerão aqui automaticamente.
             </p>
+          </div>
+        ) : viewMode === "graficos" ? (
+          <div className="p-6 space-y-10">
+            <div className="grid gap-8 lg:grid-cols-2">
+              {/* Entidade Distribution */}
+              <div className="rounded-xl bg-muted/20 p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <PieChartIcon className="h-4 w-4 text-primary" />
+                  <h3 className="font-display text-sm font-semibold uppercase tracking-wider">
+                    Distribuição por Entidade
+                  </h3>
+                </div>
+                <div className="h-[250px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={entityData}
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {entityData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                      />
+                      <Legend verticalAlign="bottom" height={36}/>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* User Activity Ranking */}
+              <div className="rounded-xl bg-muted/20 p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <UserIcon className="h-4 w-4 text-primary" />
+                  <h3 className="font-display text-sm font-semibold uppercase tracking-wider">
+                    Usuários Mais Ativos
+                  </h3>
+                </div>
+                <div className="h-[250px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={userData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="rgba(0,0,0,0.05)" />
+                      <XAxis type="number" hide />
+                      <YAxis 
+                        dataKey="name" 
+                        type="category" 
+                        width={100} 
+                        tick={{ fontSize: 10, fill: '#666' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip 
+                        cursor={{fill: 'transparent'}}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                      />
+                      <Bar dataKey="value" fill="#FF5500" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* Category Analysis for Products */}
+            {categoryData.length > 0 && (
+              <div className="rounded-xl bg-muted/20 p-6">
+                <div className="mb-6 flex items-center gap-2">
+                  <LayoutList className="h-4 w-4 text-primary" />
+                  <h3 className="font-display text-sm font-semibold uppercase tracking-wider">
+                    Atividade de Produtos por Categoria
+                  </h3>
+                </div>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={categoryData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: '#666' }} 
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: '#666' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                      />
+                      <Bar dataKey="value" fill="#001F3F" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <ol className="divide-y divide-border">
