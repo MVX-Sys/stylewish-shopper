@@ -6,7 +6,7 @@ import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
-import { ChevronLeft, MessageCircle, FileText, X, User, Ticket, Loader2 } from "lucide-react";
+import { ChevronLeft, MessageCircle, FileText, X, User, Ticket, Loader2, ShoppingBag } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
 import { createOrder } from "@/lib/orders.functions";
@@ -257,7 +257,7 @@ function CheckoutPage() {
                         : 'border-border bg-muted/30 hover:bg-muted/50'
                     }`}
                   >
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-1">
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-0.5">
                       {item.foto ? (
                         <img
                           src={item.foto}
@@ -265,9 +265,7 @@ function CheckoutPage() {
                           className="h-full w-full object-contain"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                          <FileText className="h-6 w-6 opacity-20" />
-                        </div>
+                        <ShoppingBag className="h-6 w-6 text-muted-foreground/20" />
                       )}
                       {isDiscounted && (
                         <div className="absolute -top-1 -right-1 rounded-full bg-primary p-1 shadow-sm">
