@@ -362,9 +362,35 @@ function PedidosAdminPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <span className="font-semibold">{pecasCount}</span>
-                          <span className="text-xs text-muted-foreground">peças</span>
+                        <div className="group relative">
+                          <div className="flex items-center gap-1 cursor-default">
+                            <span className="font-semibold">{pecasCount}</span>
+                            <span className="text-xs text-muted-foreground">peças</span>
+                          </div>
+                          
+                          {/* Mini Sidebar Popup for Items */}
+                          <div className="invisible absolute left-full top-0 z-50 ml-2 w-64 rounded-xl border border-border bg-card p-3 shadow-2xl transition-all group-hover:visible group-hover:opacity-100 opacity-0">
+                            <h4 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Itens do Pedido</h4>
+                            <div className="space-y-2 max-h-60 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border">
+                              {pedido.itens?.map((item, idx) => (
+                                <div key={idx} className="flex gap-2 rounded-lg bg-muted/50 p-2">
+                                  <div className="h-8 w-8 shrink-0 overflow-hidden rounded bg-white border border-border flex items-center justify-center p-0.5">
+                                    {item.imagem_url ? (
+                                      <img src={item.imagem_url} alt="" className="h-full w-full object-contain" />
+                                    ) : (
+                                      <ShoppingBag className="h-4 w-4 text-muted-foreground/30" />
+                                    )}
+                                  </div>
+                                  <div className="flex flex-1 flex-col justify-center min-w-0">
+                                    <p className="truncate text-[10px] font-bold leading-tight">{item.nome_produto}</p>
+                                    <p className="text-[9px] text-muted-foreground leading-tight">
+                                      {item.quantidade}x • {item.cor} • {item.tamanho}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 font-semibold tabular-nums">

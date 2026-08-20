@@ -253,13 +253,13 @@ function CheckoutPage() {
           </div>
         </div>
 
-        <section className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7">
+        <section className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-4">
+          <div className="lg:col-span-3 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7">
             <h2 className="mb-6 font-display text-lg font-semibold">Itens do pedido</h2>
-            <div className="divide-y divide-border">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (
-                <div key={item.key} className="flex gap-4 py-4 first:pt-0 last:pb-0">
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-1">
+                <div key={item.key} className="flex gap-3 rounded-xl border border-border bg-muted/30 p-3 transition-colors hover:bg-muted/50">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-1">
                     {item.foto ? (
                       <img
                         src={item.foto}
@@ -268,24 +268,24 @@ function CheckoutPage() {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                        <FileText className="h-8 w-8 opacity-20" />
+                        <FileText className="h-6 w-6 opacity-20" />
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-1 flex-col justify-center">
-                    <h3 className="text-sm font-semibold text-foreground line-clamp-1">{item.nome}</h3>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {item.cor} • Tam {item.tamanho}
+                  <div className="flex flex-1 flex-col justify-center min-w-0">
+                    <h3 className="text-xs font-bold text-foreground line-clamp-1">{item.nome}</h3>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider">
+                      {item.cor} • {item.tamanho}
                     </p>
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{item.quantidade}x {brl(itemPrecoEfetivo(item))}</span>
-                      <span className="text-sm font-bold text-foreground">{brl(itemPrecoEfetivo(item) * item.quantidade)}</span>
+                    <div className="mt-1.5 flex items-center justify-between">
+                      <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
+                      <span className="text-xs font-bold text-foreground">{brl(itemPrecoEfetivo(item) * item.quantidade)}</span>
                     </div>
                   </div>
                 </div>
               ))}
               {items.length === 0 && (
-                <div className="py-8 text-center text-sm text-muted-foreground">
+                <div className="col-span-full py-8 text-center text-sm text-muted-foreground">
                   Seu carrinho está vazio.
                 </div>
               )}
