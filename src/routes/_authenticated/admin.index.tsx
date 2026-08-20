@@ -53,7 +53,7 @@ function AdminProductsList() {
   const [sort, setSort] = useState<SortKey>("recentes");
   const [showFilters, setShowFilters] = useState(true);
   const [showQRScanner, setShowQRScanner] = useState(false);
-  const [qrToView, setQrToView] = useState<{ id: string; nome: string } | null>(null);
+  const [qrToView, setQrToView] = useState<{ id: string; nome: string; hash_id?: string } | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showConfig, setShowConfig] = useState(false);
   const { data: config, refetch: refetchConfig } = useQuery({
@@ -710,7 +710,7 @@ function AdminProductsList() {
                       <td className="p-3">
                         <div className="flex justify-end gap-1">
                           <button
-                            onClick={() => setQrToView({ id: p.id, nome: p.nome })}
+                            onClick={() => setQrToView({ id: p.id, nome: p.nome, hash_id: p.hash_id })}
                             className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             title="Ver QR Code"
                           >
@@ -769,7 +769,7 @@ function AdminProductsList() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex flex-col items-center justify-center gap-6 p-8">
+            <div className="flex flex-col items-center justify-center gap-5 p-8 text-center">
               <div className="aspect-square w-full max-w-[200px] overflow-hidden rounded-xl border border-border bg-white p-2">
                 {qrDataUrl ? (
                   <img src={qrDataUrl} alt="QR Code" className="h-full w-full" />
@@ -778,6 +778,24 @@ function AdminProductsList() {
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
                 )}
+              </div>
+
+              <div className="w-full space-y-2">
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2">
+                  <code className="flex-1 truncate text-left text-[10px] font-mono text-muted-foreground">
+                    ID: {qrToView.hash_id || qrToView.id}
+                  </code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(qrToView.hash_id || qrToView.id);
+                      toast.success("ID copiado!");
+                    }}
+                    className="rounded-md p-1.5 hover:bg-accent"
+                    title="Copiar ID"
+                  >
+                    <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </div>
               </div>
               <a
                 href={qrDataUrl}

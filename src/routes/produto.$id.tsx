@@ -736,9 +736,29 @@ function ProductPage() {
             <div className="overflow-hidden rounded-xl border border-border bg-white p-2">
               <img src={qrDataUrl} alt="QR Code" className="h-64 w-64" />
             </div>
-            <p className="text-center text-sm text-muted-foreground">
-              Aponte a câmera do celular para abrir este produto
-            </p>
+            
+            <div className="w-full space-y-2 text-center">
+              <p className="text-sm text-muted-foreground">
+                Aponte a câmera do celular para abrir este produto
+              </p>
+              
+              <div className="mx-auto flex max-w-[280px] items-center gap-2 rounded-lg border border-border bg-muted/30 p-2">
+                <code className="flex-1 truncate text-[10px] font-mono text-muted-foreground">
+                  ID: {p.hash_id || p.id}
+                </code>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(p.hash_id || p.id);
+                    toast.success("ID copiado!");
+                  }}
+                  className="rounded-md p-1.5 hover:bg-accent"
+                  title="Copiar ID"
+                >
+                  <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              </div>
+            </div>
+
             <button
               onClick={() => {
                 const link = document.createElement("a");
