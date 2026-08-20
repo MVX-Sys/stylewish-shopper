@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { getImageUrl } from "@/lib/storage";
 import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
@@ -246,53 +247,9 @@ function CheckoutPage() {
           <div className="lg:col-span-3 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7">
             <h2 className="mb-6 font-display text-lg font-semibold">Itens do pedido</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => {
-                const isDiscounted = itemsWithDiscount.has(item.key);
-                return (
-                  <div 
-                    key={item.key} 
-                    className={`flex gap-3 rounded-xl border p-3 transition-colors ${
-                      isDiscounted 
-                        ? 'border-primary/50 bg-primary/5 shadow-sm ring-1 ring-primary/10' 
-                        : 'border-border bg-muted/30 hover:bg-muted/50'
-                    }`}
-                  >
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-0.5">
-                      {item.foto ? (
-                        <img
-                          src={item.foto}
-                          alt={item.nome}
-                          className="h-full w-full object-contain"
-                        />
-                      ) : (
-                        <ShoppingBag className="h-6 w-6 text-muted-foreground/20" />
-                      )}
-                      {isDiscounted && (
-                        <div className="absolute -top-1 -right-1 rounded-full bg-primary p-1 shadow-sm">
-                          <Ticket className="h-2.5 w-2.5 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-1 flex-col justify-center min-w-0">
-                      <h3 className="text-xs font-bold text-foreground line-clamp-1">{item.nome}</h3>
-                      <p className="mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider">
-                        {item.cor} • {item.tamanho}
-                      </p>
-                      <div className="mt-1.5 flex items-center justify-between">
-                        <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
-                        <div className="flex flex-col items-end">
-                          <span className={`text-xs font-bold ${isDiscounted ? 'text-primary' : 'text-foreground'}`}>
-                            {brl(itemPrecoEfetivo(item) * item.quantidade)}
-                          </span>
-                          {isDiscounted && (
-                            <span className="text-[8px] font-bold text-primary uppercase tracking-tighter">Cupom aplicado</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {items.map((item) => (
+                <CheckoutItemRow key={item.key} item={item} itemsWithDiscount={itemsWithDiscount} />
+              ))}
               {items.length === 0 && (
                 <div className="col-span-full py-8 text-center text-sm text-muted-foreground">
                   Seu carrinho está vazio.
@@ -543,5 +500,62 @@ function ReadonlyInput({ value, strong }: { value: string; strong?: boolean }) {
       value={value}
       className={`input cursor-default bg-muted/50 text-xs py-2 h-9 ${strong ? "font-bold text-primary" : ""}`}
     />
+  );
+}
+
+function CheckoutItemRow({ item, itemsWithDiscount }: { item: any, itemsWithDiscount: Set<string> }) {
+  const [img, setImg] = useState<string>("");
+  const isDiscounted = itemsWithDiscount.has(item.key);
+
+  useEffect(() => {
+    if (item.foto && item.foto.includes("/")) {
+      getImageUrl(item.foto, { width: 150 }).then(setImg);
+    } else if (item.foto) {
+      setImg(item.foto);
+    }
+  }, [item.foto]);
+
+  return (
+    <div 
+      className={`flex gap-3 rounded-xl border p-3 transition-colors ${
+        isDiscounted 
+          ? 'border-primary/50 bg-primary/5 shadow-sm ring-1 ring-primary/10' 
+          : 'border-border bg-muted/30 hover:bg-muted/50'
+      }`}
+    >
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-0.5">
+        {img ? (
+          <img
+            src={img}
+            alt={item.nome}
+            className="h-full w-full object-contain"
+          />
+        ) : (
+          <ShoppingBag className="h-6 w-6 text-muted-foreground/20" />
+        )}
+        {isDiscounted && (
+          <div className="absolute -top-1 -right-1 rounded-full bg-primary p-1 shadow-sm">
+            <Ticket className="h-2.5 w-2.5 text-white" />
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col justify-center min-w-0">
+        <h3 className="text-xs font-bold text-foreground line-clamp-1">{item.nome}</h3>
+        <p className="mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider">
+          {item.cor} • {item.tamanho}
+        </p>
+        <div className="mt-1.5 flex items-center justify-between">
+          <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
+          <div className="flex flex-col items-end">
+            <span className={`text-xs font-bold ${isDiscounted ? 'text-primary' : 'text-foreground'}`}>
+              {brl(itemPrecoEfetivo(item) * item.quantidade)}
+            </span>
+            {isDiscounted && (
+              <span className="text-[8px] font-bold text-primary uppercase tracking-tighter">Cupom aplicado</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
