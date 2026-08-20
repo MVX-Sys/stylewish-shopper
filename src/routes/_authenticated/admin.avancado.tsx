@@ -230,7 +230,7 @@ function AvancadoPage() {
                     <div>
                       <p className="font-semibold">{b.name}</p>
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        {b.public ? 'Público' : 'Privado'} • Criado em {new Date(b.created_at).toLocaleDateString()}
+                        {b.public ? 'Público' : 'Privado'} • {(stats as any).formatSize(b.size)} • Criado em {new Date(b.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
