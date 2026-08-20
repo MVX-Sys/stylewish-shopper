@@ -158,8 +158,8 @@ function AvancadoPage() {
         <StatCard 
           icon={<HardDrive className="h-5 w-5 text-orange-500" />}
           label="Armazenamento"
-          value={`${stats?.buckets.length ?? 0} Buckets`}
-          sub="Volumes de mídia ativos"
+          value={stats?.totalStorage ?? "0 B"}
+          sub={`${stats?.buckets.length ?? 0} Buckets ativos`}
         />
       </div>
 
