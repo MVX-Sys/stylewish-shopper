@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAudit } from "@/lib/audit";
 
 async function assertCouponManager(ctx: {
   supabase: any;
@@ -58,6 +59,7 @@ export const saveCupon = createServerFn({ method: "POST" })
         .select()
         .single();
       if (error) throw error;
+      await logAudit({ acao: "editar", entidade: "cupom", entidade_id: id, descricao: `Editou cupom ${data.codigo}` });
       return updated;
     } else {
       const { data: inserted, error } = await supabase
@@ -66,6 +68,7 @@ export const saveCupon = createServerFn({ method: "POST" })
         .select()
         .single();
       if (error) throw error;
+      await logAudit({ acao: "criar", entidade: "cupom", entidade_id: inserted.id, descricao: `Criou cupom ${data.codigo}` });
       return inserted;
     }
   });
@@ -76,16 +79,16 @@ export const deleteCupon = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertCouponManager(context);
     const { supabase } = context;
+    const { data: cupom } = await supabase.from("cupons").select("codigo").eq("id", data.id).single();
     const { error } = await supabase.from("cupons").delete().eq("id", data.id);
     if (error) throw error;
+    await logAudit({ acao: "excluir", entidade: "cupom", entidade_id: data.id, descricao: `Excluiu cupom ${cupom?.codigo || data.id}` });
     return { success: true };
   });
 
 export const validateCupon = createServerFn({ method: "GET" })
   .inputValidator((d) => z.object({ codigo: z.string().min(1) }).parse(d))
   .handler(async ({ data }) => {
-    // For validation we can use the default supabase client as it needs to be public
-    // but the db policies allow public read now.
     const { supabase: supabaseClient } = await import("@/integrations/supabase/client");
     const { data: cupom, error } = await supabaseClient
       .from("cupons")

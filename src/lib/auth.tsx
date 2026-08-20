@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { classifyRole, type UserRoleKind } from "@/lib/permissions";
+import { logAudit } from "@/lib/audit";
 
 type AuthCtx = {
   session: Session | null;
@@ -57,6 +58,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (s?.user) {
         await checkRole(s.user.id);
+        // Registra log apenas em eventos de login explícitos
+        if (event === "SIGNED_IN") {
+          const rolesRes = await supabase.from("user_roles").select("role").eq("user_id", s.user.id);
+          const roles = (rolesRes.data ?? []).map((r) => r.role as string);
+          if (roles.includes("admin") || roles.includes("funcionario")) {
+            await logAudit({ 
+              acao: "login", 
+              entidade: "sessao", 
+              descricao: `Usuário ${s.user.email} entrou no painel administrativo` 
+            });
+          }
+        }
       } else {
         setRoleKind("cliente");
         setPermissions([]);

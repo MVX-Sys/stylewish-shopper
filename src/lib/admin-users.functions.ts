@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logAudit } from "@/lib/audit";
 
 export type AdminUserRow = {
   id: string;
@@ -193,6 +194,8 @@ export const setUserRole = createServerFn({ method: "POST" })
       if (permErr) throw new Error(permErr.message);
     }
 
+    await logAudit({ acao: "editar", entidade: "usuario", entidade_id: data.userId, descricao: `Alterou papel do usuário para ${data.role}` });
+
     return { ok: true };
   });
 
@@ -231,6 +234,8 @@ export const setUserPermissions = createServerFn({ method: "POST" })
         .insert(rows);
       if (insErr) throw new Error(insErr.message);
     }
+
+    await logAudit({ acao: "editar", entidade: "usuario", entidade_id: data.userId, descricao: `Alterou permissões do usuário: ${data.permissions.join(", ")}` });
 
     return { ok: true };
   });
@@ -285,6 +290,8 @@ export const deleteUserAccess = createServerFn({ method: "POST" })
 
       // We return accountDeleted: false so the UI knows it just downgraded them
     }
+
+    await logAudit({ acao: "excluir", entidade: "usuario", entidade_id: data.userId, descricao: accountDeleted ? "Excluiu conta do usuário completamente" : "Removeu acesso administrativo do usuário" });
 
     return { ok: true, accountDeleted };
   });

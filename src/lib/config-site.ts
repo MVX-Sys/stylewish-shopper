@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logAudit } from "@/lib/audit";
 
 export type HeroSlide = {
   id: string;
@@ -16,16 +17,14 @@ export type SiteConfig = {
 };
 
 export async function getSiteConfig(): Promise<SiteConfig> {
-  // Fetch main config
   const { data: config, error: configError } = await supabase
     .from("site_config")
     .select("*")
     .eq("id", "current")
     .single();
   
-  // Fetch hero slides
-  const { data: slides, error: slidesError } = await (supabase
-    .from("hero_slides") as any)
+  const { data: slides, error: slidesError } = await supabase
+    .from("hero_slides")
     .select("*")
     .order("ordem", { ascending: true });
 
@@ -35,35 +34,39 @@ export async function getSiteConfig(): Promise<SiteConfig> {
 
   return {
     id: "current",
-    hero_slides: slides || []
+    hero_slides: (slides as any) || []
   };
 }
 
 export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide, 'id'>>) {
-  const { error } = await (supabase
-    .from("hero_slides") as any)
+  const { error } = await supabase
+    .from("hero_slides")
     .update(slide)
     .eq("id", id);
   
   if (error) throw error;
+  await logAudit({ acao: "editar", entidade: "configuracao_site", entidade_id: id, descricao: `Editou slide do banner: ${slide.titulo || id}` });
 }
 
 export async function createHeroSlide(slide: Omit<HeroSlide, 'id'>) {
-  const { data, error } = await (supabase
-    .from("hero_slides") as any)
+  const { data, error } = await supabase
+    .from("hero_slides")
     .insert(slide)
     .select()
     .single();
   
   if (error) throw error;
+  await logAudit({ acao: "criar", entidade: "configuracao_site", entidade_id: (data as any).id, descricao: `Criou novo slide no banner: ${slide.titulo}` });
   return data;
 }
 
 export async function deleteHeroSlide(id: string) {
-  const { error } = await (supabase
-    .from("hero_slides") as any)
+  const { data: slide } = await supabase.from("hero_slides").select("titulo").eq("id", id).single();
+  const { error } = await supabase
+    .from("hero_slides")
     .delete()
     .eq("id", id);
   
   if (error) throw error;
+  await logAudit({ acao: "excluir", entidade: "configuracao_site", entidade_id: id, descricao: `Excluiu slide do banner: ${slide?.titulo || id}` });
 }
