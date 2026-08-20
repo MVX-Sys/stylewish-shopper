@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
 import { canAccess, hasAdminPanelAccess, type PermissionKey } from "@/lib/permissions";
-import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Menu, Ticket } from "lucide-react";
+import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Menu, Ticket, Settings } from "lucide-react";
 import {
   Select,
   SelectContent,
