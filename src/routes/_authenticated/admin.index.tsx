@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square, MoreHorizontal, EyeOff, Ticket, Play } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square, MoreHorizontal, EyeOff, Ticket, Play, Tags } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
@@ -56,6 +56,17 @@ function AdminProductsList() {
   const [qrToView, setQrToView] = useState<{ id: string; nome: string; hash_id?: string } | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showConfig, setShowConfig] = useState(false);
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [couponSearch, setCouponSearch] = useState("");
+  const { data: allCupons = [] } = useQuery({
+    queryKey: ["admin", "cupons-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("cupons").select("id, codigo, ativo, produtos_ids");
+      if (error) throw error;
+      return data;
+    },
+    enabled: showCouponModal,
+  });
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: config, refetch: refetchConfig } = useQuery({
     queryKey: ["site-config"],
@@ -274,6 +285,28 @@ function AdminProductsList() {
     setSelectedIds(new Set());
     qc.invalidateQueries({ queryKey: ["admin-produtos"] });
     qc.invalidateQueries({ queryKey: ["produtos"] });
+  };
+
+  const associateCoupon = async (couponId: string) => {
+    const coupon = allCupons.find(c => c.id === couponId);
+    if (!coupon) return;
+
+    const idsToAdd = Array.from(selectedIds);
+    const currentIds = coupon.produtos_ids || [];
+    const newIds = Array.from(new Set([...currentIds, ...idsToAdd]));
+
+    const { error } = await supabase
+      .from("cupons")
+      .update({ produtos_ids: newIds })
+      .eq("id", couponId);
+
+    if (error) return toast.error(error.message);
+    
+    toast.success(`Produtos associados ao cupom ${coupon.codigo}!`);
+    setSelectedIds(new Set());
+    setShowCouponModal(false);
+    qc.invalidateQueries({ queryKey: ["admin", "cupons-list"] });
+    qc.invalidateQueries({ queryKey: ["admin", "cupons"] });
   };
 
   return (
@@ -503,6 +536,15 @@ function AdminProductsList() {
                   <Ticket className="h-3.5 w-3.5" />
                   Cupom
                 </Link>
+                
+                <button
+                  onClick={() => setShowCouponModal(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-background px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5 transition-colors"
+                  title="Associar a cupom existente"
+                >
+                  <Tags className="h-3.5 w-3.5" />
+                  + Cupom
+                </button>
 
                 <button
                   onClick={() => bulkAction('excluir')}
@@ -947,6 +989,80 @@ function AdminProductsList() {
               >
                 Baixar QR Code
               </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCouponModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-background shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <h3 className="font-display font-semibold">Associar a Cupom Existente</h3>
+              <button
+                onClick={() => setShowCouponModal(false)}
+                className="rounded-full p-1 hover:bg-accent"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="relative mb-4">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={couponSearch}
+                  onChange={(e) => setCouponSearch(e.target.value)}
+                  placeholder="Buscar cupom por código..."
+                  className="w-full rounded-lg border border-input bg-background py-2 pl-9 pr-4 text-sm outline-none focus:border-primary"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="max-h-[300px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                {allCupons
+                  .filter(c => c.codigo.toLowerCase().includes(couponSearch.toLowerCase()))
+                  .map(cupom => (
+                    <button
+                      key={cupom.id}
+                      onClick={() => associateCoupon(cupom.id)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-left transition-colors hover:bg-muted group border border-transparent hover:border-border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`h-8 w-8 rounded-full grid place-items-center ${cupom.ativo ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                          <Ticket className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-mono text-sm font-bold uppercase">{cupom.codigo}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {cupom.produtos_ids?.length || 0} produtos já associados
+                          </p>
+                        </div>
+                      </div>
+                      {!cupom.ativo && (
+                        <span className="text-[10px] font-bold uppercase text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                          Inativo
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                
+                {allCupons.filter(c => c.codigo.toLowerCase().includes(couponSearch.toLowerCase())).length === 0 && (
+                  <div className="py-8 text-center text-sm text-muted-foreground">
+                    Nenhum cupom encontrado.
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="border-t border-border bg-muted/30 p-4 flex justify-between items-center">
+              <p className="text-[10px] text-muted-foreground italic">
+                {selectedIds.size} produtos serão adicionados ao cupom escolhido.
+              </p>
+              <button
+                onClick={() => setShowCouponModal(false)}
+                className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
