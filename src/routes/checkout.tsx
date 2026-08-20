@@ -283,21 +283,28 @@ function CheckoutPage() {
           <div className="lg:col-span-3 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7">
             <h2 className="mb-6 font-display text-lg font-semibold">Itens do pedido</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
-                <div key={item.key} className="flex gap-3 rounded-xl border border-border bg-muted/30 p-3 transition-colors hover:bg-muted/50">
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-1">
-                    {item.foto ? (
-                      <img
-                        src={item.foto}
-                        alt={item.nome}
-                        className="h-full w-full object-contain"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                        <FileText className="h-6 w-6 opacity-20" />
-                      </div>
-                    )}
-                  </div>
+              {items.map((item) => {
+                const isDiscounted = itemsWithDiscount.has(item.key);
+                return (
+                  <div key={item.key} className={`flex gap-3 rounded-xl border p-3 transition-colors ${isDiscounted ? 'border-primary/50 bg-primary/5' : 'border-border bg-muted/30 hover:bg-muted/50'}`}>
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-1">
+                      {item.foto ? (
+                        <img
+                          src={item.foto}
+                          alt={item.nome}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                          <FileText className="h-6 w-6 opacity-20" />
+                        </div>
+                      )}
+                      {isDiscounted && (
+                        <div className="absolute top-0 right-0 p-0.5">
+                          <Ticket className="h-3 w-3 text-primary drop-shadow-sm" />
+                        </div>
+                      )}
+                    </div>
                   <div className="flex flex-1 flex-col justify-center min-w-0">
                     <h3 className="text-xs font-bold text-foreground line-clamp-1">{item.nome}</h3>
                     <p className="mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider">
