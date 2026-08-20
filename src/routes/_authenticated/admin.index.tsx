@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square, MoreHorizontal, EyeOff, Ticket, Play } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square, MoreHorizontal, EyeOff, Ticket, Play, Tags } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
@@ -56,6 +56,17 @@ function AdminProductsList() {
   const [qrToView, setQrToView] = useState<{ id: string; nome: string; hash_id?: string } | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showConfig, setShowConfig] = useState(false);
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [couponSearch, setCouponSearch] = useState("");
+  const { data: allCupons = [] } = useQuery({
+    queryKey: ["admin", "cupons-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("cupons").select("id, codigo, ativo, produtos_ids");
+      if (error) throw error;
+      return data;
+    },
+    enabled: showCouponModal,
+  });
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: config, refetch: refetchConfig } = useQuery({
     queryKey: ["site-config"],
@@ -274,6 +285,28 @@ function AdminProductsList() {
     setSelectedIds(new Set());
     qc.invalidateQueries({ queryKey: ["admin-produtos"] });
     qc.invalidateQueries({ queryKey: ["produtos"] });
+  };
+
+  const associateCoupon = async (couponId: string) => {
+    const coupon = allCupons.find(c => c.id === couponId);
+    if (!coupon) return;
+
+    const idsToAdd = Array.from(selectedIds);
+    const currentIds = coupon.produtos_ids || [];
+    const newIds = Array.from(new Set([...currentIds, ...idsToAdd]));
+
+    const { error } = await supabase
+      .from("cupons")
+      .update({ produtos_ids: newIds })
+      .eq("id", couponId);
+
+    if (error) return toast.error(error.message);
+    
+    toast.success(`Produtos associados ao cupom ${coupon.codigo}!`);
+    setSelectedIds(new Set());
+    setShowCouponModal(false);
+    qc.invalidateQueries({ queryKey: ["admin", "cupons-list"] });
+    qc.invalidateQueries({ queryKey: ["admin", "cupons"] });
   };
 
   return (
@@ -503,6 +536,15 @@ function AdminProductsList() {
                   <Ticket className="h-3.5 w-3.5" />
                   Cupom
                 </Link>
+                
+                <button
+                  onClick={() => setShowCouponModal(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-background px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5 transition-colors"
+                  title="Associar a cupom existente"
+                >
+                  <Tags className="h-3.5 w-3.5" />
+                  + Cupom
+                </button>
 
                 <button
                   onClick={() => bulkAction('excluir')}
