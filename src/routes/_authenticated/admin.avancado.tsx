@@ -263,49 +263,76 @@ function AvancadoPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider">Monitoramento de Latência</h2>
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider">Latência</h2>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl border border-border/50 p-4 text-center">
-              <p className="text-[10px] font-bold uppercase text-muted-foreground">Database</p>
-              <p className="mt-1 text-xl font-bold text-green-500">12ms</p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Database</span>
+              <span className="font-bold text-green-500">12ms</span>
             </div>
-            <div className="rounded-xl border border-border/50 p-4 text-center">
-              <p className="text-[10px] font-bold uppercase text-muted-foreground">API Edge</p>
-              <p className="mt-1 text-xl font-bold text-green-500">24ms</p>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">API Edge</span>
+              <span className="font-bold text-green-500">24ms</span>
+            </div>
+            <div className="pt-2">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                <span>Uptime</span>
+                <span className="font-bold text-foreground">99.98%</span>
+              </div>
+              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
+                <div className="h-full w-[99.98%] bg-green-500" />
+              </div>
             </div>
           </div>
-          <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
-            <span>Uptime do Sistema</span>
-            <span className="font-bold text-foreground">99.98%</span>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-2">
+            <Database className="h-5 w-5 text-primary" />
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider">Volume de Dados</h2>
           </div>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full w-[99.98%] bg-green-500" />
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            <div className="text-center">
+              <p className="text-lg font-bold">{(stats as any).tableCounts?.produtos || 0}</p>
+              <p className="text-[9px] font-bold uppercase text-muted-foreground">Produtos</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold">{(stats as any).tableCounts?.pedidos || 0}</p>
+              <p className="text-[9px] font-bold uppercase text-muted-foreground">Pedidos</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold">{(stats as any).tableCounts?.variacoes_produto || 0}</p>
+              <p className="text-[9px] font-bold uppercase text-muted-foreground">Variações</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold">{(stats as any).tableCounts?.cupons || 0}</p>
+              <p className="text-[9px] font-bold uppercase text-muted-foreground">Cupons</p>
+            </div>
           </div>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider">Acessos por Plataforma</h2>
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider">Plataformas</h2>
           </div>
-          <div className="flex items-center justify-around py-2">
+          <div className="flex items-center justify-around py-1">
             <div className="text-center">
-              <p className="text-2xl font-bold">65%</p>
-              <p className="text-[10px] font-bold uppercase text-muted-foreground">Mobile</p>
+              <p className="text-xl font-bold">65%</p>
+              <p className="text-[9px] font-bold uppercase text-muted-foreground">Mobile</p>
             </div>
             <div className="h-8 w-px bg-border" />
             <div className="text-center">
-              <p className="text-2xl font-bold">35%</p>
-              <p className="text-[10px] font-bold uppercase text-muted-foreground">Desktop</p>
+              <p className="text-xl font-bold">35%</p>
+              <p className="text-[9px] font-bold uppercase text-muted-foreground">Desktop</p>
             </div>
           </div>
-          <p className="mt-4 text-[10px] text-center text-muted-foreground italic">
-            * Dados baseados em User-Agents das últimas 24 horas
+          <p className="mt-3 text-[9px] text-center text-muted-foreground italic">
+            * Base: Últimas 24h
           </p>
         </div>
       </div>
