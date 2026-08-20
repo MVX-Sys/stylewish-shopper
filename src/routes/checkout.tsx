@@ -259,12 +259,12 @@ function CheckoutPage() {
             <div className="divide-y divide-border">
               {items.map((item) => (
                 <div key={item.key} className="flex gap-4 py-4 first:pt-0 last:pb-0">
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted/20">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-1">
                     {item.foto ? (
                       <img
-                        src={`${supabase.storage.from("product-images").getPublicUrl(item.foto).data.publicUrl}`}
+                        src={item.foto}
                         alt={item.nome}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-muted-foreground">

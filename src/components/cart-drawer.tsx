@@ -80,9 +80,9 @@ export function CartDrawer() {
                   key={i.key}
                   className="flex gap-3 rounded-xl border border-border bg-card p-3 transition-shadow hover:shadow-sm"
                 >
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border bg-white">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center">
                     {i.foto ? (
-                      <img src={i.foto} alt="" className="h-full w-full object-cover" />
+                      <img src={i.foto} alt="" className="h-full w-full object-contain p-0.5" />
                     ) : (
                       <div className="grid h-full w-full place-items-center bg-muted text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                         {i.cor.slice(0, 3)}
