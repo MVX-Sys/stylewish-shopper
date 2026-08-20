@@ -370,33 +370,14 @@ function AdminProductsList() {
       {/* Navigation Tabs */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-1">
         <div className="flex items-center gap-1">
-          <Link 
-            to="/admin" 
-            className="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
-          >
-            Produtos
-          </Link>
-          <Link 
-            to="/admin/vendas" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
-          >
-            Vendas
-          </Link>
-          <Link 
-            to="/admin/usuarios" 
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors"
-          >
-            Usuários
-          </Link>
           <button 
             onClick={() => setShowConfig(true)}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border border-b-2 border-transparent transition-colors flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium border-b-2 border-primary text-primary transition-colors flex items-center gap-2"
           >
             <Settings className="h-4 w-4" />
-            Configurações
+            Configurações da Tela Inicial
           </button>
         </div>
-
       </div>
 
 
