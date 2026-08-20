@@ -21,12 +21,21 @@ export async function getImageUrl(
   const hit = cache.get(cacheKey);
   if (hit && hit.expires > now + 60_000) return hit.url;
 
-  // Use getPublicUrl for images in the public product-images bucket
-  const { data } = supabase.storage
+  // Try to use a signed URL if we're not sure if the bucket is public,
+  // or use getPublicUrl if we're certain it's public.
+  // For now, let's use createSignedUrl to ensure access even if bucket is private.
+  const { data, error } = await supabase.storage
     .from("product-images")
-    .getPublicUrl(path);
+    .createSignedUrl(path, 3600); // 1 hour expiry
     
-  const url = data?.publicUrl ?? "";
+  if (error) {
+    console.error("Error generating signed URL for", path, error);
+    // Fallback to public URL just in case
+    const { data: publicData } = supabase.storage.from("product-images").getPublicUrl(path);
+    return publicData?.publicUrl ?? "";
+  }
+    
+  const url = data?.signedUrl ?? "";
   if (url) cache.set(cacheKey, { url, expires: now + 55 * 60_000 });
   return url;
 }
