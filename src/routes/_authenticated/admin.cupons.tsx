@@ -267,7 +267,6 @@ function CuponsPage() {
                   className="input"
                 />
               </div>
-              </div>
 
               <div className="grid grid-cols-1 gap-4 border-t border-border pt-4">
                 <div className="space-y-1">
