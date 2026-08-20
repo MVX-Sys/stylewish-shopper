@@ -464,6 +464,12 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         {/* Main */}
         <div className="space-y-6">
           <Card title="Informações básicas">
+            {produtoId && existing?.hash_id && (
+              <div className="mb-4 rounded-lg bg-muted p-2 text-center">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">ID do Produto: </span>
+                <code className="text-xs font-mono font-bold text-foreground">{existing.hash_id}</code>
+              </div>
+            )}
             <Field label="Nome do produto *">
               <input
                 value={nome}

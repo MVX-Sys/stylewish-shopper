@@ -255,6 +255,54 @@ function CuponsPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 gap-4 border-t border-border pt-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold">Restrições (IDs separados por vírgula)</label>
+                  <p className="text-[10px] text-muted-foreground">Use o ID reduzido (ex: 8 dígitos iniciais) ou o ID completo do produto/categoria.</p>
+                </div>
+                
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">IDs de Produtos Específicos (Opcional)</label>
+                  <textarea
+                    placeholder="Cole os IDs dos produtos aqui, separados por vírgula..."
+                    value={(editing.produtos_ids || []).join(", ")}
+                    onChange={(e) => {
+                      const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                      setEditing({ ...editing, produtos_ids: val });
+                    }}
+                    className="input min-h-[80px] font-mono text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">IDs de Categorias Específicas (Opcional)</label>
+                  <textarea
+                    placeholder="Cole os IDs das categorias aqui, separados por vírgula..."
+                    value={(editing.categorias_ids || []).join(", ")}
+                    onChange={(e) => {
+                      const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                      setEditing({ ...editing, categorias_ids: val });
+                    }}
+                    className="input min-h-[80px] font-mono text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold">Preço Mínimo do Pedido (Opcional)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={editing.preco_minimo_pedido || ""}
+                    onChange={(e) => setEditing({ ...editing, preco_minimo_pedido: e.target.value ? Number(e.target.value) : null })}
+                    className="input pl-9"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="mb-1.5 block text-sm font-semibold">Validade (Opcional)</label>
                 <div className="relative">
