@@ -561,19 +561,36 @@ function AdminProductsList() {
                   </button>
                 </div>
                 <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Type className="h-4 w-4" /> Título do Hero
-                    </label>
-                    <input 
-                      type="text" 
-                      defaultValue={config.hero_title}
-                      onBlur={(e) => updateSiteConfig({ hero_title: e.target.value }).then(() => {
-                        toast.success("Título atualizado");
-                        refetchConfig();
-                      })}
-                      className="w-full rounded-lg border border-input bg-background p-2 text-sm"
-                    />
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Type className="h-4 w-4" /> Título do Hero
+                      </label>
+                      <input 
+                        type="text" 
+                        defaultValue={config.hero_title}
+                        onBlur={(e) => updateSiteConfig({ hero_title: e.target.value }).then(() => {
+                          toast.success("Título atualizado");
+                          refetchConfig();
+                        })}
+                        className="w-full rounded-lg border border-input bg-background p-2 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Type className="h-4 w-4 text-muted-foreground" /> Subtítulo do Hero
+                      </label>
+                      <input 
+                        type="text" 
+                        defaultValue={config.hero_subtitle || ""}
+                        placeholder="Ex: O melhor da moda masculina atacado"
+                        onBlur={(e) => updateSiteConfig({ hero_subtitle: e.target.value }).then(() => {
+                          toast.success("Subtítulo atualizado");
+                          refetchConfig();
+                        })}
+                        className="w-full rounded-lg border border-input bg-background p-2 text-sm"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-4">
