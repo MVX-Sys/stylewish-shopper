@@ -51,6 +51,7 @@ export async function listProdutos(): Promise<ProductListItem[]> {
   const { data, error } = await supabase
     .from("produtos")
     .select("*, imagens:imagens_produto(*), variacoes:variacoes_produto(*)")
+    .eq("ativo", true)
     .order("criado_em", { ascending: false });
   if (error) throw error;
   return (data ?? []) as ProductListItem[];
