@@ -444,7 +444,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
 
   return (
     <form onSubmit={submit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
         {/* Main */}
         <div className="space-y-6">
           <Card title="Informações básicas">
