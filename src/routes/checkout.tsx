@@ -546,8 +546,6 @@ function CheckoutItemRow({ item, itemsWithDiscount, appliedCoupon, items }: { it
         </p>
         <div className="mt-1.5 flex items-center justify-between">
           <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
-        <div className="mt-1.5 flex items-center justify-between">
-          <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
           <div className="flex flex-col items-end">
             <div className="flex flex-col items-end gap-0.5">
               {isDiscounted && (
@@ -556,7 +554,7 @@ function CheckoutItemRow({ item, itemsWithDiscount, appliedCoupon, items }: { it
                 </span>
               )}
               <span className={`text-xs font-bold ${isDiscounted ? 'text-primary' : 'text-foreground'}`}>
-                {brl((isDiscounted ? (appliedCoupon?.tipo_desconto === 'fixo' ? (itemPrecoEfetivo(item) * item.quantidade - (appliedCoupon.valor_desconto / items.filter(it => itemsWithDiscount.has(it.key)).length)) : (itemPrecoEfetivo(item) * item.quantidade * (1 - appliedCoupon.valor_desconto / 100))) : itemPrecoEfetivo(item) * item.quantidade))}
+                {brl((isDiscounted ? (appliedCoupon?.tipo_desconto === 'fixo' ? (itemPrecoEfetivo(item) * item.quantidade - (appliedCoupon.valor_desconto / items.filter((it: any) => itemsWithDiscount.has(it.key)).length)) : (itemPrecoEfetivo(item) * item.quantidade * (1 - appliedCoupon.valor_desconto / 100))) : itemPrecoEfetivo(item) * item.quantidade))}
               </span>
             </div>
             {isDiscounted && (
