@@ -19,12 +19,14 @@ export const saveCupon = createServerFn({ method: "POST" })
       .object({
         id: z.string().optional(),
         codigo: z.string().min(1),
-        tipo_desconto: z.enum(["percentual"]),
+        tipo_desconto: z.enum(["percentual", "fixo"]),
         valor_desconto: z.number().min(0),
         quantidade_minima_itens: z.number().min(0),
         validade: z.string().nullable(),
         ativo: z.boolean(),
         produtos_ids: z.array(z.string()).nullable(),
+        categorias_ids: z.array(z.string()).nullable(),
+        preco_minimo_pedido: z.number().nullable(),
       })
       .parse(d)
   )

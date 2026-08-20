@@ -61,6 +61,9 @@ function CheckoutPage() {
 
   const discountAmount = useMemo(() => {
     if (!appliedCoupon) return 0;
+    if (appliedCoupon.tipo_desconto === "fixo") {
+      return appliedCoupon.valor_desconto;
+    }
     return (total * appliedCoupon.valor_desconto) / 100;
   }, [total, appliedCoupon]);
 
@@ -262,7 +265,15 @@ function CheckoutPage() {
               <ReadonlyInput value={brl(total)} />
             </Field>
             <Field label="Desconto:">
-              <ReadonlyInput value={appliedCoupon ? `-${appliedCoupon.valor_desconto}%` : "Não Aplicado"} />
+              <ReadonlyInput 
+                value={
+                  appliedCoupon 
+                    ? appliedCoupon.tipo_desconto === "fixo" 
+                      ? brl(appliedCoupon.valor_desconto) 
+                      : `-${appliedCoupon.valor_desconto}%` 
+                    : "Não Aplicado"
+                } 
+              />
             </Field>
             <Field label="Desconto Cupom:">
               <ReadonlyInput value={discountAmount > 0 ? `-${brl(discountAmount)}` : "Não Aplicado"} />
@@ -330,12 +341,38 @@ function CheckoutPage() {
                       const res = await fnValidateCoupon({ data: { codigo: couponCode } });
                       if (res.valid && res.cupom) {
                         const totalItens = items.reduce((s, i) => s + i.quantidade, 0);
+                        
+                        // Validar valor mínimo do pedido se definido no cupom
+                        if (res.cupom.preco_minimo_pedido && total < res.cupom.preco_minimo_pedido) {
+                          toast.error(`Este cupom exige um pedido mínimo de ${brl(res.cupom.preco_minimo_pedido)}.`);
+                          return;
+                        }
+
                         if (totalItens < res.cupom.quantidade_minima_itens) {
                           toast.error(`Este cupom exige no mínimo ${res.cupom.quantidade_minima_itens} itens no carrinho.`);
-                        } else {
-                          setAppliedCoupon(res.cupom);
-                          toast.success("Cupom aplicado com sucesso!");
+                          return;
                         }
+
+                        // Validar produtos específicos (se definido)
+                        // Consideramos válido se o ID reduzido ou completo bater com qualquer item no carrinho
+                        if (res.cupom.produtos_ids && res.cupom.produtos_ids.length > 0) {
+                          const allowedProductIds = res.cupom.produtos_ids.map((id: string) => id.toLowerCase());
+                          const hasAllowedProduct = items.some(item => {
+                            const pId = item.produtoId.toLowerCase();
+                            // Buscamos o produto no estado global para pegar o hash_id se disponível, 
+                            // mas por enquanto checamos se o ID fornecido no cupom é prefixo do UUID ou bate com o hash_id visível
+                            // Para simplificar, checamos se o ID da restrição está contido no ID do produto ou se é prefixo
+                            return allowedProductIds.some(aid => pId.includes(aid) || aid.includes(pId));
+                          });
+
+                          if (!hasAllowedProduct) {
+                            toast.error("Este cupom não é válido para os produtos no seu carrinho.");
+                            return;
+                          }
+                        }
+
+                        setAppliedCoupon(res.cupom);
+                        toast.success("Cupom aplicado com sucesso!");
                       } else {
                         toast.error(res.message || "Cupom inválido.");
                       }
