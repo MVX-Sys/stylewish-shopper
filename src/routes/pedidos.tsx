@@ -89,12 +89,26 @@ function OrdersPage() {
                   <div className="p-6">
                     <div className="mb-4 space-y-3">
                       {order.itens?.map((item: any) => (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <div className="flex gap-2">
-                            <span className="font-bold">{item.quantidade}x</span>
-                            <span>{item.detalhes?.nome || 'Produto'} ({item.detalhes?.cor}, {item.detalhes?.tamanho})</span>
+                        <div key={item.id} className="flex items-center justify-between text-sm gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-1">
+                              {item.imagem_url ? (
+                                <img src={item.imagem_url} alt="" className="h-full w-full object-contain" />
+                              ) : (
+                                <Package className="h-6 w-6 text-muted-foreground/20" />
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <div className="flex gap-2">
+                                <span className="font-bold">{item.quantidade}x</span>
+                                <span className="font-medium">{item.detalhes?.nome || 'Produto'}</span>
+                              </div>
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                                {item.detalhes?.cor} • {item.detalhes?.tamanho}
+                              </span>
+                            </div>
                           </div>
-                          <span className="font-medium">{brl(item.preco_unitario * item.quantidade)}</span>
+                          <span className="font-semibold tabular-nums">{brl(item.preco_unitario * item.quantidade)}</span>
                         </div>
                       ))}
                     </div>

@@ -382,9 +382,9 @@ function PedidosAdminPage() {
                                     )}
                                   </div>
                                   <div className="flex flex-1 flex-col justify-center min-w-0">
-                                    <p className="truncate text-[10px] font-bold leading-tight">{item.nome_produto}</p>
+                                    <p className="truncate text-[10px] font-bold leading-tight">{item.nome_produto || item.detalhes?.nome}</p>
                                     <p className="text-[9px] text-muted-foreground leading-tight">
-                                      {item.quantidade}x • {item.cor} • {item.tamanho}
+                                      {item.quantidade}x • {item.cor || item.detalhes?.cor} • {item.tamanho || item.detalhes?.tamanho}
                                     </p>
                                   </div>
                                 </div>

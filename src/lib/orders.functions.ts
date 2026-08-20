@@ -103,10 +103,38 @@ export const listUserOrders = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("pedidos")
-      .select("*, itens:pedidos_itens(*)")
+      .select(`
+        *,
+        itens:pedidos_itens(*)
+      `)
       .eq("user_id", userId)
       .order("criado_em", { ascending: false });
 
     if (error) throw error;
-    return data;
+
+    // Aumentar os itens com URLs de imagem assinadas
+    const results = await Promise.all((data || []).map(async (pedido) => {
+      const itensWithImages = await Promise.all((pedido.itens || []).map(async (item: any) => {
+        let imagemUrl = null;
+        if (item.produto_id) {
+          const { data: imgData } = await supabase
+            .from("imagens_produto")
+            .select("storage_path")
+            .eq("produto_id", item.produto_id)
+            .eq("principal", true)
+            .maybeSingle();
+          
+          if (imgData?.storage_path) {
+            const { data: signed } = await supabase.storage
+              .from("product-images")
+              .createSignedUrl(imgData.storage_path, 3600);
+            imagemUrl = signed?.signedUrl;
+          }
+        }
+        return { ...item, imagem_url: imagemUrl };
+      }));
+      return { ...pedido, itens: itensWithImages };
+    }));
+
+    return results;
   });
