@@ -36,8 +36,31 @@ function AvancadoPage() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats-advanced"],
     queryFn: async () => {
-      // 1. Storage Info
+      // 1. Storage Info & Total Size
       const { data: buckets } = await supabase.storage.listBuckets();
+      
+      let totalSizeBytes = 0;
+      const bucketStats = [];
+
+      if (buckets) {
+        for (const bucket of buckets) {
+          const { data: files } = await supabase.storage.from(bucket.name).list();
+          const bucketSize = (files || []).reduce((acc, file) => acc + (file.metadata?.size || 0), 0);
+          totalSizeBytes += bucketSize;
+          bucketStats.push({
+            ...bucket,
+            size: bucketSize
+          });
+        }
+      }
+
+      const formatSize = (bytes: number) => {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB", "TB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      };
       
       // 2. Access Info (Logs by day for chart)
       const { data: logs } = await supabase
@@ -75,12 +98,14 @@ function AvancadoPage() {
       })).reverse();
 
       return {
-        buckets: buckets ?? [],
+        buckets: bucketStats,
         totalLogs: logs?.length ?? 0,
         userCount: userCount ?? 0,
         totalSales: orders?.reduce((sum, o) => sum + (o.total || 0), 0) ?? 0,
         orderCount: orders?.length ?? 0,
-        chartData
+        chartData,
+        totalStorage: formatSize(totalSizeBytes),
+        formatSize
       };
     },
   });
