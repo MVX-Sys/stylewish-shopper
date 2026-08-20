@@ -198,7 +198,7 @@ function ProductPage() {
           preco: p.preco,
           precoPromocional: promo?.ativa ? promo.precoFinal : null,
           promocaoAte: promo?.ativa && promo.validoAte ? promo.validoAte.toISOString() : null,
-          foto: p.imagens.find(i => i.principal)?.storage_path || p.imagens[0]?.storage_path || null,
+          foto: p.imagens.find((i: any) => i.principal)?.storage_path || p.imagens[0]?.storage_path || null,
         },
         q,
       );
