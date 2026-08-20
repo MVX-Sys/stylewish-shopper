@@ -5,13 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square, MoreHorizontal, EyeOff, Ticket, Play, Tags } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square, MoreHorizontal, EyeOff, Ticket, Play, Tags, ChevronUp, ChevronDown } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
 import { downloadProductsCSV, downloadProductsPDF, downloadProductsXLSX } from "@/lib/pdf";
 import { ExportMenu } from "@/components/export-menu";
-import { getSiteConfig, updateSiteConfig } from "@/lib/config-site";
+import { getSiteConfig, updateHeroSlide, createHeroSlide, deleteHeroSlide } from "@/lib/config-site";
 import { uploadImage } from "@/lib/storage";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -549,107 +549,199 @@ function AdminProductsList() {
           )}
 
           {showConfig && config && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-              <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-background shadow-2xl">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+              <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-background shadow-2xl animate-in fade-in zoom-in duration-200">
                 <div className="flex items-center justify-between border-b border-border p-4">
                   <h3 className="font-display font-semibold flex items-center gap-2">
                     <Settings className="h-4 w-4" />
-                    Configurar Página Inicial
+                    Configurar Banners da Home
                   </h3>
                   <button onClick={() => setShowConfig(false)} className="rounded-full p-1 hover:bg-accent">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
-                <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium flex items-center gap-2">
-                        <Type className="h-4 w-4" /> Título do Hero
-                      </label>
-                      <input 
-                        type="text" 
-                        defaultValue={config.hero_title}
-                        onBlur={(e) => updateSiteConfig({ hero_title: e.target.value }).then(() => {
-                          toast.success("Título atualizado");
+                <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">Gerencie as imagens e textos que aparecem no topo do site.</p>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await createHeroSlide({
+                            titulo: "Novo Banner",
+                            subtitulo: "Descrição do banner",
+                            tipo: 'gradient',
+                            media_url: null,
+                            ordem: config.hero_slides.length,
+                            ativo: true
+                          });
+                          toast.success("Banner adicionado!");
                           refetchConfig();
-                        })}
-                        className="w-full rounded-lg border border-input bg-background p-2 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium flex items-center gap-2">
-                        <Type className="h-4 w-4 text-muted-foreground" /> Subtítulo do Hero
-                      </label>
-                      <input 
-                        type="text" 
-                        defaultValue={config.hero_subtitle || ""}
-                        placeholder="Ex: O melhor da moda masculina atacado"
-                        onBlur={(e) => updateSiteConfig({ hero_subtitle: e.target.value }).then(() => {
-                          toast.success("Subtítulo atualizado");
-                          refetchConfig();
-                        })}
-                        className="w-full rounded-lg border border-input bg-background p-2 text-sm"
-                      />
-                    </div>
+                        } catch (err: any) {
+                          toast.error(err.message);
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground hover:opacity-90"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Adicionar Slide
+                    </button>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-sm font-medium">Tipo de Fundo</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { id: 'gradient', label: 'Gradiente', icon: SlidersHorizontal },
-                        { id: 'image', label: 'Imagem', icon: ImageIcon },
-                        { id: 'video', label: 'Vídeo', icon: Video },
-                      ].map((t) => (
-                        <button
-                          key={t.id}
-                          onClick={() => updateSiteConfig({ hero_type: t.id as any }).then(() => {
-                            toast.success(`Modo ${t.label} ativado`);
-                            refetchConfig();
-                          })}
-                          className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${config.hero_type === t.id ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:bg-accent'}`}
-                        >
-                          <t.icon className="h-6 w-6" />
-                          <span className="text-xs font-bold uppercase">{t.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                    {config.hero_slides.map((slide, index) => (
+                      <div key={slide.id} className="group relative rounded-2xl border border-border bg-card p-5 space-y-4 transition-all hover:border-primary/50">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Título</label>
+                                <input
+                                  type="text"
+                                  defaultValue={slide.titulo}
+                                  onBlur={(e) => updateHeroSlide(slide.id, { titulo: e.target.value }).then(() => {
+                                    toast.success("Título atualizado");
+                                    refetchConfig();
+                                  })}
+                                  className="w-full rounded-lg border border-input bg-background p-2 text-sm focus:border-primary outline-none"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Subtítulo</label>
+                                <input
+                                  type="text"
+                                  defaultValue={slide.subtitulo || ""}
+                                  onBlur={(e) => updateHeroSlide(slide.id, { subtitulo: e.target.value }).then(() => {
+                                    toast.success("Subtítulo atualizado");
+                                    refetchConfig();
+                                  })}
+                                  className="w-full rounded-lg border border-input bg-background p-2 text-sm focus:border-primary outline-none"
+                                />
+                              </div>
+                            </div>
 
-                  {config.hero_type !== 'gradient' && (
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium flex items-center gap-2">
-                        {config.hero_type === 'video' ? <Video className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}
-                        Upload de {config.hero_type === 'video' ? 'Vídeo' : 'Imagem'}
-                      </label>
-                      <input 
-                        type="file" 
-                        accept={config.hero_type === 'video' ? "video/*" : "image/*"}
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const loadingToast = toast.loading("Enviando mídia...");
-                          try {
-                            const path = await uploadImage(file);
-                            const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(path);
-                            await updateSiteConfig({ hero_media_url: publicUrl });
-                            toast.success("Mídia atualizada!", { id: loadingToast });
-                            refetchConfig();
-                          } catch (err: any) {
-                            toast.error(err.message, { id: loadingToast });
-                          }
-                        }}
-                        className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                      />
-                      {config.hero_media_url && (
-                        <p className="text-[10px] text-muted-foreground break-all">Atual: {config.hero_media_url}</p>
-                      )}
-                    </div>
-                  )}
+                            <div className="space-y-3">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipo de Fundo</label>
+                              <div className="flex flex-wrap gap-2">
+                                {[
+                                  { id: 'gradient', label: 'Gradiente', icon: SlidersHorizontal },
+                                  { id: 'image', label: 'Imagem', icon: ImageIcon },
+                                  { id: 'video', label: 'Vídeo', icon: Video },
+                                ].map((t) => (
+                                  <button
+                                    key={t.id}
+                                    onClick={() => updateHeroSlide(slide.id, { tipo: t.id as any }).then(() => {
+                                      toast.success(`Modo ${t.label} ativado`);
+                                      refetchConfig();
+                                    })}
+                                    className={`flex items-center gap-2 rounded-full border px-4 py-1.5 transition-all text-[10px] font-bold uppercase tracking-wider ${slide.tipo === t.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:bg-accent'}`}
+                                  >
+                                    <t.icon className="h-3 w-3" />
+                                    {t.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {slide.tipo !== 'gradient' && (
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                  Mídia ({slide.tipo === 'video' ? 'Vídeo' : 'Imagem'})
+                                </label>
+                                <div className="flex items-center gap-3">
+                                  {slide.media_url && (
+                                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                                      {slide.tipo === 'video' ? (
+                                        <div className="flex h-full w-full items-center justify-center bg-navy/20">
+                                          <Video className="h-4 w-4 text-primary" />
+                                        </div>
+                                      ) : (
+                                        <img src={slide.media_url} alt="" className="h-full w-full object-cover" />
+                                      )}
+                                    </div>
+                                  )}
+                                  <input
+                                    type="file"
+                                    accept={slide.tipo === 'video' ? "video/*" : "image/*"}
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      const loadingToast = toast.loading("Enviando mídia...");
+                                      try {
+                                        const path = await uploadImage(file);
+                                        const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(path);
+                                        await updateHeroSlide(slide.id, { media_url: publicUrl });
+                                        toast.success("Mídia atualizada!", { id: loadingToast });
+                                        refetchConfig();
+                                      } catch (err: any) {
+                                        toast.error(err.message, { id: loadingToast });
+                                      }
+                                    }}
+                                    className="flex-1 text-[10px] file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-muted file:text-foreground hover:file:bg-muted/80 cursor-pointer"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            <div className="flex flex-col rounded-lg border border-border bg-muted/30 p-1">
+                              <button
+                                disabled={index === 0}
+                                onClick={() => {
+                                  const prev = config.hero_slides[index - 1];
+                                  Promise.all([
+                                    updateHeroSlide(slide.id, { ordem: index - 1 }),
+                                    updateHeroSlide(prev.id, { ordem: index })
+                                  ]).then(() => refetchConfig());
+                                }}
+                                className="p-1.5 hover:bg-background rounded-md transition-colors disabled:opacity-30"
+                              >
+                                <ChevronUp className="h-4 w-4" />
+                              </button>
+                              <button
+                                disabled={index === config.hero_slides.length - 1}
+                                onClick={() => {
+                                  const next = config.hero_slides[index + 1];
+                                  Promise.all([
+                                    updateHeroSlide(slide.id, { ordem: index + 1 }),
+                                    updateHeroSlide(next.id, { ordem: index })
+                                  ]).then(() => refetchConfig());
+                                }}
+                                className="p-1.5 hover:bg-background rounded-md transition-colors disabled:opacity-30"
+                              >
+                                <ChevronDown className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => {
+                                if (confirm("Excluir este banner?")) {
+                                  deleteHeroSlide(slide.id).then(() => {
+                                    toast.success("Banner excluído");
+                                    refetchConfig();
+                                  });
+                                }
+                              }}
+                              className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                              title="Excluir slide"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {config.hero_slides.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-12 text-center opacity-50">
+                        <ImageIcon className="h-12 w-12 mb-4" />
+                        <p className="text-sm font-medium">Nenhum banner configurado.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="p-4 border-t border-border flex justify-end">
-                  <button onClick={() => setShowConfig(false)} className="rounded-full bg-foreground text-background px-6 py-2 text-sm font-bold uppercase tracking-wide">
-                    Fechar
+                <div className="p-4 border-t border-border flex justify-end bg-muted/30">
+                  <button onClick={() => setShowConfig(false)} className="rounded-full bg-foreground text-background px-8 py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-90">
+                    Concluir
                   </button>
                 </div>
               </div>
