@@ -444,7 +444,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
 
   return (
     <form onSubmit={submit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
         {/* Main */}
         <div className="space-y-6">
           <Card title="Informações básicas">
@@ -608,10 +608,23 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
                     {/* Cabeçalho da Cor */}
                     <div className="flex items-center justify-between bg-muted/40 px-4 py-3 border-b border-border">
                       <div className="flex items-center gap-3">
-                        <div
-                          className="h-6 w-6 rounded-full border border-border shadow-inner"
-                          style={{ backgroundColor: c.hex }}
-                        />
+                        <div className="flex items-center gap-1.5">
+                          <label
+                            className="h-6 w-6 cursor-pointer rounded-full border border-border shadow-inner"
+                            style={{ backgroundColor: c.hex }}
+                            title="Mudar cor visual"
+                          >
+                            <input
+                              type="color"
+                              value={c.hex}
+                              onChange={(e) => {
+                                const newHex = e.target.value;
+                                setVars(prev => prev.map(v => v.nome_cor === c.nome ? { ...v, hex_cor: newHex } : v));
+                              }}
+                              className="pointer-events-none absolute h-0 w-0 opacity-0"
+                            />
+                          </label>
+                        </div>
                         <span className="font-display font-bold text-sm uppercase tracking-wider">{c.nome}</span>
                       </div>
                       <button

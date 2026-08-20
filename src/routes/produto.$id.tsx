@@ -304,15 +304,15 @@ function ProductPage() {
               <ChevronLeft className="h-4 w-4" /> Continuar comprando
             </Link>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_400px] md:gap-8">
               {/* Gallery (Thumbs + Main) */}
               <div className="flex flex-col gap-4">
-                <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-white">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-white">
                   {imgs[mainIdx] ? (
                     <img
                       src={imgs[mainIdx]}
                       alt={p.nome}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain p-4"
                     />
                   ) : (
                     <div className="skeleton h-full w-full" />
@@ -352,7 +352,7 @@ function ProductPage() {
                           : "border-border opacity-70 hover:opacity-100"
                       }`}
                     >
-                      <img src={u} alt="" className="h-full w-full object-cover" />
+                      <img src={u} alt="" className="h-full w-full object-contain p-1" />
                     </button>
                   ))}
                 </div>
