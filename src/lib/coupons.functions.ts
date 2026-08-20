@@ -13,7 +13,10 @@ export const listCupons = createServerFn({ method: "GET" })
     return data;
   });
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
 export const saveCupon = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
     z
       .object({
@@ -30,8 +33,10 @@ export const saveCupon = createServerFn({ method: "POST" })
       })
       .parse(d)
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
+    const { supabase } = context;
+
     if (id) {
       const { data: updated, error } = await supabase
         .from("cupons")
@@ -53,8 +58,10 @@ export const saveCupon = createServerFn({ method: "POST" })
   });
 
 export const deleteCupon = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string() }).parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
     const { error } = await supabase.from("cupons").delete().eq("id", data.id);
     if (error) throw error;
     return { success: true };
