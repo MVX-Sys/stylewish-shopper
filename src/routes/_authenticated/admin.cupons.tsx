@@ -252,7 +252,7 @@ function CuponsPage() {
                     type="number"
                     required
                     min="0"
-                    max={editing.tipo_desconto === "percentual" ? "100" : undefined}
+                    max={editing.tipo_desconto === "percentual" ? 100 : undefined}
                     value={editing.valor_desconto}
                     onChange={(e) => setEditing({ ...editing, valor_desconto: Number(e.target.value) })}
                     className="input"
