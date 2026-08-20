@@ -253,14 +253,54 @@ function CheckoutPage() {
           </div>
         </div>
 
-        <section className="mt-8 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7">
+        <section className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7">
+            <h2 className="mb-6 font-display text-lg font-semibold">Itens do pedido</h2>
+            <div className="divide-y divide-border">
+              {items.map((item) => (
+                <div key={item.key} className="flex gap-4 py-4 first:pt-0 last:pb-0">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted/20">
+                    {item.foto ? (
+                      <img
+                        src={`${supabase.storage.from("product-images").getPublicUrl(item.foto).data.publicUrl}`}
+                        alt={item.nome}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                        <FileText className="h-8 w-8 opacity-20" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col justify-center">
+                    <h3 className="text-sm font-semibold text-foreground line-clamp-1">{item.nome}</h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {item.cor} • Tam {item.tamanho}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{item.quantidade}x {brl(itemPrecoEfetivo(item))}</span>
+                      <span className="text-sm font-bold text-foreground">{brl(itemPrecoEfetivo(item) * item.quantidade)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {items.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted-foreground">
+                  Seu carrinho está vazio.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7 h-fit">
+            <h2 className="mb-6 font-display text-lg font-semibold">Resumo do Pedido</h2>
           {/* Valor mínimo */}
           <Field label="Valor mínimo para compra:">
             <ReadonlyInput value={brl(VALOR_MINIMO_COMPRA)} />
           </Field>
 
           {/* Valores */}
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
             <Field label="Valor Pedido:">
               <ReadonlyInput value={brl(total)} />
             </Field>
@@ -447,6 +487,7 @@ function CheckoutPage() {
               <MessageCircle className="h-4 w-4" />
               Finalizar
             </button>
+          </div>
           </div>
         </section>
       </main>
