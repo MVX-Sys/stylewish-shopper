@@ -21,14 +21,12 @@ export async function getImageUrl(
   const hit = cache.get(cacheKey);
   if (hit && hit.expires > now + 60_000) return hit.url;
 
-  // Smart resizing disabled per user request to ensure full quality images
-  const transform = undefined;
-
-  const { data } = await supabase.storage
+  // Use getPublicUrl for images in the public product-images bucket
+  const { data } = supabase.storage
     .from("product-images")
-    .createSignedUrl(path, 60 * 60, { transform });
+    .getPublicUrl(path);
     
-  const url = data?.signedUrl ?? "";
+  const url = data?.publicUrl ?? "";
   if (url) cache.set(cacheKey, { url, expires: now + 55 * 60_000 });
   return url;
 }

@@ -173,30 +173,14 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
     ).then(setImgs);
   }, [existing]);
 
-  const isHeic = (f: File) =>
-    /\.hei[cf]$/i.test(f.name) || /image\/hei[cf]/i.test(f.type);
-
-  const convertHeic = async (f: File): Promise<File> => {
-    try {
-      const heic2any = (await import("heic2any")).default;
-      const blob = (await heic2any({ blob: f, toType: "image/jpeg", quality: 0.9 })) as Blob;
-      const newName = f.name.replace(/\.hei[cf]$/i, ".jpg");
-      return new File([blob], newName, { type: "image/jpeg" });
-    } catch (err) {
-      console.error("HEIC conversion failed", err);
-      throw new Error(`Falha ao converter HEIC: ${f.name}`);
-    }
-  };
-
   const onPickFiles = async (files: FileList | null) => {
     if (!files) return;
+    const { processImageFile } = await import("@/lib/images");
     const arr = Array.from(files);
-    const hasHeic = arr.some(isHeic);
-    if (hasHeic) toast.info("Convertendo imagens HEIC…");
     const processed: File[] = [];
     for (const f of arr) {
       try {
-        processed.push(isHeic(f) ? await convertHeic(f) : f);
+        processed.push(await processImageFile(f));
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Erro ao processar imagem.");
       }
@@ -702,7 +686,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
               <input
                 type="file"
                 multiple
-                accept="image/*,.heic,.heif,.webp,.avif"
+                accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.avif,.jxl"
                 onChange={(e) => onPickFiles(e.target.files)}
                 className="hidden"
               />

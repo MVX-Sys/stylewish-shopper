@@ -661,14 +661,20 @@ function AdminProductsList() {
                                   )}
                                   <input
                                     type="file"
-                                    accept={slide.tipo === 'video' ? "video/*" : "image/*"}
+                                    accept={slide.tipo === 'video' ? "video/*" : ".jpg,.jpeg,.png,.webp,.heic,.heif,.avif,.jxl"}
                                     onChange={async (e) => {
                                       const file = e.target.files?.[0];
                                       if (!file) return;
                                       const loadingToast = toast.loading("Enviando mídia...");
                                       try {
-                                        const path = await uploadImage(file);
-                                        const { data: { publicUrl } } = supabase.storage.from('produtos').getPublicUrl(path);
+                                        let fileToUpload = file;
+                                        if (slide.tipo === 'image') {
+                                          const { processImageFile } = await import("@/lib/images");
+                                          fileToUpload = await processImageFile(file);
+                                        }
+                                        
+                                        const path = await uploadImage(fileToUpload);
+                                        const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(path);
                                         await updateHeroSlide(slide.id, { media_url: publicUrl });
                                         toast.success("Mídia atualizada!", { id: loadingToast });
                                         refetchConfig();
