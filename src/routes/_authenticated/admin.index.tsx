@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
@@ -56,6 +56,7 @@ function AdminProductsList() {
   const [qrToView, setQrToView] = useState<{ id: string; nome: string; hash_id?: string } | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showConfig, setShowConfig] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: config, refetch: refetchConfig } = useQuery({
     queryKey: ["site-config"],
     queryFn: getSiteConfig,
@@ -419,6 +420,33 @@ function AdminProductsList() {
             </div>
           </div>
 
+          {selectedIds.size > 0 && (
+            <div className="flex items-center justify-between bg-primary/5 px-4 py-2 border-t border-primary/10 animate-in fade-in slide-in-from-top-1">
+              <span className="text-xs font-medium text-primary">
+                {selectedIds.size} {selectedIds.size === 1 ? 'produto selecionado' : 'produtos selecionados'}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const ids = Array.from(selectedIds).join(', ');
+                    navigator.clipboard.writeText(ids);
+                    toast.success(`${selectedIds.size} IDs copiados!`);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  Copiar IDs
+                </button>
+                <button
+                  onClick={() => setSelectedIds(new Set())}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
           {showConfig && config && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
               <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-background shadow-2xl">
@@ -644,6 +672,25 @@ function AdminProductsList() {
             <table className="w-full text-sm min-w-[800px]">
               <thead className="bg-muted/40 text-left">
                 <tr className="text-xs uppercase tracking-wider text-muted-foreground">
+                  <th className="p-4 w-10">
+                    <button 
+                      onClick={() => {
+                        if (selectedIds.size === filtered.length) {
+                          setSelectedIds(new Set());
+                        } else {
+                          setSelectedIds(new Set(filtered.map(p => p.hash_id || p.id)));
+                        }
+                      }}
+                      className="rounded hover:bg-muted p-1 transition-colors"
+                      title={selectedIds.size === filtered.length ? "Desmarcar todos" : "Selecionar todos da lista"}
+                    >
+                      {selectedIds.size > 0 && selectedIds.size === filtered.length ? (
+                        <CheckSquare className="h-4 w-4 text-primary" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                    </button>
+                  </th>
                   <th className="p-4 font-semibold">Produto</th>
                   <th className="p-4 font-semibold">ID</th>
                   <th className="p-4 font-semibold">Preço</th>
@@ -662,8 +709,26 @@ function AdminProductsList() {
                   return (
                     <tr
                       key={p.id}
-                      className="border-t border-border transition-colors hover:bg-muted/40"
+                      className={`border-t border-border transition-colors hover:bg-muted/40 ${selectedIds.has(p.hash_id || p.id) ? 'bg-primary/5' : ''}`}
                     >
+                      <td className="p-4">
+                        <button 
+                          onClick={() => {
+                            const next = new Set(selectedIds);
+                            const id = p.hash_id || p.id;
+                            if (next.has(id)) next.delete(id);
+                            else next.add(id);
+                            setSelectedIds(next);
+                          }}
+                          className="rounded hover:bg-muted p-1 transition-colors"
+                        >
+                          {selectedIds.has(p.hash_id || p.id) ? (
+                            <CheckSquare className="h-4 w-4 text-primary" />
+                          ) : (
+                            <Square className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </button>
+                      </td>
                       <td className="p-3">
                         <div className="flex items-center gap-3">
                           <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
