@@ -2,6 +2,8 @@ import { X, Minus, Plus, MessageCircle, Trash2, ShoppingBag, AlertCircle } from 
 import { useNavigate } from "@tanstack/react-router";
 import { useCart, itemPrecoEfetivo } from "@/lib/cart";
 import { brl } from "@/lib/format";
+import { getImageUrl } from "@/lib/storage";
+import { useEffect, useState } from "react";
 import { VALOR_MINIMO_COMPRA } from "@/lib/config";
 import { toast } from "sonner";
 
@@ -76,68 +78,7 @@ export function CartDrawer() {
           ) : (
             <ul className="space-y-4">
               {items.map((i) => (
-                <li
-                  key={i.key}
-                  className="flex gap-3 rounded-xl border border-border bg-card p-3 transition-shadow hover:shadow-sm"
-                >
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border bg-white flex items-center justify-center p-0.5">
-                    {i.foto ? (
-                      <img src={i.foto} alt="" className="h-full w-full object-contain" />
-                    ) : (
-                      <ShoppingBag className="h-5 w-5 text-muted-foreground/20" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{i.nome}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {i.cor} · Tam {i.tamanho}
-                    </p>
-                    <div className="mt-2 flex items-center gap-1.5">
-                      <button
-                        onClick={() => setQty(i.key, i.quantidade - 1)}
-                        className="grid h-7 w-7 place-items-center rounded-full border border-border transition-colors hover:bg-accent"
-                        aria-label="Menos"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                      <span className="w-7 text-center text-sm font-medium tabular-nums">
-                        {i.quantidade}
-                      </span>
-                      <button
-                        onClick={() => setQty(i.key, i.quantidade + 1)}
-                        className="grid h-7 w-7 place-items-center rounded-full border border-border transition-colors hover:bg-accent"
-                        aria-label="Mais"
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
-                      <button
-                        onClick={() => remove(i.key)}
-                        className="ml-auto rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                        aria-label="Remover"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="shrink-0 text-right text-sm font-semibold tabular-nums">
-                    {(() => {
-                      const eff = itemPrecoEfetivo(i);
-                      const promo = eff < i.preco;
-                      return (
-                        <div className="flex flex-col items-end">
-                          <span className={promo ? "text-primary" : undefined}>
-                            {brl(eff * i.quantidade)}
-                          </span>
-                          {promo && (
-                            <span className="text-[10px] font-medium text-muted-foreground line-through">
-                              {brl(i.preco * i.quantidade)}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </li>
+                <CartItemRow key={i.key} item={i} setQty={setQty} remove={remove} />
               ))}
             </ul>
           )}
