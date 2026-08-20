@@ -1,0 +1,2 @@
+ALTER TABLE public.site_config ADD COLUMN IF NOT EXISTS hero_subtitle text;
+UPDATE public.site_config SET hero_subtitle = 'O melhor da moda masculina atacado' WHERE id = 'current' AND hero_subtitle IS NULL;
