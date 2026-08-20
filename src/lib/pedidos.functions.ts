@@ -12,6 +12,11 @@ export type PedidoItem = {
   cor: string | null;
   tamanho: string | null;
   imagem_url: string | null;
+  detalhes?: {
+    nome: string;
+    cor: string;
+    tamanho: string;
+  } | null;
 };
 
 export type PedidoRow = {
