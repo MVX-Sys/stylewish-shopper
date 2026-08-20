@@ -562,7 +562,7 @@ export type Database = {
         Returns: undefined
       }
       has_permission: {
-        Args: { _perm: string; _user_id: string }
+        Args: { _permission: string; _user_id: string }
         Returns: boolean
       }
       has_role: {
