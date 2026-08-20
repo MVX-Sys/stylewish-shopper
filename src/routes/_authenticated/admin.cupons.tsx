@@ -333,7 +333,7 @@ function CuponsPage() {
                       {produtosLoading ? (
                         <div className="p-2 text-center text-xs text-muted-foreground">Carregando produtos...</div>
                       ) : (
-                        produtos?.map(p => (
+                        produtos?.map((p: any) => (
                           <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors">
                             <input
                               type="checkbox"
@@ -363,7 +363,7 @@ function CuponsPage() {
                       {categoriasLoading ? (
                         <div className="p-2 text-center text-xs text-muted-foreground">Carregando categorias...</div>
                       ) : (
-                        categorias?.map(c => (
+                        categorias?.map((c: any) => (
                           <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors">
                             <input
                               type="checkbox"
