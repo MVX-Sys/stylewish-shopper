@@ -686,7 +686,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
               <input
                 type="file"
                 multiple
-                accept="image/*,.heic,.heif,.webp,.avif"
+                accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.avif,.jxl"
                 onChange={(e) => onPickFiles(e.target.files)}
                 className="hidden"
               />
