@@ -24,6 +24,7 @@ import {
   saveCupon,
   deleteCupon,
 } from "@/lib/coupons.functions";
+import { listCategoriasFn, listProdutosFn } from "@/lib/products.functions";
 import { BRAND } from "@/lib/config";
 import { brl } from "@/lib/format";
 
@@ -48,7 +49,19 @@ function CuponsPage() {
   const fetchCupons = useServerFn(listCupons);
   const fnSave = useServerFn(saveCupon);
   const fnDelete = useServerFn(deleteCupon);
+  const fetchCategorias = useServerFn(listCategoriasFn);
+  const fetchProdutos = useServerFn(listProdutosFn);
   const qc = useQueryClient();
+
+  const { data: categorias, isLoading: categoriasLoading } = useQuery({
+    queryKey: ["admin", "categorias"],
+    queryFn: () => fetchCategorias(),
+  });
+
+  const { data: produtos, isLoading: produtosLoading } = useQuery({
+    queryKey: ["admin", "produtos"],
+    queryFn: () => fetchProdutos(),
+  });
 
   useEffect(() => {
     if (ids) {
