@@ -313,31 +313,65 @@ function CuponsPage() {
                   <span className="text-xs font-bold uppercase tracking-wider">Restrições e Validade</span>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div>
-                    <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">Produtos Específicos (IDs)</label>
-                    <textarea
-                      placeholder="Cole os IDs dos produtos aqui, separados por vírgula..."
-                      value={(editing.produtos_ids || []).join(", ")}
-                      onChange={(e) => {
-                        const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
-                        setEditing({ ...editing, produtos_ids: val });
-                      }}
-                      className="input min-h-[70px] font-mono text-[11px] leading-relaxed"
-                    />
+                    <label className="mb-2 block text-[10px] font-bold uppercase text-muted-foreground">Produtos Restritos</label>
+                    <div className="max-h-[150px] overflow-y-auto rounded-lg border border-border bg-background p-2 space-y-1">
+                      {produtosLoading ? (
+                        <div className="p-2 text-center text-xs text-muted-foreground">Carregando produtos...</div>
+                      ) : (
+                        produtos?.map(p => (
+                          <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={(editing.produtos_ids || []).includes(p.id)}
+                              onChange={(e) => {
+                                const currentIds = editing.produtos_ids || [];
+                                const newIds = e.target.checked 
+                                  ? [...currentIds, p.id]
+                                  : currentIds.filter(id => id !== p.id);
+                                setEditing({ ...editing, produtos_ids: newIds });
+                              }}
+                              className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary/20"
+                            />
+                            <div className="flex flex-col">
+                              <span className="text-xs font-medium leading-tight">{p.nome}</span>
+                              <span className="text-[9px] font-mono text-muted-foreground">{p.hash_id || p.id.slice(0, 8)}</span>
+                            </div>
+                          </label>
+                        ))
+                      )}
+                    </div>
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">Categorias Específicas (IDs)</label>
-                    <textarea
-                      placeholder="Cole os IDs das categorias aqui, separados por vírgula..."
-                      value={(editing.categorias_ids || []).join(", ")}
-                      onChange={(e) => {
-                        const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
-                        setEditing({ ...editing, categorias_ids: val });
-                      }}
-                      className="input min-h-[70px] font-mono text-[11px] leading-relaxed"
-                    />
+                    <label className="mb-2 block text-[10px] font-bold uppercase text-muted-foreground">Categorias Restritas</label>
+                    <div className="max-h-[120px] overflow-y-auto rounded-lg border border-border bg-background p-2 space-y-1">
+                      {categoriasLoading ? (
+                        <div className="p-2 text-center text-xs text-muted-foreground">Carregando categorias...</div>
+                      ) : (
+                        categorias?.map(c => (
+                          <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={(editing.categorias_ids || []).includes(c.id)}
+                              onChange={(e) => {
+                                const currentIds = editing.categorias_ids || [];
+                                const newIds = e.target.checked 
+                                  ? [...currentIds, c.id]
+                                  : currentIds.filter(id => id !== c.id);
+                                setEditing({ ...editing, categorias_ids: newIds });
+                              }}
+                              className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary/20"
+                            />
+                            <div className="flex flex-col">
+                              <span className="text-xs font-medium leading-tight">{c.nome}</span>
+                              <span className="text-[9px] font-mono text-muted-foreground">{c.slug}</span>
+                            </div>
+                          </label>
+                        ))
+                      )}
+                    </div>
                   </div>
 
                   <div>
