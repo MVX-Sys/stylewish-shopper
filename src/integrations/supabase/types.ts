@@ -149,6 +149,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_slides: {
+        Row: {
+          ativo: boolean
+          created_at: string | null
+          id: string
+          media_url: string | null
+          ordem: number
+          subtitulo: string | null
+          tipo: Database["public"]["Enums"]["hero_type"]
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string | null
+          id?: string
+          media_url?: string | null
+          ordem?: number
+          subtitulo?: string | null
+          tipo?: Database["public"]["Enums"]["hero_type"]
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string | null
+          id?: string
+          media_url?: string | null
+          ordem?: number
+          subtitulo?: string | null
+          tipo?: Database["public"]["Enums"]["hero_type"]
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       imagens_produto: {
         Row: {
           criado_em: string
@@ -536,6 +572,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "funcionario" | "user"
+      hero_type: "gradient" | "image" | "video"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -664,6 +701,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "funcionario", "user"],
+      hero_type: ["gradient", "image", "video"],
     },
   },
 } as const
