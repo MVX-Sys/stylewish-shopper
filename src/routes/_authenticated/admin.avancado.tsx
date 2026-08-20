@@ -78,6 +78,17 @@ function AvancadoPage() {
         .from("pedidos")
         .select("total, criado_em");
 
+      // 5. Database Table Stats
+      const tables = ["produtos", "pedidos", "usuarios", "categorias", "variacoes_produto", "cupons"];
+      const tableCounts: Record<string, number> = {};
+      
+      for (const table of tables) {
+        const { count } = await supabase
+          .from(table as any)
+          .select("*", { count: 'exact', head: true });
+        tableCounts[table] = count || 0;
+      }
+
       // Process data for charts
       const logsByDay = (logs || []).reduce((acc: any, log) => {
         const dateStr = log.criado_em ? new Date(log.criado_em).toLocaleDateString() : 'N/A';
@@ -105,7 +116,8 @@ function AvancadoPage() {
         orderCount: orders?.length ?? 0,
         chartData,
         totalStorage: formatSize(totalSizeBytes),
-        formatSize
+        formatSize,
+        tableCounts
       };
     },
   });
