@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
@@ -95,63 +96,140 @@ function Home() {
 }
 
 function HeroSection({ config }: { config?: any }) {
-  const mediaUrl = config?.hero_media_url;
-  const heroType = config?.hero_type || 'gradient';
-  const title = config?.hero_title || 'Estilo Urbano Sem Limites';
-  const subtitle = config?.hero_subtitle;
+  const slides = config?.hero_slides || [];
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slides.length);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  if (slides.length === 0) return null;
+
+  const nextSlide = () => setCurrent((prev) => (prev + 1) % slides.length);
+  const prevSlide = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
 
   return (
-    <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden">
-      {heroType === 'video' && mediaUrl ? (
-        <video 
-          src={mediaUrl} 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
-        />
-      ) : heroType === 'image' && mediaUrl ? (
-        <img 
-          src={mediaUrl} 
-          alt="Hero background" 
-          className="absolute inset-0 z-0 h-full w-full object-cover grayscale opacity-60"
-          loading="eager"
-          fetchPriority="high"
-        />
-      ) : (
-        <div className="absolute inset-0 z-0 bg-navy grayscale opacity-60">
-          <div 
-            className="absolute inset-0 z-10 opacity-40"
-            style={{
-              backgroundImage: "radial-gradient(circle at center, var(--primary), transparent 70%)"
-            }}
-          />
-        </div>
+    <section className="relative h-[85vh] min-h-[600px] w-full overflow-hidden bg-navy">
+      <AnimatePresence mode="wait">
+        {slides.map((slide: any, index: number) => index === current && (
+          <motion.div
+            key={slide.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            {/* Background Media */}
+            <div className="absolute inset-0 z-0">
+              {slide.tipo === 'video' && slide.media_url ? (
+                <video 
+                  src={slide.media_url} 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline 
+                  className="h-full w-full object-cover grayscale opacity-50"
+                />
+              ) : slide.tipo === 'image' && slide.media_url ? (
+                <img 
+                  src={slide.media_url} 
+                  alt={slide.titulo} 
+                  className="h-full w-full object-cover grayscale opacity-50"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                />
+              ) : (
+                <div className="h-full w-full bg-navy">
+                  <div 
+                    className="absolute inset-0 opacity-40"
+                    style={{
+                      backgroundImage: "radial-gradient(circle at center, var(--primary), transparent 70%)"
+                    }}
+                  />
+                </div>
+              )}
+              {/* Overlay for better text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-navy via-transparent to-navy/30 opacity-60" />
+            </div>
+
+            {/* Content */}
+            <div className="relative z-20 flex h-full flex-col items-center justify-center px-4 text-center">
+              <motion.h1 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="max-w-4xl font-display text-5xl font-black uppercase tracking-tighter text-white md:text-7xl lg:text-8xl"
+              >
+                {slide.titulo.split(' ').map((word: string, i: number, arr: string[]) => (
+                  <span key={i} className={i >= arr.length - 2 ? "text-primary" : ""}>
+                    {word}{" "}
+                  </span>
+                ))}
+              </motion.h1>
+              
+              {slide.subtitulo && (
+                <motion.p 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                  className="mt-6 max-w-2xl font-body text-lg font-medium text-white/90 md:text-xl lg:text-2xl"
+                >
+                  {slide.subtitulo}
+                </motion.p>
+              )}
+              
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+              >
+                <Link
+                  to="/produtos"
+                  className="btn-shine mt-12 inline-block rounded-full bg-primary px-10 py-4 text-lg font-bold uppercase tracking-widest text-white shadow-premium transition-transform hover:scale-105 active:scale-95"
+                >
+                  Ver todos os produtos
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      {/* Navigation Controls */}
+      {slides.length > 1 && (
+        <>
+          <div className="absolute bottom-10 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3">
+            {slides.map((_: any, i: number) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                className={`h-1.5 transition-all duration-300 rounded-full ${i === current ? 'w-8 bg-primary' : 'w-2 bg-white/30 hover:bg-white/50'}`}
+                aria-label={`Slide ${i + 1}`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={prevSlide}
+            className="absolute left-6 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/20 bg-white/5 p-3 text-white backdrop-blur-sm transition-all hover:bg-white/10 hover:border-white/40 md:left-10"
+            aria-label="Slide anterior"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-6 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/20 bg-white/5 p-3 text-white backdrop-blur-sm transition-all hover:bg-white/10 hover:border-white/40 md:right-10"
+            aria-label="Próximo slide"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        </>
       )}
-      
-      <div className="relative z-20 flex h-full flex-col items-center justify-center px-4 text-center">
-        <h1 className="max-w-4xl font-display text-5xl font-black uppercase tracking-tighter text-white md:text-7xl lg:text-8xl">
-          {title.split(' ').map((word: string, i: number, arr: string[]) => (
-            <span key={i} className={i >= arr.length - 2 ? "text-primary" : ""}>
-              {word}{" "}
-            </span>
-          ))}
-        </h1>
-        
-        {subtitle && (
-          <p className="mt-6 max-w-2xl font-body text-lg font-medium text-white/90 md:text-xl lg:text-2xl">
-            {subtitle}
-          </p>
-        )}
-        
-        <Link
-          to="/produtos"
-          className="btn-shine mt-12 rounded-full bg-primary px-10 py-4 text-lg font-bold uppercase tracking-widest text-white shadow-premium transition-transform hover:scale-105 active:scale-95"
-        >
-          Ver todos os produtos
-        </Link>
-      </div>
     </section>
   );
 }
