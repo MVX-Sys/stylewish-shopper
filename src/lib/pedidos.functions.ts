@@ -75,13 +75,38 @@ export const listPedidos = createServerFn({ method: "GET" })
     const { data, error } = await query;
     if (error) throw error;
     
-    return (data as any[]).map(p => ({
-      ...p,
-      created_at: p.created_at || p.criado_em,
-      usuario_id: p.user_id,
-      cliente_nome: p.cliente_nome || "Cliente",
-      cliente_whatsapp: p.cliente_whatsapp || "—"
-    })) as PedidoRow[];
+    const enriched = await Promise.all((data as any[]).map(async p => {
+      const itensWithImages = await Promise.all((p.itens || []).map(async (item: any) => {
+        let imagemUrl = null;
+        if (item.produto_id) {
+          const { data: imgData } = await supabase
+            .from("imagens_produto")
+            .select("storage_path")
+            .eq("produto_id", item.produto_id)
+            .eq("principal", true)
+            .maybeSingle();
+          
+          if (imgData?.storage_path) {
+            const { data: signed } = await supabase.storage
+              .from("product-images")
+              .createSignedUrl(imgData.storage_path, 3600);
+            imagemUrl = signed?.signedUrl;
+          }
+        }
+        return { ...item, imagem_url: imagemUrl };
+      }));
+
+      return {
+        ...p,
+        created_at: p.created_at || p.criado_em,
+        usuario_id: p.user_id,
+        cliente_nome: p.cliente_nome || "Cliente",
+        cliente_whatsapp: p.cliente_whatsapp || "—",
+        itens: itensWithImages
+      };
+    }));
+
+    return enriched as PedidoRow[];
   });
 
 export const updatePedidoStatus = createServerFn({ method: "POST" })
