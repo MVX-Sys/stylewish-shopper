@@ -993,6 +993,80 @@ function AdminProductsList() {
           </div>
         </div>
       )}
+
+      {showCouponModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-background shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <h3 className="font-display font-semibold">Associar a Cupom Existente</h3>
+              <button
+                onClick={() => setShowCouponModal(false)}
+                className="rounded-full p-1 hover:bg-accent"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="relative mb-4">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={couponSearch}
+                  onChange={(e) => setCouponSearch(e.target.value)}
+                  placeholder="Buscar cupom por código..."
+                  className="w-full rounded-lg border border-input bg-background py-2 pl-9 pr-4 text-sm outline-none focus:border-primary"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="max-h-[300px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                {allCupons
+                  .filter(c => c.codigo.toLowerCase().includes(couponSearch.toLowerCase()))
+                  .map(cupom => (
+                    <button
+                      key={cupom.id}
+                      onClick={() => associateCoupon(cupom.id)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-left transition-colors hover:bg-muted group border border-transparent hover:border-border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`h-8 w-8 rounded-full grid place-items-center ${cupom.ativo ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                          <Ticket className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-mono text-sm font-bold uppercase">{cupom.codigo}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {cupom.produtos_ids?.length || 0} produtos já associados
+                          </p>
+                        </div>
+                      </div>
+                      {!cupom.ativo && (
+                        <span className="text-[10px] font-bold uppercase text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                          Inativo
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                
+                {allCupons.filter(c => c.codigo.toLowerCase().includes(couponSearch.toLowerCase())).length === 0 && (
+                  <div className="py-8 text-center text-sm text-muted-foreground">
+                    Nenhum cupom encontrado.
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="border-t border-border bg-muted/30 p-4 flex justify-between items-center">
+              <p className="text-[10px] text-muted-foreground italic">
+                {selectedIds.size} produtos serão adicionados ao cupom escolhido.
+              </p>
+              <button
+                onClick={() => setShowCouponModal(false)}
+                className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
