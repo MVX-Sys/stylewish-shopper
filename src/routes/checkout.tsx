@@ -59,13 +59,42 @@ function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
-  const discountAmount = useMemo(() => {
-    if (!appliedCoupon) return 0;
+  const { discountAmount, itemsWithDiscount } = useMemo(() => {
+    if (!appliedCoupon) return { discountAmount: 0, itemsWithDiscount: new Set<string>() };
+
+    let totalEligible = 0;
+    const eligibleItemKeys = new Set<string>();
+
+    const allowedProductIds = appliedCoupon.produtos_ids?.map((id: string) => id.toLowerCase()) || [];
+    const allowedCategoryIds = (appliedCoupon as any).categorias_ids?.map((id: string) => id.toLowerCase()) || [];
+
+    items.forEach(item => {
+      const pId = item.produtoId.toLowerCase();
+      // Em um sistema real, precisaríamos do categoria_id do produto aqui também
+      // Para fins desta implementação, se não houver restrições, todos são elegíveis
+      const isProductAllowed = allowedProductIds.length === 0 || 
+        allowedProductIds.some(aid => pId.includes(aid) || aid.includes(pId));
+      
+      // Simulação de check de categoria se implementado futuramente
+      const isCategoryAllowed = allowedCategoryIds.length === 0;
+
+      if (isProductAllowed && isCategoryAllowed) {
+        totalEligible += itemPrecoEfetivo(item) * item.quantidade;
+        eligibleItemKeys.add(item.key);
+      }
+    });
+
+    if (totalEligible === 0) return { discountAmount: 0, itemsWithDiscount: new Set<string>() };
+
+    let discount = 0;
     if (appliedCoupon.tipo_desconto === "fixo") {
-      return appliedCoupon.valor_desconto;
+      discount = appliedCoupon.valor_desconto;
+    } else {
+      discount = (totalEligible * appliedCoupon.valor_desconto) / 100;
     }
-    return (total * appliedCoupon.valor_desconto) / 100;
-  }, [total, appliedCoupon]);
+
+    return { discountAmount: discount, itemsWithDiscount: eligibleItemKeys };
+  }, [total, appliedCoupon, items]);
 
   const valorFinal = total - discountAmount;
   const minAtingido = useMemo(
