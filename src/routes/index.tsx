@@ -98,6 +98,7 @@ function HeroSection({ config }: { config?: any }) {
   const mediaUrl = config?.hero_media_url;
   const heroType = config?.hero_type || 'gradient';
   const title = config?.hero_title || 'Estilo Urbano Sem Limites';
+  const subtitle = config?.hero_subtitle;
 
   return (
     <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden">
@@ -137,6 +138,12 @@ function HeroSection({ config }: { config?: any }) {
             </span>
           ))}
         </h1>
+        
+        {subtitle && (
+          <p className="mt-6 max-w-2xl font-body text-lg font-medium text-white/90 md:text-xl lg:text-2xl">
+            {subtitle}
+          </p>
+        )}
         
         <Link
           to="/produtos"

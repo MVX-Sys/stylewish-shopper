@@ -354,6 +354,7 @@ export type Database = {
       site_config: {
         Row: {
           hero_media_url: string | null
+          hero_subtitle: string | null
           hero_title: string | null
           hero_type: string
           id: string
@@ -361,6 +362,7 @@ export type Database = {
         }
         Insert: {
           hero_media_url?: string | null
+          hero_subtitle?: string | null
           hero_title?: string | null
           hero_type?: string
           id?: string
@@ -368,6 +370,7 @@ export type Database = {
         }
         Update: {
           hero_media_url?: string | null
+          hero_subtitle?: string | null
           hero_title?: string | null
           hero_type?: string
           id?: string
