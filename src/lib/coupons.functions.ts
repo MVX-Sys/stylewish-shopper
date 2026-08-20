@@ -24,9 +24,9 @@ export const saveCupon = createServerFn({ method: "POST" })
         quantidade_minima_itens: z.number().min(0),
         validade: z.string().nullable(),
         ativo: z.boolean(),
-        produtos_ids: z.array(z.string()).nullable(),
-        categorias_ids: z.array(z.string()).nullable(),
-        preco_minimo_pedido: z.number().nullable(),
+        produtos_ids: z.array(z.string()).nullable().optional(),
+        categorias_ids: z.array(z.string()).nullable().optional(),
+        preco_minimo_pedido: z.number().nullable().optional(),
       })
       .parse(d)
   )
