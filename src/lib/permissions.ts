@@ -5,7 +5,8 @@ export type PermissionKey =
   | "backup.manage"
   | "usuarios.manage"
   | "pedidos.view"
-  | "cupons.manage";
+  | "cupons.manage"
+  | "admin.advanced";
 
 export const ALL_PERMISSIONS: {
   key: PermissionKey;
@@ -46,6 +47,11 @@ export const ALL_PERMISSIONS: {
     key: "cupons.manage",
     label: "Gerenciar cupons",
     description: "Criar, editar e excluir cupons de desconto.",
+  },
+  {
+    key: "admin.advanced",
+    label: "Acesso Avançado",
+    description: "Visualizar estatísticas técnicas e uso de recursos do sistema.",
   },
 ];
 
