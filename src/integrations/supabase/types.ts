@@ -557,6 +557,10 @@ export type Database = {
           phone: string
         }[]
       }
+      decrement_stock: {
+        Args: { amount: number; var_id: string }
+        Returns: undefined
+      }
       has_permission: {
         Args: { _perm: string; _user_id: string }
         Returns: boolean
