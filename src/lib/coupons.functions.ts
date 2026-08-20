@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const listCupons = createServerFn({ method: "GET" })
   .handler(async () => {
@@ -12,8 +13,6 @@ export const listCupons = createServerFn({ method: "GET" })
     if (error) throw error;
     return data;
   });
-
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const saveCupon = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
