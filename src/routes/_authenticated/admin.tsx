@@ -34,6 +34,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/admin/usuarios", label: "Usuários", icon: <Users className="h-4 w-4" />, perm: "usuarios.manage" },
   { to: "/admin/backup", label: "Backup", icon: <Database className="h-4 w-4" />, perm: "backup.manage" },
   { to: "/admin/auditoria", label: "Auditoria", icon: <History className="h-4 w-4" />, perm: "auditoria.view" },
+  { to: "/admin/avancado", label: "Avançado", icon: <Settings className="h-4 w-4" />, perm: "admin" },
 ];
 
 function AdminLayout() {
