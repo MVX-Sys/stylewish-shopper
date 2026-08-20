@@ -57,14 +57,14 @@ function AvancadoPage() {
 
       // Process data for charts
       const logsByDay = (logs || []).reduce((acc: any, log) => {
-        const date = new Date(log.criado_em).toLocaleDateString();
-        acc[date] = (acc[date] || 0) + 1;
+        const dateStr = log.criado_em ? new Date(log.criado_em).toLocaleDateString() : 'N/A';
+        acc[dateStr] = (acc[dateStr] || 0) + 1;
         return acc;
       }, {});
 
       const salesByDay = (orders || []).reduce((acc: any, order) => {
-        const date = new Date(order.criado_em).toLocaleDateString();
-        acc[date] = (acc[date] || 0) + (order.total || 0);
+        const dateStr = order.criado_em ? new Date(order.criado_em).toLocaleDateString() : 'N/A';
+        acc[dateStr] = (acc[dateStr] || 0) + (order.total || 0);
         return acc;
       }, {});
 
