@@ -48,6 +48,11 @@ export const ALL_PERMISSIONS: {
     label: "Gerenciar cupons",
     description: "Criar, editar e excluir cupons de desconto.",
   },
+  {
+    key: "admin.advanced",
+    label: "Acesso Avançado",
+    description: "Visualizar estatísticas técnicas e uso de recursos do sistema.",
+  },
 ];
 
 export type UserRoleKind = "admin" | "funcionario" | "cliente";
