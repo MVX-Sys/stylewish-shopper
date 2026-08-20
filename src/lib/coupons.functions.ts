@@ -22,11 +22,11 @@ export const saveCupon = createServerFn({ method: "POST" })
         tipo_desconto: z.enum(["percentual", "fixo"]),
         valor_desconto: z.number().min(0),
         quantidade_minima_itens: z.number().min(0),
-        preco_minimo_pedido: z.number().min(0).optional().default(0),
         validade: z.string().nullable(),
         ativo: z.boolean(),
-        produtos_ids: z.array(z.string()).nullable().optional(),
-        categorias_ids: z.array(z.string()).nullable().optional(),
+        produtos_ids: z.array(z.string()).nullable(),
+        categorias_ids: z.array(z.string()).nullable(),
+        preco_minimo_pedido: z.number().nullable(),
       })
       .parse(d)
   )

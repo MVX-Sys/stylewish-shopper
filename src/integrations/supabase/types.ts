@@ -83,6 +83,7 @@ export type Database = {
       categorias: {
         Row: {
           criado_em: string
+          hash_id: string | null
           id: string
           nome: string
           ordem: number
@@ -90,6 +91,7 @@ export type Database = {
         }
         Insert: {
           criado_em?: string
+          hash_id?: string | null
           id?: string
           nome: string
           ordem?: number
@@ -97,6 +99,7 @@ export type Database = {
         }
         Update: {
           criado_em?: string
+          hash_id?: string | null
           id?: string
           nome?: string
           ordem?: number
@@ -298,6 +301,7 @@ export type Database = {
           categoria_id: string | null
           criado_em: string
           descricao: string | null
+          hash_id: string | null
           id: string
           marca: string | null
           nome: string
@@ -312,6 +316,7 @@ export type Database = {
           categoria_id?: string | null
           criado_em?: string
           descricao?: string | null
+          hash_id?: string | null
           id?: string
           marca?: string | null
           nome: string
@@ -326,6 +331,7 @@ export type Database = {
           categoria_id?: string | null
           criado_em?: string
           descricao?: string | null
+          hash_id?: string | null
           id?: string
           marca?: string | null
           nome?: string

@@ -1,9 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type Categoria = { id: string; nome: string; slug: string; ordem: number };
+export type Categoria = { id: string; hash_id?: string; nome: string; slug: string; ordem: number };
 
 export type Produto = {
   id: string;
+  hash_id?: string;
   nome: string;
   descricao: string | null;
   preco: number;

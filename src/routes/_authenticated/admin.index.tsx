@@ -645,6 +645,7 @@ function AdminProductsList() {
               <thead className="bg-muted/40 text-left">
                 <tr className="text-xs uppercase tracking-wider text-muted-foreground">
                   <th className="p-4 font-semibold">Produto</th>
+                  <th className="p-4 font-semibold">ID</th>
                   <th className="p-4 font-semibold">Preço</th>
                   <th className="p-4 font-semibold">Estoque</th>
                   <th className="p-4 font-semibold">Status</th>
@@ -680,6 +681,11 @@ function AdminProductsList() {
                             <p className="truncate font-medium">{p.nome}</p>
                           </div>
                         </div>
+                      </td>
+                      <td className="p-4">
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground" title={p.hash_id}>
+                          {p.hash_id ? `${p.hash_id.substring(0, 8)}...` : '---'}
+                        </code>
                       </td>
                       <td className="p-4 tabular-nums">{brl(p.preco)}</td>
                       <td className="p-4">
@@ -754,7 +760,7 @@ function AdminProductsList() {
             <div className="flex items-center justify-between border-b border-border p-4">
               <div>
                 <h3 className="font-display font-semibold">QR Code do Produto</h3>
-                <p className="text-xs text-muted-foreground">{qrToView.nome}</p>
+                <p className="text-xs text-muted-foreground">{qrToView.nome} • {qrToView.id.substring(0, 8)}</p>
               </div>
               <button
                 onClick={() => setQrToView(null)}

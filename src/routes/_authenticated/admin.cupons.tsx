@@ -88,12 +88,9 @@ function CuponsPage() {
               codigo: "",
               tipo_desconto: "percentual",
               valor_desconto: 0,
-              quantidade_minima_itens: 0,
-              preco_minimo_pedido: 0,
+              quantidade_minima_itens: 1,
               ativo: true,
               validade: null,
-              produtos_ids: [],
-              categorias_ids: [],
             })
           }
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 active:scale-95"
@@ -151,7 +148,7 @@ function CuponsPage() {
                     </td>
                     <td className="px-4 py-4">
                       <span className="font-semibold text-primary">
-                        {c.tipo_desconto === "percentual" ? `${c.valor_desconto}%` : brl(c.valor_desconto)}
+                        {c.valor_desconto}%
                       </span>
                     </td>
                     <td className="px-4 py-4 text-muted-foreground">
@@ -237,22 +234,21 @@ function CuponsPage() {
                   <label className="mb-1.5 block text-sm font-semibold">Tipo de Desconto</label>
                   <select
                     value={editing.tipo_desconto}
-                    onChange={(e) => setEditing({ ...editing, tipo_desconto: e.target.value as "percentual" | "fixo" })}
+                    onChange={(e) => setEditing({ ...editing, tipo_desconto: e.target.value as any })}
                     className="input"
                   >
                     <option value="percentual">Percentual (%)</option>
-                    <option value="fixo">Fixo (R$)</option>
+                    <option value="fixo">Valor Fixo (R$)</option>
                   </select>
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold">
-                    Valor do Desconto {editing.tipo_desconto === "percentual" ? "(%)" : "(R$)"}
+                    {editing.tipo_desconto === "fixo" ? "Valor (R$)" : "Desconto (%)"}
                   </label>
                   <input
                     type="number"
                     required
                     min="0"
-                    max={editing.tipo_desconto === "percentual" ? 100 : undefined}
                     value={editing.valor_desconto}
                     onChange={(e) => setEditing({ ...editing, valor_desconto: Number(e.target.value) })}
                     className="input"
@@ -260,52 +256,63 @@ function CuponsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold">Mínimo de Itens</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  value={editing.quantidade_minima_itens}
+                  onChange={(e) => setEditing({ ...editing, quantidade_minima_itens: Number(e.target.value) })}
+                  className="input"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 border-t border-border pt-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold">Restrições (IDs separados por vírgula)</label>
+                  <p className="text-[10px] text-muted-foreground">Use o ID reduzido (ex: 8 dígitos iniciais) ou o ID completo do produto/categoria.</p>
+                </div>
+                
                 <div>
-                  <label className="mb-1.5 block text-sm font-semibold">Mínimo de Itens</label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={editing.quantidade_minima_itens}
-                    onChange={(e) => setEditing({ ...editing, quantidade_minima_itens: Number(e.target.value) })}
-                    className="input"
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">IDs de Produtos Específicos (Opcional)</label>
+                  <textarea
+                    placeholder="Cole os IDs dos produtos aqui, separados por vírgula..."
+                    value={(editing.produtos_ids || []).join(", ")}
+                    onChange={(e) => {
+                      const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                      setEditing({ ...editing, produtos_ids: val });
+                    }}
+                    className="input min-h-[80px] font-mono text-xs"
                   />
                 </div>
+
                 <div>
-                  <label className="mb-1.5 block text-sm font-semibold">Valor Mín. Pedido (R$)</label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={editing.preco_minimo_pedido || 0}
-                    onChange={(e) => setEditing({ ...editing, preco_minimo_pedido: Number(e.target.value) })}
-                    className="input"
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">IDs de Categorias Específicas (Opcional)</label>
+                  <textarea
+                    placeholder="Cole os IDs das categorias aqui, separados por vírgula..."
+                    value={(editing.categorias_ids || []).join(", ")}
+                    onChange={(e) => {
+                      const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                      setEditing({ ...editing, categorias_ids: val });
+                    }}
+                    className="input min-h-[80px] font-mono text-xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-semibold text-primary">Restrições (IDs separados por vírgula)</label>
-                <div className="space-y-3">
-                  <div>
-                    <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">IDs de Produtos Específicos (opcional)</label>
-                    <textarea
-                      placeholder="Cole os IDs dos produtos aqui, separados por vírgula..."
-                      value={editing.produtos_ids?.join(", ") || ""}
-                      onChange={(e) => setEditing({ ...editing, produtos_ids: e.target.value.split(",").map(id => id.trim()).filter(Boolean) })}
-                      className="input min-h-[60px] text-xs font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">IDs de Categorias Específicas (opcional)</label>
-                    <textarea
-                      placeholder="Cole os IDs das categorias aqui, separados por vírgula..."
-                      value={editing.categorias_ids?.join(", ") || ""}
-                      onChange={(e) => setEditing({ ...editing, categorias_ids: e.target.value.split(",").map(id => id.trim()).filter(Boolean) })}
-                      className="input min-h-[60px] text-xs font-mono"
-                    />
-                  </div>
+                <label className="mb-1.5 block text-sm font-semibold">Preço Mínimo do Pedido (Opcional)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={editing.preco_minimo_pedido || ""}
+                    onChange={(e) => setEditing({ ...editing, preco_minimo_pedido: e.target.value ? Number(e.target.value) : null })}
+                    className="input pl-9"
+                  />
                 </div>
               </div>
 
