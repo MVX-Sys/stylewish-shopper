@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const listCupons = createServerFn({ method: "GET" })
   .handler(async () => {
@@ -15,7 +14,6 @@ export const listCupons = createServerFn({ method: "GET" })
   });
 
 export const saveCupon = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
     z
       .object({
@@ -32,10 +30,8 @@ export const saveCupon = createServerFn({ method: "POST" })
       })
       .parse(d)
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
     const { id, ...rest } = data;
-    const { supabase } = context;
-
     if (id) {
       const { data: updated, error } = await supabase
         .from("cupons")
@@ -57,10 +53,8 @@ export const saveCupon = createServerFn({ method: "POST" })
   });
 
 export const deleteCupon = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
+  .handler(async ({ data }) => {
     const { error } = await supabase.from("cupons").delete().eq("id", data.id);
     if (error) throw error;
     return { success: true };
