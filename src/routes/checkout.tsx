@@ -65,17 +65,14 @@ function CheckoutPage() {
     let totalEligible = 0;
     const eligibleItemKeys = new Set<string>();
 
-    const allowedProductIds = appliedCoupon.produtos_ids?.map((id: string) => id.toLowerCase()) || [];
-    const allowedCategoryIds = (appliedCoupon as any).categorias_ids?.map((id: string) => id.toLowerCase()) || [];
+    const allowedProductIds = (appliedCoupon.produtos_ids as string[])?.map((id: string) => id.toLowerCase()) || [];
+    const allowedCategoryIds = (appliedCoupon.categorias_ids as string[])?.map((id: string) => id.toLowerCase()) || [];
 
     items.forEach(item => {
       const pId = item.produtoId.toLowerCase();
-      // Em um sistema real, precisaríamos do categoria_id do produto aqui também
-      // Para fins desta implementação, se não houver restrições, todos são elegíveis
       const isProductAllowed = allowedProductIds.length === 0 || 
-        allowedProductIds.some(aid => pId.includes(aid) || aid.includes(pId));
+        allowedProductIds.some((aid: string) => pId.includes(aid) || aid.includes(pId));
       
-      // Simulação de check de categoria se implementado futuramente
       const isCategoryAllowed = allowedCategoryIds.length === 0;
 
       if (isProductAllowed && isCategoryAllowed) {
