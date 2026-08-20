@@ -5,7 +5,8 @@ export type PermissionKey =
   | "backup.manage"
   | "usuarios.manage"
   | "pedidos.view"
-  | "cupons.manage";
+  | "cupons.manage"
+  | "admin.advanced";
 
 export const ALL_PERMISSIONS: {
   key: PermissionKey;
