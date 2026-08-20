@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listProdutos, listCategorias, isEsgotado } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, PackageX, PackageCheck, Search, X, SlidersHorizontal, Eye, QrCode, Loader2, ShoppingBag, Settings, Video, Image as ImageIcon, Type, Copy, CheckSquare, Square, MoreHorizontal, EyeOff, Ticket, Play } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/library";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
@@ -240,6 +240,42 @@ function AdminProductsList() {
     qc.invalidateQueries({ queryKey: ["produtos"] });
   };
 
+  const bulkAction = async (action: 'ativar' | 'desativar' | 'excluir') => {
+    const ids = Array.from(selectedIds);
+    // Note: selectedIds contains hash_id or id. We need internal UUIDs for DB ops.
+    const internalIds = produtos
+      .filter(p => selectedIds.has(p.hash_id || p.id))
+      .map(p => p.id);
+
+    if (internalIds.length === 0) return;
+
+    if (action === 'excluir') {
+      if (!confirm(`Excluir ${internalIds.length} produtos permanentemente?`)) return;
+      const { error } = await supabase.from("produtos").delete().in("id", internalIds);
+      if (error) return toast.error(error.message);
+      toast.success(`${internalIds.length} produtos excluídos.`);
+    } else {
+      const active = action === 'ativar';
+      const { error } = await supabase
+        .from("produtos")
+        .update({ ativo: active })
+        .in("id", internalIds);
+      if (error) return toast.error(error.message);
+      toast.success(`${internalIds.length} produtos ${active ? 'ativados' : 'desativados'}.`);
+    }
+
+    await logAudit({
+      acao: action === 'excluir' ? 'excluir' : 'editar',
+      entidade: "produto",
+      entidade_id: "bulk",
+      descricao: `${action === 'excluir' ? 'Excluiu' : 'Alterou status de'} ${internalIds.length} produtos em massa`,
+    });
+
+    setSelectedIds(new Set());
+    qc.invalidateQueries({ queryKey: ["admin-produtos"] });
+    qc.invalidateQueries({ queryKey: ["produtos"] });
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -435,11 +471,53 @@ function AdminProductsList() {
                   className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
                 >
                   <Copy className="h-3.5 w-3.5" />
-                  Copiar IDs
+                  IDs
                 </button>
+                
+                <div className="h-4 w-px bg-primary/20 mx-1" />
+
+                <button
+                  onClick={() => bulkAction('ativar')}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-background px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5 transition-colors"
+                  title="Ativar selecionados"
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  Ativar
+                </button>
+
+                <button
+                  onClick={() => bulkAction('desativar')}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-background px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5 transition-colors"
+                  title="Desativar selecionados"
+                >
+                  <EyeOff className="h-3.5 w-3.5" />
+                  Inativar
+                </button>
+
+                <Link
+                  to="/admin/cupons"
+                  search={{ ids: Array.from(selectedIds).join(',') }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-background px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5 transition-colors"
+                  title="Criar cupom para selecionados"
+                >
+                  <Ticket className="h-3.5 w-3.5" />
+                  Cupom
+                </Link>
+
+                <button
+                  onClick={() => bulkAction('excluir')}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-destructive/20 bg-background px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-destructive hover:bg-destructive/5 transition-colors"
+                  title="Excluir selecionados"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Excluir
+                </button>
+
+                <div className="h-4 w-px bg-primary/20 mx-1" />
+
                 <button
                   onClick={() => setSelectedIds(new Set())}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2"
+                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors px-2"
                 >
                   Cancelar
                 </button>

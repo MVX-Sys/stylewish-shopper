@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+
+const couponsSearchSchema = z.object({
+  ids: z.string().optional(),
+});
 import {
   Plus,
   Search,
@@ -23,6 +28,7 @@ import { BRAND } from "@/lib/config";
 import { brl } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/cupons")({
+  validateSearch: couponsSearchSchema,
   head: () => ({
     meta: [
       { title: `Cupons — ${BRAND}` },
@@ -38,10 +44,26 @@ export const Route = createFileRoute("/_authenticated/admin/cupons")({
 type Coupon = Awaited<ReturnType<typeof listCupons>>[number];
 
 function CuponsPage() {
+  const { ids } = Route.useSearch();
   const fetchCupons = useServerFn(listCupons);
   const fnSave = useServerFn(saveCupon);
   const fnDelete = useServerFn(deleteCupon);
   const qc = useQueryClient();
+
+  useEffect(() => {
+    if (ids) {
+      const productIds = ids.split(',').map(s => s.trim()).filter(Boolean);
+      setEditing({
+        codigo: "",
+        tipo_desconto: "percentual",
+        valor_desconto: 0,
+        quantidade_minima_itens: 1,
+        ativo: true,
+        validade: null,
+        produtos_ids: productIds,
+      });
+    }
+  }, [ids]);
 
   const { data: cupons, isLoading } = useQuery({
     queryKey: ["admin", "cupons"],
