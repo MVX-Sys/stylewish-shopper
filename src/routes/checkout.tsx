@@ -333,32 +333,30 @@ function CheckoutPage() {
                       const res = await fnValidateCoupon({ data: { codigo: couponCode } });
                       if (res.valid && res.cupom) {
                         const totalItens = items.reduce((s, i) => s + i.quantidade, 0);
+                        const cupom = res.cupom as any; // Cast temporário para evitar erros de tipagem até o SDK sincronizar
                         
                         // Validar Mínimo de Itens
-                        if (totalItens < res.cupom.quantidade_minima_itens) {
-                          toast.error(`Este cupom exige no mínimo ${res.cupom.quantidade_minima_itens} itens no carrinho.`);
+                        if (totalItens < (cupom.quantidade_minima_itens || 0)) {
+                          toast.error(`Este cupom exige no mínimo ${cupom.quantidade_minima_itens} itens no carrinho.`);
                           return;
                         }
 
                         // Validar Preço Mínimo
-                        if (res.cupom.preco_minimo_pedido > 0 && total < res.cupom.preco_minimo_pedido) {
-                          toast.error(`Este cupom exige um pedido mínimo de ${brl(res.cupom.preco_minimo_pedido)}.`);
+                        const minPrice = cupom.preco_minimo_pedido || 0;
+                        if (minPrice > 0 && total < minPrice) {
+                          toast.error(`Este cupom exige um pedido mínimo de ${brl(minPrice)}.`);
                           return;
                         }
 
                         // Validar Produtos Específicos
-                        if (res.cupom.produtos_ids && res.cupom.produtos_ids.length > 0) {
-                          const hasValidProduct = items.some(item => res.cupom.produtos_ids.includes(item.produtoId));
+                        const allowedProds = cupom.produtos_ids as string[] | null;
+                        if (allowedProds && allowedProds.length > 0) {
+                          const hasValidProduct = items.some(item => allowedProds.includes(item.produtoId));
                           if (!hasValidProduct) {
                             toast.error("Este cupom não é válido para os produtos no seu carrinho.");
                             return;
                           }
                         }
-
-                        // Validar Categorias Específicas
-                        // Nota: Precisamos dos IDs das categorias dos itens do carrinho se quisermos validar aqui.
-                        // Como os itens do carrinho geralmente não carregam categoria_id por padrão, 
-                        // a validação de categoria pode ser mais robusta no servidor, mas aqui fazemos o possível.
 
                         setAppliedCoupon(res.cupom);
                         toast.success("Cupom aplicado com sucesso!");
