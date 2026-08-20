@@ -24,8 +24,8 @@ export async function getSiteConfig(): Promise<SiteConfig> {
     .single();
   
   // Fetch hero slides
-  const { data: slides, error: slidesError } = await supabase
-    .from("hero_slides")
+  const { data: slides, error: slidesError } = await (supabase
+    .from("hero_slides") as any)
     .select("*")
     .order("ordem", { ascending: true });
 
@@ -40,8 +40,8 @@ export async function getSiteConfig(): Promise<SiteConfig> {
 }
 
 export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide, 'id'>>) {
-  const { error } = await supabase
-    .from("hero_slides")
+  const { error } = await (supabase
+    .from("hero_slides") as any)
     .update(slide)
     .eq("id", id);
   
@@ -49,8 +49,8 @@ export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide,
 }
 
 export async function createHeroSlide(slide: Omit<HeroSlide, 'id'>) {
-  const { data, error } = await supabase
-    .from("hero_slides")
+  const { data, error } = await (supabase
+    .from("hero_slides") as any)
     .insert(slide)
     .select()
     .single();
@@ -60,8 +60,8 @@ export async function createHeroSlide(slide: Omit<HeroSlide, 'id'>) {
 }
 
 export async function deleteHeroSlide(id: string) {
-  const { error } = await supabase
-    .from("hero_slides")
+  const { error } = await (supabase
+    .from("hero_slides") as any)
     .delete()
     .eq("id", id);
   
