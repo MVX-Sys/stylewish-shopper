@@ -674,7 +674,8 @@ function AdminProductsList() {
                                         }
                                         
                                         const path = await uploadImage(fileToUpload);
-                                        const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(path);
+                                        const { getImageUrl } = await import("@/lib/storage");
+                                        const publicUrl = await getImageUrl(path);
                                         await updateHeroSlide(slide.id, { media_url: publicUrl });
                                         toast.success("Mídia atualizada!", { id: loadingToast });
                                         refetchConfig();
