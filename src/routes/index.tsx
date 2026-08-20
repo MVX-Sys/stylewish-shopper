@@ -165,11 +165,14 @@ function HeroSection({ config }: { config?: any }) {
                 transition={{ delay: 0.3, duration: 0.8 }}
                 className="max-w-4xl font-display text-5xl font-black uppercase tracking-tighter text-white md:text-7xl lg:text-8xl"
               >
-                {slide.titulo.split(' ').map((word: string, i: number, arr: string[]) => (
-                  <span key={i} className={i >= arr.length - 2 ? "text-primary" : ""}>
-                    {word}{" "}
-                  </span>
-                ))}
+                {slide.titulo.split(' ').map((word: string, i: number, arr: string[]) => {
+                  const isHighlighted = arr.length > 2 ? i >= arr.length - 2 : i === arr.length - 1;
+                  return (
+                    <span key={i} className={isHighlighted ? "text-primary" : ""}>
+                      {word}{" "}
+                    </span>
+                  );
+                })}
               </motion.h1>
               
               {slide.subtitulo && (
