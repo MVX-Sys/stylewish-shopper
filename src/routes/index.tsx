@@ -133,13 +133,13 @@ function HeroSection({ config }: { config?: any }) {
                   loop 
                   muted 
                   playsInline 
-                  className="h-full w-full object-cover grayscale opacity-50"
+                  className="h-full w-full object-cover opacity-50"
                 />
               ) : slide.tipo === 'image' && slide.media_url ? (
                 <img 
                   src={slide.media_url} 
                   alt={slide.titulo} 
-                  className="h-full w-full object-cover grayscale opacity-50"
+                  className="h-full w-full object-cover opacity-50"
                   loading={index === 0 ? "eager" : "lazy"}
                   fetchPriority={index === 0 ? "high" : "auto"}
                 />
