@@ -304,7 +304,7 @@ function ProductPage() {
               <ChevronLeft className="h-4 w-4" /> Continuar comprando
             </Link>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_400px] md:gap-8">
               {/* Gallery (Thumbs + Main) */}
               <div className="flex flex-col gap-4">
                 <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-white">
