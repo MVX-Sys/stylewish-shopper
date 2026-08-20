@@ -107,9 +107,11 @@ export type Database = {
       cupons: {
         Row: {
           ativo: boolean
+          categorias_ids: string[] | null
           codigo: string
           created_at: string | null
           id: string
+          preco_minimo_pedido: number | null
           produtos_ids: string[] | null
           quantidade_minima_itens: number
           tipo_desconto: string
@@ -118,9 +120,11 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean
+          categorias_ids?: string[] | null
           codigo: string
           created_at?: string | null
           id?: string
+          preco_minimo_pedido?: number | null
           produtos_ids?: string[] | null
           quantidade_minima_itens?: number
           tipo_desconto?: string
@@ -129,9 +133,11 @@ export type Database = {
         }
         Update: {
           ativo?: boolean
+          categorias_ids?: string[] | null
           codigo?: string
           created_at?: string | null
           id?: string
+          preco_minimo_pedido?: number | null
           produtos_ids?: string[] | null
           quantidade_minima_itens?: number
           tipo_desconto?: string
