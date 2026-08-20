@@ -20,7 +20,11 @@ export type AuditEntidade =
   | "variacao"
   | "imagem"
   | "solicitacao_reposicao"
-  | "sessao";
+  | "sessao"
+  | "cupom"
+  | "usuario"
+  | "atendente"
+  | "configuracao_site";
 
 export async function logAudit(input: {
   acao: AuditAcao;
