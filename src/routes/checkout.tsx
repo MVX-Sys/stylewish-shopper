@@ -297,26 +297,25 @@ function CheckoutPage() {
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                           <FileText className="h-6 w-6 opacity-20" />
-                        </div>
-                      )}
-                      {isDiscounted && (
-                        <div className="absolute top-0 right-0 p-0.5">
-                          <Ticket className="h-3 w-3 text-primary drop-shadow-sm" />
-                        </div>
-                      )}
                     </div>
-                  <div className="flex flex-1 flex-col justify-center min-w-0">
-                    <h3 className="text-xs font-bold text-foreground line-clamp-1">{item.nome}</h3>
-                    <p className="mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider">
-                      {item.cor} • {item.tamanho}
-                    </p>
-                    <div className="mt-1.5 flex items-center justify-between">
-                      <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
-                      <span className="text-xs font-bold text-foreground">{brl(itemPrecoEfetivo(item) * item.quantidade)}</span>
+                    <div className="flex flex-1 flex-col justify-center min-w-0">
+                      <h3 className="text-xs font-bold text-foreground line-clamp-1">{item.nome}</h3>
+                      <p className="mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider">
+                        {item.cor} • {item.tamanho}
+                      </p>
+                      <div className="mt-1.5 flex items-center justify-between">
+                        <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
+                        <div className="flex flex-col items-end">
+                          <span className="text-xs font-bold text-foreground">{brl(itemPrecoEfetivo(item) * item.quantidade)}</span>
+                          {isDiscounted && (
+                            <span className="text-[9px] font-bold text-primary uppercase">Com desconto</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {items.length === 0 && (
                 <div className="col-span-full py-8 text-center text-sm text-muted-foreground">
                   Seu carrinho está vazio.
