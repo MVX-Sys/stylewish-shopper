@@ -220,8 +220,8 @@ function CuponsPage() {
 
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-premium animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-premium animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between border-b border-border bg-muted/30 px-6 py-4 flex-shrink-0">
               <h2 className="font-display text-lg font-bold">
                 {editing.id ? "Editar Cupom" : "Novo Cupom"}
               </h2>
@@ -232,26 +232,27 @@ function CuponsPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
+            
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 mutationSave.mutate(editing);
               }}
-              className="p-6 space-y-4"
+              className="flex-1 overflow-y-auto p-6 space-y-6"
             >
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold">Código do Cupom</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="EX: VERAO10"
-                  value={editing.codigo}
-                  onChange={(e) => setEditing({ ...editing, codigo: e.target.value.toUpperCase() })}
-                  className="input uppercase font-mono"
-                />
-              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="mb-1.5 block text-sm font-semibold">Código do Cupom</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="EX: VERAO10"
+                    value={editing.codigo}
+                    onChange={(e) => setEditing({ ...editing, codigo: e.target.value.toUpperCase() })}
+                    className="input uppercase font-mono"
+                  />
+                </div>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold">Tipo de Desconto</label>
                   <select
@@ -263,6 +264,7 @@ function CuponsPage() {
                     <option value="fixo">Valor Fixo (R$)</option>
                   </select>
                 </div>
+                
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold">
                     {editing.tipo_desconto === "fixo" ? "Valor (R$)" : "Desconto (%)"}
@@ -276,107 +278,113 @@ function CuponsPage() {
                     className="input"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold">Mínimo de Itens</label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  value={editing.quantidade_minima_itens}
-                  onChange={(e) => setEditing({ ...editing, quantidade_minima_itens: Number(e.target.value) })}
-                  className="input"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 border-t border-border pt-4">
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold">Restrições (IDs separados por vírgula)</label>
-                  <p className="text-[10px] text-muted-foreground">Use o ID reduzido (ex: 8 dígitos iniciais) ou o ID completo do produto/categoria.</p>
-                </div>
-                
-                <div>
-                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">IDs de Produtos Específicos (Opcional)</label>
-                  <textarea
-                    placeholder="Cole os IDs dos produtos aqui, separados por vírgula..."
-                    value={(editing.produtos_ids || []).join(", ")}
-                    onChange={(e) => {
-                      const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
-                      setEditing({ ...editing, produtos_ids: val });
-                    }}
-                    className="input min-h-[80px] font-mono text-xs"
-                  />
-                </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">IDs de Categorias Específicas (Opcional)</label>
-                  <textarea
-                    placeholder="Cole os IDs das categorias aqui, separados por vírgula..."
-                    value={(editing.categorias_ids || []).join(", ")}
-                    onChange={(e) => {
-                      const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
-                      setEditing({ ...editing, categorias_ids: val });
-                    }}
-                    className="input min-h-[80px] font-mono text-xs"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold">Preço Mínimo do Pedido (Opcional)</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
+                  <label className="mb-1.5 block text-sm font-semibold">Mínimo de Itens</label>
                   <input
                     type="number"
-                    min="0"
-                    step="0.01"
-                    value={editing.preco_minimo_pedido || ""}
-                    onChange={(e) => setEditing({ ...editing, preco_minimo_pedido: e.target.value ? Number(e.target.value) : null })}
-                    className="input pl-9"
+                    required
+                    min="1"
+                    value={editing.quantidade_minima_itens}
+                    onChange={(e) => setEditing({ ...editing, quantidade_minima_itens: Number(e.target.value) })}
+                    className="input"
                   />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold">Preço Mínimo (Pedido)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={editing.preco_minimo_pedido || ""}
+                      onChange={(e) => setEditing({ ...editing, preco_minimo_pedido: e.target.value ? Number(e.target.value) : null })}
+                      className="input pl-9"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold">Validade (Opcional)</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
+                <div className="flex items-center gap-2 text-primary">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-wider">Restrições e Validade</span>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">Produtos Específicos (IDs)</label>
+                    <textarea
+                      placeholder="Cole os IDs dos produtos aqui, separados por vírgula..."
+                      value={(editing.produtos_ids || []).join(", ")}
+                      onChange={(e) => {
+                        const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                        setEditing({ ...editing, produtos_ids: val });
+                      }}
+                      className="input min-h-[70px] font-mono text-[11px] leading-relaxed"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">Categorias Específicas (IDs)</label>
+                    <textarea
+                      placeholder="Cole os IDs das categorias aqui, separados por vírgula..."
+                      value={(editing.categorias_ids || []).join(", ")}
+                      onChange={(e) => {
+                        const val = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                        setEditing({ ...editing, categorias_ids: val });
+                      }}
+                      className="input min-h-[70px] font-mono text-[11px] leading-relaxed"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold">Data de Validade</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        type="date"
+                        value={editing.validade ? editing.validade.split('T')[0] : ""}
+                        onChange={(e) => setEditing({ ...editing, validade: e.target.value || null })}
+                        className="input pl-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 flex-shrink-0 bg-card pt-2">
+                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-muted/20 p-3 transition-colors hover:bg-muted/40">
                   <input
-                    type="date"
-                    value={editing.validade ? editing.validade.split('T')[0] : ""}
-                    onChange={(e) => setEditing({ ...editing, validade: e.target.value || null })}
-                    className="input pl-10"
+                    type="checkbox"
+                    checked={editing.ativo}
+                    onChange={(e) => setEditing({ ...editing, ativo: e.target.checked })}
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
                   />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold">Cupom Ativo</span>
+                    <span className="text-[10px] text-muted-foreground">O cupom poderá ser usado imediatamente se marcado.</span>
+                  </div>
+                </label>
+
+                <div className="flex gap-3 pb-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(null)}
+                    className="flex-1 rounded-xl border border-border bg-background py-3 text-sm font-bold transition-all hover:bg-accent active:scale-[0.98]"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={mutationSave.isPending}
+                    className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {mutationSave.isPending ? "Salvando..." : "Salvar Cupom"}
+                  </button>
                 </div>
-                <p className="mt-1 text-[10px] text-muted-foreground">O cupom expirará ao final deste dia.</p>
-              </div>
-
-              <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-muted/20 p-3 transition-colors hover:bg-muted/40">
-                <input
-                  type="checkbox"
-                  checked={editing.ativo}
-                  onChange={(e) => setEditing({ ...editing, ativo: e.target.checked })}
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
-                />
-                <span className="text-sm font-medium">Cupom Ativo</span>
-              </label>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setEditing(null)}
-                  className="flex-1 rounded-lg border border-border bg-background py-2.5 text-sm font-semibold transition-colors hover:bg-accent"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={mutationSave.isPending}
-                  className="flex-1 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 disabled:opacity-50"
-                >
-                  {mutationSave.isPending ? "Salvando..." : "Salvar Cupom"}
-                </button>
               </div>
             </form>
           </div>
