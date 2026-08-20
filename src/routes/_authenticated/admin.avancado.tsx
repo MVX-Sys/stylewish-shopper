@@ -10,9 +10,14 @@ import {
   Zap,
   TrendingUp,
   Users,
-  TrendingDown
+  Search,
+  Filter,
+  Calendar,
+  ChevronRight,
+  Shield
 } from "lucide-react";
 import { brl } from "@/lib/format";
+import { useState, useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -20,12 +25,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell,
-  PieChart,
-  Pie
+  ResponsiveContainer
 } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/admin/avancado")({
@@ -33,6 +33,10 @@ export const Route = createFileRoute("/_authenticated/admin/avancado")({
 });
 
 function AvancadoPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
+  const [selectedLog, setSelectedLog] = useState<any>(null);
+
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats-advanced"],
     queryFn: async () => {
@@ -62,10 +66,10 @@ function AvancadoPage() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
       };
       
-      // 2. Access Info (Logs by day for chart)
+      // 2. Access Info (Logs by day for chart and detailed list)
       const { data: logs } = await supabase
         .from("admin_audit_log")
-        .select("criado_em, acao")
+        .select("*")
         .order("criado_em", { ascending: false });
 
       // 3. User stats
@@ -110,6 +114,7 @@ function AvancadoPage() {
 
       return {
         buckets: bucketStats,
+        logs: logs || [],
         totalLogs: logs?.length ?? 0,
         userCount: userCount ?? 0,
         totalSales: orders?.reduce((sum, o) => sum + (o.total || 0), 0) ?? 0,
@@ -121,6 +126,43 @@ function AvancadoPage() {
       };
     },
   });
+
+  const filteredLogs = useMemo(() => {
+    if (!stats?.logs) return [];
+    
+    return stats.logs.filter((log: any) => {
+      const matchesSearch = 
+        log.acao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.entidade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.descricao?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (!matchesSearch) return false;
+
+      if (dateFilter === "all") return true;
+      
+      const logDate = new Date(log.criado_em);
+      const now = new Date();
+      
+      if (dateFilter === "today") {
+        return logDate.toDateString() === now.toDateString();
+      }
+      
+      if (dateFilter === "week") {
+        const weekAgo = new Date();
+        weekAgo.setDate(now.getDate() - 7);
+        return logDate >= weekAgo;
+      }
+      
+      if (dateFilter === "month") {
+        const monthAgo = new Date();
+        monthAgo.setMonth(now.getMonth() - 1);
+        return logDate >= monthAgo;
+      }
+      
+      return true;
+    });
+  }, [stats?.logs, searchTerm, dateFilter]);
 
   if (isLoading) {
     return (
@@ -336,6 +378,149 @@ function AvancadoPage() {
           </p>
         </div>
       </div>
+
+      {/* Audit Logs Section */}
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <h2 className="font-display text-lg font-semibold">Logs de Auditoria</h2>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Buscar logs..."
+                className="h-9 w-[200px] rounded-lg border border-border bg-background pl-9 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/30 p-1">
+              {(["all", "today", "week", "month"] as const).map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setDateFilter(filter)}
+                  className={`rounded-md px-3 py-1 text-[10px] font-bold uppercase transition-all ${
+                    dateFilter === filter 
+                      ? "bg-background text-primary shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {filter === "all" ? "Tudo" : filter === "today" ? "Hoje" : filter === "week" ? "Semana" : "Mês"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <th className="pb-3 pl-2">Evento</th>
+                <th className="pb-3">Entidade</th>
+                <th className="pb-3">Usuário</th>
+                <th className="pb-3">Data/Hora</th>
+                <th className="pb-3 text-right pr-2">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              {filteredLogs.slice(0, 10).map((log: any) => (
+                <tr key={log.id} className="group hover:bg-muted/30">
+                  <td className="py-3 pl-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${
+                        log.acao?.includes('DELETE') ? 'bg-red-500' : 
+                        log.acao?.includes('UPDATE') ? 'bg-blue-500' : 'bg-green-500'
+                      }`} />
+                      <span className="font-medium">{log.acao}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 text-muted-foreground">{log.entidade}</td>
+                  <td className="py-3">
+                    <span className="text-xs">{log.user_email || 'Sistema'}</span>
+                  </td>
+                  <td className="py-3 text-xs text-muted-foreground">
+                    {new Date(log.criado_em).toLocaleString('pt-BR')}
+                  </td>
+                  <td className="py-3 text-right pr-2">
+                    <button 
+                      onClick={() => setSelectedLog(log)}
+                      className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          {filteredLogs.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Search className="mb-2 h-8 w-8 opacity-20" />
+              <p className="text-sm">Nenhum registro encontrado para os filtros aplicados.</p>
+            </div>
+          )}
+          
+          {filteredLogs.length > 10 && (
+            <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Mostrando os 10 registros mais recentes de {filteredLogs.length} totais
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Detail Modal Overlay */}
+      {selectedLog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="border-b border-border p-6">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-xl font-semibold">Detalhes do Evento</h3>
+                <button 
+                  onClick={() => setSelectedLog(null)}
+                  className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <ChevronRight className="h-6 w-6 rotate-90" />
+                </button>
+              </div>
+            </div>
+            <div className="max-h-[70vh] overflow-y-auto p-6">
+              <div className="space-y-4">
+                <DetailItem label="Ação" value={selectedLog.acao} />
+                <DetailItem label="Entidade" value={selectedLog.entidade} />
+                <DetailItem label="ID da Entidade" value={selectedLog.entidade_id || 'N/A'} />
+                <DetailItem label="Usuário" value={selectedLog.user_email || 'Sistema'} />
+                <DetailItem label="Data" value={new Date(selectedLog.criado_em).toLocaleString('pt-BR')} />
+                <DetailItem label="Descrição" value={selectedLog.descricao || 'Nenhuma descrição disponível'} />
+                
+                {selectedLog.detalhes && (
+                  <div className="mt-6">
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Dados Técnicos (JSON)</p>
+                    <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-[10px] leading-relaxed text-muted-foreground">
+                      {JSON.stringify(selectedLog.detalhes, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailItem({ label, value }: { label: string, value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="mt-0.5 text-sm font-medium">{value}</p>
     </div>
   );
 }
