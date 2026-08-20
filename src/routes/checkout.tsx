@@ -248,7 +248,7 @@ function CheckoutPage() {
             <h2 className="mb-6 font-display text-lg font-semibold">Itens do pedido</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (
-                <CheckoutItemRow key={item.key} item={item} itemsWithDiscount={itemsWithDiscount} />
+                <CheckoutItemRow key={item.key} item={item} itemsWithDiscount={itemsWithDiscount} appliedCoupon={appliedCoupon} items={items} />
               ))}
               {items.length === 0 && (
                 <div className="col-span-full py-8 text-center text-sm text-muted-foreground">
@@ -503,7 +503,7 @@ function ReadonlyInput({ value, strong }: { value: string; strong?: boolean }) {
   );
 }
 
-function CheckoutItemRow({ item, itemsWithDiscount }: { item: any, itemsWithDiscount: Set<string> }) {
+function CheckoutItemRow({ item, itemsWithDiscount, appliedCoupon, items }: { item: any, itemsWithDiscount: Set<string>, appliedCoupon: any, items: any[] }) {
   const [img, setImg] = useState<string>("");
   const isDiscounted = itemsWithDiscount.has(item.key);
 
@@ -547,9 +547,16 @@ function CheckoutItemRow({ item, itemsWithDiscount }: { item: any, itemsWithDisc
         <div className="mt-1.5 flex items-center justify-between">
           <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
           <div className="flex flex-col items-end">
-            <span className={`text-xs font-bold ${isDiscounted ? 'text-primary' : 'text-foreground'}`}>
-              {brl(itemPrecoEfetivo(item) * item.quantidade)}
-            </span>
+            <div className="flex flex-col items-end gap-0.5">
+              {isDiscounted && (
+                <span className="text-[10px] text-muted-foreground line-through decoration-muted-foreground/50">
+                  {brl(itemPrecoEfetivo(item) * item.quantidade)}
+                </span>
+              )}
+              <span className={`text-xs font-bold ${isDiscounted ? 'text-primary' : 'text-foreground'}`}>
+                {brl((isDiscounted ? (appliedCoupon?.tipo_desconto === 'fixo' ? (itemPrecoEfetivo(item) * item.quantidade - (appliedCoupon.valor_desconto / items.filter((it: any) => itemsWithDiscount.has(it.key)).length)) : (itemPrecoEfetivo(item) * item.quantidade * (1 - appliedCoupon.valor_desconto / 100))) : itemPrecoEfetivo(item) * item.quantidade))}
+              </span>
+            </div>
             {isDiscounted && (
               <span className="text-[8px] font-bold text-primary uppercase tracking-tighter">Cupom aplicado</span>
             )}
