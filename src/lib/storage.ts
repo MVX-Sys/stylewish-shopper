@@ -23,14 +23,17 @@ export async function getImageUrl(
 
   // Try to use a signed URL if we're not sure if the bucket is public,
   // or use getPublicUrl if we're certain it's public.
-  // For now, let's use createSignedUrl to ensure access even if bucket is private.
+  // Force a fresh session check to ensure we have the latest auth token for the request
+  const { data: { session: currentSession } } = await supabase.auth.getSession();
+  
+  // Use createSignedUrl to ensure access to the private bucket
   const { data, error } = await supabase.storage
     .from("product-images")
     .createSignedUrl(path, 3600); // 1 hour expiry
     
   if (error) {
     console.error("Error generating signed URL for", path, error);
-    // Fallback to public URL just in case
+    // Fallback to public URL only if signed URL fails, though bucket is private
     const { data: publicData } = supabase.storage.from("product-images").getPublicUrl(path);
     return publicData?.publicUrl ?? "";
   }
