@@ -294,34 +294,15 @@ function CheckoutPage() {
 
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7 h-fit">
             <h2 className="mb-6 font-display text-lg font-semibold">Resumo do Pedido</h2>
-          {/* Valor mínimo */}
-          <Field label="Valor mínimo para compra:">
-            <ReadonlyInput value={brl(VALOR_MINIMO_COMPRA)} />
-          </Field>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="Valor mínimo para compra:">
+                <ReadonlyInput value={brl(VALOR_MINIMO_COMPRA)} />
+              </Field>
+              <Field label="Valor Pedido:">
+                <ReadonlyInput value={brl(total)} />
+              </Field>
+            </div>
 
-          {/* Valores */}
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
-            <Field label="Valor Pedido:">
-              <ReadonlyInput value={brl(total)} />
-            </Field>
-            <Field label="Desconto:">
-              <ReadonlyInput 
-                value={
-                  appliedCoupon 
-                    ? appliedCoupon.tipo_desconto === "fixo" 
-                      ? brl(appliedCoupon.valor_desconto) 
-                      : `-${appliedCoupon.valor_desconto}%` 
-                    : "Não Aplicado"
-                } 
-              />
-            </Field>
-            <Field label="Desconto Cupom:">
-              <ReadonlyInput value={discountAmount > 0 ? `-${brl(discountAmount)}` : "Não Aplicado"} />
-            </Field>
-            <Field label="Valor Final:">
-              <ReadonlyInput value={brl(valorFinal)} strong />
-            </Field>
-          </div>
 
           {/* Forma de envio */}
           <Field label="Forma de Envio:" required className="mt-4">
@@ -430,6 +411,24 @@ function CheckoutPage() {
             </div>
           </Field>
 
+          {/* Valores de Desconto */}
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <Field label="Desconto:">
+              <ReadonlyInput 
+                value={
+                  appliedCoupon 
+                    ? appliedCoupon.tipo_desconto === "fixo" 
+                      ? brl(appliedCoupon.valor_desconto) 
+                      : `-${appliedCoupon.valor_desconto}%` 
+                    : "Não Aplicado"
+                } 
+              />
+            </Field>
+            <Field label="Desconto Cupom:">
+              <ReadonlyInput value={discountAmount > 0 ? `-${brl(discountAmount)}` : "Não Aplicado"} />
+            </Field>
+          </div>
+
           <Field label="Observações:" className="mt-4">
             <textarea
               value={observacoes}
@@ -440,6 +439,14 @@ function CheckoutPage() {
               className="input min-h-[110px] resize-y"
             />
           </Field>
+
+          <div className="mt-6 border-t border-border pt-6">
+            <div className="flex items-center justify-between rounded-xl bg-primary/5 p-4 border border-primary/20">
+              <span className="font-display text-lg font-semibold">Valor Final</span>
+              <span className="font-display text-2xl font-bold text-primary">{brl(valorFinal)}</span>
+            </div>
+          </div>
+
 
           <p className="mt-6 text-xs text-muted-foreground">
             Os campos com <span className="text-foreground">*</span> são obrigatórios.
