@@ -564,20 +564,20 @@ function ProductPage() {
                                       {q === 0 ? (
                                         <button
                                           onClick={() => setQ(key, 1)}
-                                          className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-border transition-all hover:border-foreground hover:bg-foreground hover:text-background"
+                                          className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg border border-border transition-all hover:border-foreground hover:bg-foreground hover:text-background"
                                           aria-label="Adicionar"
                                         >
                                           <Plus className="h-4 w-4" />
                                         </button>
                                       ) : (
-                                        <div className="mx-auto flex items-center justify-center gap-1 rounded-full bg-foreground p-0.5 text-background">
+                                        <div className="mx-auto flex items-center justify-center gap-0.5 rounded-lg bg-foreground p-0.5 text-background">
                                           <button
                                             onClick={() => setQ(key, q - 1)}
-                                            className="grid h-7 w-7 place-items-center rounded-full hover:bg-background/10"
+                                            className="grid h-8 w-7 place-items-center rounded-md hover:bg-background/10"
                                           >
                                             <Minus className="h-3 w-3" />
                                           </button>
-                                          <span className="w-5 text-center text-xs font-semibold tabular-nums">
+                                          <span className="w-6 text-center text-xs font-semibold tabular-nums">
                                             {q}
                                           </span>
                                           <button
@@ -585,22 +585,12 @@ function ProductPage() {
                                               setQ(key, Math.min(v.quantidade_estoque, q + 1))
                                             }
                                             disabled={q >= v.quantidade_estoque}
-                                            className="grid h-7 w-7 place-items-center rounded-full hover:bg-background/10 disabled:opacity-40"
+                                            className="grid h-8 w-7 place-items-center rounded-md hover:bg-background/10 disabled:opacity-40"
                                           >
                                             <Plus className="h-3 w-3" />
                                           </button>
                                         </div>
                                       )}
-                                      <span
-                                        className={`text-[10px] font-medium tabular-nums ${
-                                          v.quantidade_estoque <= 3
-                                            ? "text-destructive"
-                                            : "text-muted-foreground"
-                                        }`}
-                                        title="Estoque disponível"
-                                      >
-                                        {v.quantidade_estoque} em estoque
-                                      </span>
                                     </div>
                                   </td>
                                 );
