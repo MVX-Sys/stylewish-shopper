@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { getImageUrl } from "@/lib/storage";
+import { getImageUrl, downloadOrderImagesZip } from "@/lib/storage";
 import { useCart, itemPrecoEfetivo, validarPersonalizacao } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
@@ -140,6 +140,14 @@ function CheckoutPage() {
         } : undefined,
       }, true);
 
+      // Baixa também um .zip com as imagens de todos os produtos do pedido
+      try {
+        const ok = await downloadOrderImagesZip(items, "imagens-pedido");
+        if (ok) toast.success("Imagens dos produtos baixadas em .zip");
+      } catch (e) {
+        console.error("Erro ao gerar zip de imagens do pedido:", e);
+      }
+
       const order = await fnCreateOrder({
         data: {
           total: valorFinal,
@@ -197,7 +205,7 @@ function CheckoutPage() {
         `*Forma de pagamento:* ${formaPagamento}`,
         observacoes ? `\n*Observações*\n${observacoes}` : "",
         "",
-        "_(Acabei de baixar o PDF do meu pedido e estou enviando em anexo aqui)_",
+        "_(Acabei de baixar o PDF do meu pedido e o arquivo .zip com as imagens dos produtos, estou enviando em anexo aqui)_",
       ]
         .filter(Boolean)
         .join("\n");
