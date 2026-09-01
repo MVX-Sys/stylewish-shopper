@@ -98,6 +98,11 @@ function CheckoutPage() {
       toast.error(`Valor mínimo para compra: ${brl(VALOR_MINIMO_COMPRA)}`);
       return;
     }
+    const erroPerso = validarPersonalizacao(items as any);
+    if (erroPerso) {
+      toast.error(erroPerso);
+      return;
+    }
     setShowAtendentes(true);
   };
 
