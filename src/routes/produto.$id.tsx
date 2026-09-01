@@ -205,6 +205,9 @@ function ProductPage() {
           precoPromocional: promo?.ativa ? promo.precoFinal : null,
           promocaoAte: promo?.ativa && promo.validoAte ? promo.validoAte.toISOString() : null,
           foto: p.imagens.find((i: any) => i.principal)?.storage_path || p.imagens[0]?.storage_path || null,
+          categoriaId: p.categoria_id ?? null,
+          categoriaNome: categoriaAtual?.nome ?? null,
+          personalizado,
         },
         q,
       );
