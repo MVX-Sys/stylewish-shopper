@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getImageUrl } from "@/lib/storage";
-import { useCart, itemPrecoEfetivo } from "@/lib/cart";
+import { useCart, itemPrecoEfetivo, validarPersonalizacao } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
