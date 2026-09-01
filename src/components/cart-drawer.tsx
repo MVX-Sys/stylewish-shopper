@@ -167,6 +167,11 @@ function CartItemRow({ item: i, setQty, remove }: { item: any, setQty: any, remo
         <p className="mt-0.5 text-xs text-muted-foreground">
           {i.cor} · Tam {i.tamanho}
         </p>
+        {i.personalizado && (
+          <span className="mt-1 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+            Personalizado
+          </span>
+        )}
         <div className="mt-2 flex items-center gap-1.5">
           <button
             onClick={() => setQty(i.key, i.quantidade - 1)}
