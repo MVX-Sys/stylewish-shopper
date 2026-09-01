@@ -612,6 +612,29 @@ function ProductPage() {
                   </div>
                 )}
 
+                <div className="rounded-2xl border border-border bg-card p-4">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={personalizado}
+                      onChange={(e) => setPersonalizado(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold text-foreground">Personalizar Produto</span>
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        Pedido mínimo de {MIN_PECAS_PERSONALIZACAO} peças da categoria
+                        {categoriaAtual?.nome ? ` ${categoriaAtual.nome}` : ""} para produtos personalizados.
+                      </span>
+                    </span>
+                  </label>
+                  {personalizado && totalItens > 0 && totalItens < MIN_PECAS_PERSONALIZACAO && (
+                    <p className="mt-3 rounded-lg bg-primary/10 p-2.5 text-[11px] font-medium text-primary">
+                      Faltam {MIN_PECAS_PERSONALIZACAO - totalItens} peça(s) desta categoria para atingir o mínimo de personalização.
+                    </p>
+                  )}
+                </div>
+
                 <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur-md sm:p-4">
                   <div className="min-w-0">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">
