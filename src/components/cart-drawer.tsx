@@ -1,6 +1,6 @@
 import { X, Minus, Plus, MessageCircle, Trash2, ShoppingBag, AlertCircle } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useCart, itemPrecoEfetivo } from "@/lib/cart";
+import { useCart, itemPrecoEfetivo, validarPersonalizacao } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { getImageUrl } from "@/lib/storage";
 import { useEffect, useState } from "react";
