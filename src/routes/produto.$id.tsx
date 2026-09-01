@@ -84,6 +84,12 @@ function ProductPage() {
   const [restockZap, setRestockZap] = useState("");
   const [restockObs, setRestockObs] = useState("");
   const [restockSending, setRestockSending] = useState(false);
+  const [personalizado, setPersonalizado] = useState(false);
+
+  const categoriaAtual = useMemo(
+    () => (p?.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id) ?? null : null),
+    [p, categorias],
+  );
 
   const enviarSolicitacao = async () => {
     if (!p || !restock) return;
