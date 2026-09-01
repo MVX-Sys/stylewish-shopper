@@ -18,6 +18,11 @@ export function CartDrawer() {
       toast.error(`Valor mínimo para compra: ${brl(VALOR_MINIMO_COMPRA)}`);
       return;
     }
+    const erroPerso = validarPersonalizacao(items);
+    if (erroPerso) {
+      toast.error(erroPerso);
+      return;
+    }
     setOpen(false);
     nav({ to: "/checkout" });
   };
