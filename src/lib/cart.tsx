@@ -94,7 +94,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add: CartCtx["add"] = (item, qty = 1) => {
     const cartItem = item as CartItem;
-    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}`;
+    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}${cartItem.personalizado ? "|perso" : ""}`;
     setItems((prev) => {
       const idx = prev.findIndex((x) => x.key === key);
       if (idx >= 0) {
