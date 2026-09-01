@@ -121,3 +121,83 @@ export async function downloadImagesAsZip(
   a.remove();
   setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
 }
+
+/**
+ * Baixa um arquivo .zip contendo as imagens de todos os produtos do pedido,
+ * organizadas em uma pasta por produto.
+ */
+export async function downloadOrderImagesZip(
+  items: { produtoId: string; nome: string; foto?: string | null }[],
+  baseName = "imagens-pedido",
+): Promise<boolean> {
+  if (items.length === 0) return false;
+
+  // Produtos únicos do pedido
+  const produtos = new Map<string, string>();
+  for (const i of items) if (!produtos.has(i.produtoId)) produtos.set(i.produtoId, i.nome);
+
+  // Busca todas as imagens dos produtos no banco
+  const ids = [...produtos.keys()];
+  let paths = new Map<string, string[]>();
+  try {
+    const { data } = await supabase
+      .from("imagens_produto")
+      .select("produto_id,storage_path,principal,ordem")
+      .in("produto_id", ids)
+      .order("ordem");
+    for (const row of data ?? []) {
+      const list = paths.get(row.produto_id) ?? [];
+      list.push(row.storage_path);
+      paths.set(row.produto_id, list);
+    }
+  } catch (e) {
+    console.error("Erro ao buscar imagens do pedido:", e);
+  }
+
+  // Fallback: foto já presente no item do carrinho
+  for (const i of items) {
+    if (!paths.get(i.produtoId)?.length && i.foto) paths.set(i.produtoId, [i.foto]);
+  }
+
+  const [{ default: JSZip }] = await Promise.all([import("jszip")]);
+  const zip = new JSZip();
+  let count = 0;
+
+  await Promise.all(
+    [...produtos.entries()].map(async ([produtoId, nome]) => {
+      const list = paths.get(produtoId) ?? [];
+      if (list.length === 0) return;
+      const folder = zip.folder(sanitize(nome)) ?? zip;
+      await Promise.all(
+        list.map(async (p, idx) => {
+          try {
+            const url = await getImageUrl(p);
+            if (!url) return;
+            const res = await fetch(url);
+            if (!res.ok) return;
+            const blob = await res.blob();
+            const ext = extFromUrl(p, blob.type.split("/")[1] || "jpg");
+            folder.file(`${sanitize(nome)}-${String(idx + 1).padStart(2, "0")}.${ext}`, blob);
+            count++;
+          } catch (e) {
+            console.error("Erro ao adicionar imagem no zip:", e);
+          }
+        }),
+      );
+    }),
+  );
+
+  if (count === 0) return false;
+
+  const content = await zip.generateAsync({ type: "blob" });
+  const objectUrl = URL.createObjectURL(content);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = objectUrl;
+  a.download = `${sanitize(baseName)}-${stamp}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
+  return true;
+}
