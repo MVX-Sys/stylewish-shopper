@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getImageUrl } from "@/lib/storage";
-import { useCart, itemPrecoEfetivo } from "@/lib/cart";
+import { useCart, itemPrecoEfetivo, validarPersonalizacao } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
@@ -98,6 +98,11 @@ function CheckoutPage() {
       toast.error(`Valor mínimo para compra: ${brl(VALOR_MINIMO_COMPRA)}`);
       return;
     }
+    const erroPerso = validarPersonalizacao(items as any);
+    if (erroPerso) {
+      toast.error(erroPerso);
+      return;
+    }
     setShowAtendentes(true);
   };
 
@@ -165,7 +170,7 @@ function CheckoutPage() {
       });
 
       const linhas = items.map((i) => {
-        const variacao = `Cor ${i.cor}, Tam ${i.tamanho}`;
+        const variacao = `Cor ${i.cor}, Tam ${i.tamanho}${i.personalizado ? ", PERSONALIZADO" : ""}`;
         const preco = itemPrecoEfetivo(i);
         return `• ${i.quantidade}x ${i.nome} — ${variacao} — ${brl(preco)} (subtotal ${brl(preco * i.quantidade)})`;
       });
@@ -544,6 +549,11 @@ function CheckoutItemRow({ item, itemsWithDiscount, appliedCoupon, items }: { it
         <p className="mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider">
           {item.cor} • {item.tamanho}
         </p>
+        {item.personalizado && (
+          <span className="mt-1 w-fit rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+            Personalizado
+          </span>
+        )}
         <div className="mt-1.5 flex items-center justify-between">
           <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
           <div className="flex flex-col items-end">

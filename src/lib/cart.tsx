@@ -13,7 +13,32 @@ export type CartItem = {
   promocaoAte?: string | null; // ISO expiry
   quantidade: number;
   foto?: string | null;
+  categoriaId?: string | null;
+  categoriaNome?: string | null;
+  personalizado?: boolean;
 };
+
+// Pedidos personalizados exigem no mínimo 10 peças da mesma categoria
+export const MIN_PECAS_PERSONALIZACAO = 10;
+
+export function validarPersonalizacao(items: CartItem[]): string | null {
+  const categoriasPersonalizadas = new Map<string, string>();
+  for (const i of items) {
+    if (i.personalizado) {
+      const cat = i.categoriaId || "sem-categoria";
+      categoriasPersonalizadas.set(cat, i.categoriaNome || "esta categoria");
+    }
+  }
+  for (const [catId, catNome] of categoriasPersonalizadas) {
+    const totalCat = items
+      .filter((i) => (i.categoriaId || "sem-categoria") === catId)
+      .reduce((s, i) => s + i.quantidade, 0);
+    if (totalCat < MIN_PECAS_PERSONALIZACAO) {
+      return `Produtos personalizados exigem no mínimo ${MIN_PECAS_PERSONALIZACAO} peças de ${catNome}. Você tem ${totalCat}.`;
+    }
+  }
+  return null;
+}
 
 export function itemPrecoEfetivo(i: Pick<CartItem, "preco" | "precoPromocional" | "promocaoAte">): number {
   const promo = i.precoPromocional;
@@ -69,7 +94,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add: CartCtx["add"] = (item, qty = 1) => {
     const cartItem = item as CartItem;
-    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}`;
+    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}${cartItem.personalizado ? "|perso" : ""}`;
     setItems((prev) => {
       const idx = prev.findIndex((x) => x.key === key);
       if (idx >= 0) {

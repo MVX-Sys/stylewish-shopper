@@ -8,7 +8,7 @@ import { getPromoInfo, isEsgotado, type Categoria, type ProductListItem, type Va
 import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
-import { useCart } from "@/lib/cart";
+import { useCart, MIN_PECAS_PERSONALIZACAO } from "@/lib/cart";
 import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X, Share2, Copy, Check, QrCode } from "lucide-react";
 import React from "react";
 const downloadProductPDF = async (p: any) => {
@@ -84,6 +84,12 @@ function ProductPage() {
   const [restockZap, setRestockZap] = useState("");
   const [restockObs, setRestockObs] = useState("");
   const [restockSending, setRestockSending] = useState(false);
+  const [personalizado, setPersonalizado] = useState(false);
+
+  const categoriaAtual = useMemo(
+    () => (p?.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id) ?? null : null),
+    [p, categorias],
+  );
 
   const enviarSolicitacao = async () => {
     if (!p || !restock) return;
@@ -199,6 +205,9 @@ function ProductPage() {
           precoPromocional: promo?.ativa ? promo.precoFinal : null,
           promocaoAte: promo?.ativa && promo.validoAte ? promo.validoAte.toISOString() : null,
           foto: p.imagens.find((i: any) => i.principal)?.storage_path || p.imagens[0]?.storage_path || null,
+          categoriaId: p.categoria_id ?? null,
+          categoriaNome: categoriaAtual?.nome ?? null,
+          personalizado,
         },
         q,
       );
@@ -602,6 +611,29 @@ function ProductPage() {
                     </div>
                   </div>
                 )}
+
+                <div className="rounded-2xl border border-border bg-card p-4">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={personalizado}
+                      onChange={(e) => setPersonalizado(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold text-foreground">Personalizar Produto</span>
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        Pedido mínimo de {MIN_PECAS_PERSONALIZACAO} peças da categoria
+                        {categoriaAtual?.nome ? ` ${categoriaAtual.nome}` : ""} para produtos personalizados.
+                      </span>
+                    </span>
+                  </label>
+                  {personalizado && totalItens > 0 && totalItens < MIN_PECAS_PERSONALIZACAO && (
+                    <p className="mt-3 rounded-lg bg-primary/10 p-2.5 text-[11px] font-medium text-primary">
+                      Faltam {MIN_PECAS_PERSONALIZACAO - totalItens} peça(s) desta categoria para atingir o mínimo de personalização.
+                    </p>
+                  )}
+                </div>
 
                 <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur-md sm:p-4">
                   <div className="min-w-0">
