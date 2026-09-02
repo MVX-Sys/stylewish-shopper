@@ -41,7 +41,8 @@ function Home() {
   const { data: config } = useQuery({
     queryKey: ["site-config"],
     queryFn: getSiteConfig,
-    staleTime: 1000 * 60 * 60, // Config changes rarely
+    staleTime: 1000 * 60 * 20,
+    refetchInterval: 1000 * 60 * 30, // renova as URLs assinadas do banner antes de expirarem
   });
   const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],

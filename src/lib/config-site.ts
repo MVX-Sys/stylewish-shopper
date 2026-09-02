@@ -5,6 +5,8 @@ export type HeroSlide = {
   id: string;
   tipo: 'gradient' | 'image' | 'video';
   media_url: string | null;
+  /** Caminho do arquivo no storage (fonte de verdade salva no banco). */
+  media_path?: string | null;
   titulo: string;
   subtitulo: string | null;
   ordem: number;
@@ -16,42 +18,58 @@ export type SiteConfig = {
   hero_slides: HeroSlide[];
 };
 
+/** Extrai o caminho do arquivo caso um link (assinado/público) tenha sido salvo. */
+export function toStoragePath(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (!/^https?:\/\//i.test(value)) return value;
+  const clean = value.split("?")[0];
+  const m = clean.match(/\/object\/(?:sign|public)\/product-images\/(.+)$/);
+  return m ? decodeURIComponent(m[1]) : value;
+}
+
 export async function getSiteConfig(): Promise<SiteConfig> {
-  const { data: config, error: configError } = await supabase
-    .from("site_config")
-    .select("*")
-    .eq("id", "current")
-    .single();
-  
   const { data: slides, error: slidesError } = await supabase
     .from("hero_slides")
     .select("*")
     .order("ordem", { ascending: true });
 
-  if (configError) {
-    console.error("Error fetching site config:", configError);
+  if (slidesError) {
+    console.error("Error fetching hero slides:", slidesError);
   }
 
-  return {
-    id: "current",
-    hero_slides: (slides as any) || []
-  };
+  const { getImageUrl } = await import("@/lib/storage");
+
+  const resolved = await Promise.all(
+    ((slides as any[]) || []).map(async (s) => {
+      const path = toStoragePath(s.media_url);
+      let url: string | null = null;
+      if (path) {
+        url = /^https?:\/\//i.test(path) ? path : await getImageUrl(path);
+      }
+      return { ...s, media_path: path, media_url: url } as HeroSlide;
+    }),
+  );
+
+  return { id: "current", hero_slides: resolved };
 }
 
-export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide, 'id'>>) {
+
+export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide, 'id' | 'media_path'>>) {
+  const { media_path: _mp, ...payload } = slide as any;
   const { error } = await supabase
     .from("hero_slides")
-    .update(slide)
+    .update(payload)
     .eq("id", id);
   
   if (error) throw error;
   await logAudit({ acao: "editar", entidade: "configuracao_site", entidade_id: id, descricao: `Editou slide do banner: ${slide.titulo || id}` });
 }
 
-export async function createHeroSlide(slide: Omit<HeroSlide, 'id'>) {
+export async function createHeroSlide(slide: Omit<HeroSlide, 'id' | 'media_path'>) {
+  const { media_path: _mp, ...payload } = slide as any;
   const { data, error } = await supabase
     .from("hero_slides")
-    .insert(slide)
+    .insert(payload)
     .select()
     .single();
   
