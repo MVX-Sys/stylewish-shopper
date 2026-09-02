@@ -65,10 +65,11 @@ export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide,
   await logAudit({ acao: "editar", entidade: "configuracao_site", entidade_id: id, descricao: `Editou slide do banner: ${slide.titulo || id}` });
 }
 
-export async function createHeroSlide(slide: Omit<HeroSlide, 'id'>) {
+export async function createHeroSlide(slide: Omit<HeroSlide, 'id' | 'media_path'>) {
+  const { media_path: _mp, ...payload } = slide as any;
   const { data, error } = await supabase
     .from("hero_slides")
-    .insert(slide)
+    .insert(payload)
     .select()
     .single();
   
