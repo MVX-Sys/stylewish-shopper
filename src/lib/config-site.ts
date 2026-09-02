@@ -5,6 +5,8 @@ export type HeroSlide = {
   id: string;
   tipo: 'gradient' | 'image' | 'video';
   media_url: string | null;
+  /** Caminho do arquivo no storage (fonte de verdade salva no banco). */
+  media_path?: string | null;
   titulo: string;
   subtitulo: string | null;
   ordem: number;
