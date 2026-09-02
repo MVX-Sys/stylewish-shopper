@@ -41,13 +41,13 @@ export function SiteHeader() {
             className="h-11 w-11 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14 md:h-16 md:w-16"
           />
 
-          <div className="hidden min-w-0 flex-col leading-none sm:flex">
-            <h1 className="truncate font-display text-2xl font-extrabold tracking-tighter text-white md:text-3xl">
+          <div className="flex min-w-0 flex-col leading-none">
+            <h1 className="truncate font-display text-lg font-extrabold tracking-tighter text-white sm:text-2xl md:text-3xl">
               acha<span className="mx-[1px] font-bold text-white/60">&amp;</span>busca
             </h1>
-            <div className="mt-1.5 flex items-center gap-2">
-              <span className="h-px w-5 bg-white/40" />
-              <span className="font-display text-[10px] font-bold uppercase tracking-[0.35em] text-white/90">
+            <div className="mt-1 flex items-center gap-1.5 sm:mt-1.5 sm:gap-2">
+              <span className="h-px w-4 bg-white/40 sm:w-5" />
+              <span className="font-display text-[8px] font-bold uppercase tracking-[0.3em] text-white/90 sm:text-[10px] sm:tracking-[0.35em]">
                 Atacado
               </span>
             </div>
