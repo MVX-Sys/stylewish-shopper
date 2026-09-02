@@ -44,10 +44,19 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
+        if (telefoneDigitos.length < 10 || telefoneDigitos.length > 11) {
+          throw new Error("Informe um telefone válido com DDD.");
+        }
+        if (!senhaCheck.ok) {
+          throw new Error(senhaCheck.errors[0] ?? "Senha insegura.");
+        }
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { telefone: formatarTelefone(telefone), telefone_digitos: telefoneDigitos },
+          },
         });
         
         if (signUpError) throw signUpError;
