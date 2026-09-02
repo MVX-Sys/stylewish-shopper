@@ -54,10 +54,11 @@ export async function getSiteConfig(): Promise<SiteConfig> {
 }
 
 
-export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide, 'id'>>) {
+export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide, 'id' | 'media_path'>>) {
+  const { media_path: _mp, ...payload } = slide as any;
   const { error } = await supabase
     .from("hero_slides")
-    .update(slide)
+    .update(payload)
     .eq("id", id);
   
   if (error) throw error;
