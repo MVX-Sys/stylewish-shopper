@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { BRAND } from "@/lib/config";
-import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Check, X } from "lucide-react";
+import { validarSenha, formatarTelefone } from "@/lib/password";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -22,7 +23,11 @@ function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const senhaCheck = validarSenha(password, { email, telefone });
+  const telefoneDigitos = telefone.replace(/\D/g, "");
 
   useEffect(() => {
     if (session) {
@@ -39,10 +44,19 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
+        if (telefoneDigitos.length < 10 || telefoneDigitos.length > 11) {
+          throw new Error("Informe um telefone válido com DDD.");
+        }
+        if (!senhaCheck.ok) {
+          throw new Error(senhaCheck.errors[0] ?? "Senha insegura.");
+        }
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { telefone: formatarTelefone(telefone), telefone_digitos: telefoneDigitos },
+          },
         });
         
         if (signUpError) throw signUpError;
