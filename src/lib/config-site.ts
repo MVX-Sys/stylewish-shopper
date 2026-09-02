@@ -16,27 +16,41 @@ export type SiteConfig = {
   hero_slides: HeroSlide[];
 };
 
+/** Extrai o caminho do arquivo caso um link (assinado/público) tenha sido salvo. */
+export function toStoragePath(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (!/^https?:\/\//i.test(value)) return value;
+  const clean = value.split("?")[0];
+  const m = clean.match(/\/object\/(?:sign|public)\/product-images\/(.+)$/);
+  return m ? decodeURIComponent(m[1]) : value;
+}
+
 export async function getSiteConfig(): Promise<SiteConfig> {
-  const { data: config, error: configError } = await supabase
-    .from("site_config")
-    .select("*")
-    .eq("id", "current")
-    .single();
-  
   const { data: slides, error: slidesError } = await supabase
     .from("hero_slides")
     .select("*")
     .order("ordem", { ascending: true });
 
-  if (configError) {
-    console.error("Error fetching site config:", configError);
+  if (slidesError) {
+    console.error("Error fetching hero slides:", slidesError);
   }
 
-  return {
-    id: "current",
-    hero_slides: (slides as any) || []
-  };
+  const { getImageUrl } = await import("@/lib/storage");
+
+  const resolved = await Promise.all(
+    ((slides as any[]) || []).map(async (s) => {
+      const path = toStoragePath(s.media_url);
+      let url: string | null = null;
+      if (path) {
+        url = /^https?:\/\//i.test(path) ? path : await getImageUrl(path);
+      }
+      return { ...s, media_path: path, media_url: url } as HeroSlide;
+    }),
+  );
+
+  return { id: "current", hero_slides: resolved };
 }
+
 
 export async function updateHeroSlide(id: string, slide: Partial<Omit<HeroSlide, 'id'>>) {
   const { error } = await supabase
