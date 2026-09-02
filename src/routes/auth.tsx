@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { BRAND } from "@/lib/config";
-import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Check, X } from "lucide-react";
+import { validarSenha, formatarTelefone } from "@/lib/password";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
