@@ -14,6 +14,7 @@ export type Produto = {
   preco_promocional: number | null;
   promocao_ate: string | null;
   ativo: boolean;
+  ordem?: number;
 };
 
 export type ImagemProduto = {
@@ -52,6 +53,7 @@ export async function listProdutos(): Promise<ProductListItem[]> {
     .from("produtos")
     .select("*, imagens:imagens_produto(*), variacoes:variacoes_produto(*)")
     .eq("ativo", true)
+    .order("ordem", { ascending: true })
     .order("criado_em", { ascending: false });
   if (error) throw error;
   return (data ?? []) as ProductListItem[];
