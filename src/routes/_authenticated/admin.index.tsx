@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 
 type StatusFilter = "todos" | "ativos" | "inativos" | "esgotados" | "em-estoque";
 type SortKey =
+  | "ordem"
   | "recentes"
   | "antigos"
   | "nome-asc"
@@ -50,7 +51,7 @@ function AdminProductsList() {
   const [promocao, setPromocao] = useState<boolean>(false);
   const [precoMin, setPrecoMin] = useState<string>("");
   const [precoMax, setPrecoMax] = useState<string>("");
-  const [sort, setSort] = useState<SortKey>("recentes");
+  const [sort, setSort] = useState<SortKey>("ordem");
   const [showFilters, setShowFilters] = useState(true);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [qrToView, setQrToView] = useState<{ id: string; nome: string; hash_id?: string } | null>(null);
@@ -192,7 +193,7 @@ function AdminProductsList() {
     setPromocao(false);
     setPrecoMin("");
     setPrecoMax("");
-    setSort("recentes");
+    setSort("ordem");
   };
 
   const filtered = useMemo(() => {
@@ -226,6 +227,7 @@ function AdminProductsList() {
         case "maior-preco": return b.preco - a.preco;
         case "menor-estoque": return totalEstoque(a) - totalEstoque(b);
         case "maior-estoque": return totalEstoque(b) - totalEstoque(a);
+        case "ordem": return (a.ordem ?? 0) - (b.ordem ?? 0);
         case "antigos": return 0; // already sorted desc; reverse below
         default: return 0;
       }
@@ -233,6 +235,44 @@ function AdminProductsList() {
     if (sort === "antigos") sorted.reverse();
     return sorted;
   }, [produtos, q, categoriaId, cor, tamanho, status, novidade, promocao, precoMin, precoMax, sort]);
+
+  const [reordering, setReordering] = useState(false);
+
+  const moverProduto = async (id: string, dir: -1 | 1) => {
+    if (sort !== "ordem" || reordering) return;
+    const idx = filtered.findIndex((p) => p.id === id);
+    const alvoIdx = idx + dir;
+    if (idx < 0 || alvoIdx < 0 || alvoIdx >= filtered.length) return;
+    setReordering(true);
+    try {
+      // Normaliza a ordem de toda a lista visível e aplica a troca
+      const nova = [...filtered];
+      const [item] = nova.splice(idx, 1);
+      nova.splice(alvoIdx, 0, item);
+      const updates = nova.map((p, i) => ({ id: p.id, ordem: i + 1 }));
+      const alterados = updates.filter((u, i) => (nova[i].ordem ?? 0) !== u.ordem);
+      for (const u of alterados) {
+        const { error } = await supabase
+          .from("produtos")
+          .update({ ordem: u.ordem })
+          .eq("id", u.id);
+        if (error) throw error;
+      }
+      await logAudit({
+        acao: "editar",
+        entidade: "produto",
+        entidade_id: id,
+        descricao: `Alterou a ordem de exibição do produto "${item.nome}"`,
+      });
+      await qc.invalidateQueries({ queryKey: ["admin-produtos"] });
+      qc.invalidateQueries({ queryKey: ["produtos"] });
+      toast.success("Ordem atualizada.");
+    } catch (e) {
+      toast.error("Não foi possível alterar a ordem.");
+    } finally {
+      setReordering(false);
+    }
+  };
 
   const del = async (id: string) => {
     const alvo = produtos.find((p) => p.id === id);
@@ -430,6 +470,7 @@ function AdminProductsList() {
                 onChange={(e) => setSort(e.target.value as SortKey)}
                 className="rounded-full border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
               >
+                <option value="ordem">Ordem de exibição (manual)</option>
                 <option value="recentes">Mais recentes</option>
                 <option value="antigos">Mais antigos</option>
                 <option value="nome-asc">Nome (A–Z)</option>
@@ -915,7 +956,7 @@ function AdminProductsList() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((p) => {
+                {filtered.map((p, idx) => {
                   const total = p.variacoes.reduce(
                     (s, v) => s + v.quantidade_estoque,
                     0,
@@ -989,6 +1030,28 @@ function AdminProductsList() {
                       </td>
                       <td className="p-3">
                         <div className="flex justify-end gap-1">
+                          {sort === "ordem" && (
+                            <div className="mr-1 flex items-center">
+                              <button
+                                onClick={() => moverProduto(p.id, -1)}
+                                disabled={reordering || idx === 0}
+                                className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-30"
+                                title="Mover para cima"
+                                aria-label="Mover para cima"
+                              >
+                                <ChevronUp className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => moverProduto(p.id, 1)}
+                                disabled={reordering || idx === filtered.length - 1}
+                                className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-30"
+                                title="Mover para baixo"
+                                aria-label="Mover para baixo"
+                              >
+                                <ChevronDown className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                           <button
                             onClick={() => setQrToView({ id: p.id, nome: p.nome, hash_id: p.hash_id })}
                             className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
