@@ -241,6 +241,24 @@ function AuthPage() {
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-foreground"
                     />
                   </label>
+
+                  {mode === "signup" && (
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Telefone / WhatsApp
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        inputMode="numeric"
+                        placeholder="(81) 99999-9999"
+                        value={telefone}
+                        onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
+                        className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-foreground"
+                      />
+                    </label>
+                  )}
+
                   <label className="block">
                     <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Senha
@@ -248,15 +266,73 @@ function AuthPage() {
                     <input
                       type="password"
                       required
-                      minLength={6}
-                      placeholder="Mínimo 6 caracteres"
+                      minLength={mode === "signup" ? 8 : 6}
+                      placeholder={mode === "signup" ? "Mínimo 8 caracteres" : "Sua senha"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-foreground"
                     />
                   </label>
+
+                  {mode === "signup" && password.length > 0 && (
+                    <div className="space-y-3 rounded-xl border border-border bg-muted/40 p-4">
+                      {/* Barra de força */}
+                      <div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-muted-foreground">Força da senha</span>
+                          <span className={
+                            senhaCheck.score <= 1 ? "font-semibold text-destructive"
+                            : senhaCheck.score <= 2 ? "font-semibold text-yellow-600"
+                            : senhaCheck.score <= 3 ? "font-semibold text-blue-600"
+                            : "font-semibold text-green-600"
+                          }>
+                            {["Muito fraca", "Fraca", "Razoável", "Forte", "Muito forte"][senhaCheck.score]}
+                          </span>
+                        </div>
+                        <div className="mt-1.5 flex gap-1">
+                          {[0, 1, 2, 3].map((i) => (
+                            <div
+                              key={i}
+                              className={`h-1.5 flex-1 rounded-full transition-colors ${
+                                i < senhaCheck.score
+                                  ? senhaCheck.score <= 1 ? "bg-destructive"
+                                  : senhaCheck.score <= 2 ? "bg-yellow-500"
+                                  : senhaCheck.score <= 3 ? "bg-blue-500"
+                                  : "bg-green-500"
+                                  : "bg-muted"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Requisitos */}
+                      <ul className="space-y-1 text-xs">
+                        {[
+                          { ok: password.length >= 8, label: "Pelo menos 8 caracteres" },
+                          { ok: /[a-z]/.test(password) && /[A-Z]/.test(password), label: "Letras maiúsculas e minúsculas" },
+                          { ok: /[0-9]/.test(password), label: "Pelo menos um número" },
+                          { ok: /[^A-Za-z0-9]/.test(password), label: "Pelo menos um símbolo (! @ # $ %)" },
+                          {
+                            ok: senhaCheck.ok,
+                            label: "Sem senhas comuns, sequências ou seus dados pessoais",
+                          },
+                        ].map((req, i) => (
+                          <li key={i} className={`flex items-center gap-2 ${req.ok ? "text-green-600" : "text-muted-foreground"}`}>
+                            {req.ok ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5" />}
+                            {req.label}
+                          </li>
+                        ))}
+                      </ul>
+
+                      {senhaCheck.errors.length > 0 && (
+                        <p className="text-xs text-destructive">{senhaCheck.errors[0]}</p>
+                      )}
+                    </div>
+                  )}
+
                   <button
-                    disabled={loading}
+                    disabled={loading || (mode === "signup" && (!senhaCheck.ok || telefoneDigitos.length < 10))}
                     className="btn-shine flex w-full items-center justify-center rounded-full bg-foreground py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
                   >
                     {loading ? (
