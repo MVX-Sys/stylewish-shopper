@@ -306,8 +306,8 @@ function ProductPage() {
           </div>
         ) : (
           <>
-            <Link
-              to="/"
+<Link
+              to="/produtos"
               className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground lg:hidden"
             >
               <ChevronLeft className="h-4 w-4" /> Continuar comprando
