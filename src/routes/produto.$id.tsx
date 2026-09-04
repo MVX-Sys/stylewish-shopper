@@ -628,6 +628,44 @@ function ProductPage() {
                       </span>
                     </span>
                   </label>
+                  {personalizado && gruposPerso.length > 0 && (
+                    <div className="mt-4 space-y-4 border-t border-border pt-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Onde personalizar?
+                      </p>
+                      {gruposPerso.map((g) => (
+                        <div key={g.titulo} className="space-y-2">
+                          <p className="text-xs font-semibold text-foreground">{g.titulo}</p>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {g.opcoes.map((o) => (
+                              <label
+                                key={o.id}
+                                className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-primary/50"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={persoSel.includes(o.id)}
+                                    onChange={() => togglePerso(o.id)}
+                                    className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                                  />
+                                  <span className="text-foreground">{o.label}</span>
+                                </span>
+                                <span className="text-xs font-semibold tabular-nums text-primary">
+                                  + {brl(o.preco)}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      {adicionalPerso > 0 && (
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Acréscimo por peça: <span className="text-primary">{brl(adicionalPerso)}</span>
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {personalizado && totalItens > 0 && totalItens < MIN_PECAS_PERSONALIZACAO && (
                     <p className="mt-3 rounded-lg bg-primary/10 p-2.5 text-[11px] font-medium text-primary">
                       Faltam {MIN_PECAS_PERSONALIZACAO - totalItens} peça(s) desta categoria para atingir o mínimo de personalização.
