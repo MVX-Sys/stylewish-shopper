@@ -576,6 +576,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      set_produtos_ordem: { Args: { _ids: string[] }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "funcionario" | "user"
