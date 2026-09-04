@@ -110,7 +110,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add: CartCtx["add"] = (item, qty = 1) => {
     const cartItem = item as CartItem;
-    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}${cartItem.personalizado ? "|perso" : ""}`;
+    const perso = (cartItem.personalizacoes ?? []).map((o) => o.id).sort().join(",");
+    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}${cartItem.personalizado ? `|perso:${perso}` : ""}`;
     setItems((prev) => {
       const idx = prev.findIndex((x) => x.key === key);
       if (idx >= 0) {
