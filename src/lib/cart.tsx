@@ -16,6 +16,7 @@ export type CartItem = {
   categoriaId?: string | null;
   categoriaNome?: string | null;
   personalizado?: boolean;
+  personalizacoes?: { id: string; label: string; preco: number }[];
 };
 
 // Pedidos personalizados exigem no mínimo 10 peças da mesma categoria
