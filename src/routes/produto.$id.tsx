@@ -9,6 +9,7 @@ import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart, MIN_PECAS_PERSONALIZACAO } from "@/lib/cart";
+import { getGruposPersonalizacao } from "@/lib/personalizacao";
 import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X, Share2, Copy, Check, QrCode } from "lucide-react";
 import React from "react";
 const downloadProductPDF = async (p: any) => {
