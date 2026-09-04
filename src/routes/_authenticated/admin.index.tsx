@@ -245,26 +245,37 @@ function AdminProductsList() {
     if (idx < 0 || alvoIdx < 0 || alvoIdx >= filtered.length) return;
     setReordering(true);
     try {
-      // Normaliza a ordem de toda a lista visível e aplica a troca
-      const nova = [...filtered];
-      const [item] = nova.splice(idx, 1);
-      nova.splice(alvoIdx, 0, item);
-      const updates = nova.map((p, i) => ({ id: p.id, ordem: i + 1 }));
-      const alterados = updates.filter((u, i) => (nova[i].ordem ?? 0) !== u.ordem);
-      for (const u of alterados) {
-        const { error } = await supabase
-          .from("produtos")
-          .update({ ordem: u.ordem })
-          .eq("id", u.id);
-        if (error) throw error;
-      }
-      await logAudit({
+      // Ordem completa do catálogo (não só da lista filtrada)
+      const base = [...produtos].sort(
+        (a, b) => (a.ordem ?? 0) - (b.ordem ?? 0),
+      );
+      const item = filtered[idx];
+      const alvo = filtered[alvoIdx];
+      const from = base.findIndex((p) => p.id === item.id);
+      const to = base.findIndex((p) => p.id === alvo.id);
+      if (from < 0 || to < 0) return;
+      base.splice(from, 1);
+      base.splice(to, 0, item);
+      const ids = base.map((p) => p.id);
+
+      const { error } = await supabase.rpc("set_produtos_ordem", { _ids: ids });
+      if (error) throw error;
+
+      // Atualização otimista imediata
+      qc.setQueryData<typeof produtos>(["admin-produtos"], (old) =>
+        (old ?? []).map((p) => {
+          const i = ids.indexOf(p.id);
+          return i >= 0 ? { ...p, ordem: i + 1 } : p;
+        }),
+      );
+
+      void logAudit({
         acao: "editar",
         entidade: "produto",
         entidade_id: id,
         descricao: `Alterou a ordem de exibição do produto "${item.nome}"`,
       });
-      await qc.invalidateQueries({ queryKey: ["admin-produtos"] });
+      qc.invalidateQueries({ queryKey: ["admin-produtos"] });
       qc.invalidateQueries({ queryKey: ["produtos"] });
       toast.success("Ordem atualizada.");
     } catch (e) {
