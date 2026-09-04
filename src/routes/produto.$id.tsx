@@ -94,6 +94,19 @@ function ProductPage() {
     [p, categorias],
   );
 
+  const gruposPerso = useMemo(
+    () => getGruposPersonalizacao(p?.nome, categoriaAtual?.nome),
+    [p?.nome, categoriaAtual],
+  );
+  const opcoesPersoSelecionadas = useMemo(
+    () =>
+      gruposPerso
+        .flatMap((g) => g.opcoes)
+        .filter((o) => persoSel.includes(o.id)),
+    [gruposPerso, persoSel],
+  );
+  const adicionalPerso = opcoesPersoSelecionadas.reduce((s, o) => s + o.preco, 0);
+
   const enviarSolicitacao = async () => {
     if (!p || !restock) return;
     const nome = restockNome.trim();
