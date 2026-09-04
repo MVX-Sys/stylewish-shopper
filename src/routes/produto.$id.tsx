@@ -85,6 +85,9 @@ function ProductPage() {
   const [restockObs, setRestockObs] = useState("");
   const [restockSending, setRestockSending] = useState(false);
   const [personalizado, setPersonalizado] = useState(false);
+  const [persoSel, setPersoSel] = useState<string[]>([]);
+  const togglePerso = (id: string) =>
+    setPersoSel((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const categoriaAtual = useMemo(
     () => (p?.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id) ?? null : null),
