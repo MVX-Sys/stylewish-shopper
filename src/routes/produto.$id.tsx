@@ -9,6 +9,7 @@ import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart, MIN_PECAS_PERSONALIZACAO } from "@/lib/cart";
+import { getGruposPersonalizacao } from "@/lib/personalizacao";
 import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X, Share2, Copy, Check, QrCode } from "lucide-react";
 import React from "react";
 const downloadProductPDF = async (p: any) => {
@@ -85,11 +86,27 @@ function ProductPage() {
   const [restockObs, setRestockObs] = useState("");
   const [restockSending, setRestockSending] = useState(false);
   const [personalizado, setPersonalizado] = useState(false);
+  const [persoSel, setPersoSel] = useState<string[]>([]);
+  const togglePerso = (id: string) =>
+    setPersoSel((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const categoriaAtual = useMemo(
     () => (p?.categoria_id ? (categorias as Categoria[]).find((c) => c.id === p.categoria_id) ?? null : null),
     [p, categorias],
   );
+
+  const gruposPerso = useMemo(
+    () => getGruposPersonalizacao(p?.nome, categoriaAtual?.nome),
+    [p?.nome, categoriaAtual],
+  );
+  const opcoesPersoSelecionadas = useMemo(
+    () =>
+      gruposPerso
+        .flatMap((g) => g.opcoes)
+        .filter((o) => persoSel.includes(o.id)),
+    [gruposPerso, persoSel],
+  );
+  const adicionalPerso = opcoesPersoSelecionadas.reduce((s, o) => s + o.preco, 0);
 
   const enviarSolicitacao = async () => {
     if (!p || !restock) return;
@@ -628,6 +645,44 @@ function ProductPage() {
                       </span>
                     </span>
                   </label>
+                  {personalizado && gruposPerso.length > 0 && (
+                    <div className="mt-4 space-y-4 border-t border-border pt-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Onde personalizar?
+                      </p>
+                      {gruposPerso.map((g) => (
+                        <div key={g.titulo} className="space-y-2">
+                          <p className="text-xs font-semibold text-foreground">{g.titulo}</p>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {g.opcoes.map((o) => (
+                              <label
+                                key={o.id}
+                                className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-primary/50"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={persoSel.includes(o.id)}
+                                    onChange={() => togglePerso(o.id)}
+                                    className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                                  />
+                                  <span className="text-foreground">{o.label}</span>
+                                </span>
+                                <span className="text-xs font-semibold tabular-nums text-primary">
+                                  + {brl(o.preco)}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      {adicionalPerso > 0 && (
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Acréscimo por peça: <span className="text-primary">{brl(adicionalPerso)}</span>
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {personalizado && totalItens > 0 && totalItens < MIN_PECAS_PERSONALIZACAO && (
                     <p className="mt-3 rounded-lg bg-primary/10 p-2.5 text-[11px] font-medium text-primary">
                       Faltam {MIN_PECAS_PERSONALIZACAO - totalItens} peça(s) desta categoria para atingir o mínimo de personalização.

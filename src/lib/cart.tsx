@@ -16,6 +16,7 @@ export type CartItem = {
   categoriaId?: string | null;
   categoriaNome?: string | null;
   personalizado?: boolean;
+  personalizacoes?: { id: string; label: string; preco: number }[];
 };
 
 // Pedidos personalizados exigem no mínimo 10 peças da mesma categoria
@@ -40,14 +41,29 @@ export function validarPersonalizacao(items: CartItem[]): string | null {
   return null;
 }
 
-export function itemPrecoEfetivo(i: Pick<CartItem, "preco" | "precoPromocional" | "promocaoAte">): number {
+export function itemAdicionalPersonalizacao(
+  i: Pick<CartItem, "personalizacoes">,
+): number {
+  return (i.personalizacoes ?? []).reduce((s, o) => s + (o.preco || 0), 0);
+}
+
+export function itemPrecoBase(
+  i: Pick<CartItem, "preco" | "personalizacoes">,
+): number {
+  return i.preco + itemAdicionalPersonalizacao(i);
+}
+
+export function itemPrecoEfetivo(
+  i: Pick<CartItem, "preco" | "precoPromocional" | "promocaoAte" | "personalizacoes">,
+): number {
+  const extras = itemAdicionalPersonalizacao(i);
   const promo = i.precoPromocional;
-  if (promo == null || promo < 0 || promo >= i.preco) return i.preco;
+  if (promo == null || promo < 0 || promo >= i.preco) return i.preco + extras;
   if (i.promocaoAte) {
     const ate = new Date(i.promocaoAte).getTime();
-    if (!Number.isFinite(ate) || ate <= Date.now()) return i.preco;
+    if (!Number.isFinite(ate) || ate <= Date.now()) return i.preco + extras;
   }
-  return promo;
+  return promo + extras;
 }
 
 type CartCtx = {
@@ -94,7 +110,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add: CartCtx["add"] = (item, qty = 1) => {
     const cartItem = item as CartItem;
-    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}${cartItem.personalizado ? "|perso" : ""}`;
+    const perso = (cartItem.personalizacoes ?? []).map((o) => o.id).sort().join(",");
+    const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}${cartItem.personalizado ? `|perso:${perso}` : ""}`;
     setItems((prev) => {
       const idx = prev.findIndex((x) => x.key === key);
       if (idx >= 0) {
