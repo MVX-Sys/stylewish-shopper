@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { CartDrawer } from "@/components/cart-drawer";
-import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
+import { ProductCard } from "@/components/product-card";
 import { FilterSidebar, defaultFilters, type Filters } from "@/components/filter-sidebar";
 import { getPromoInfo, type ProductListItem, type Categoria } from "@/lib/products";
 import { listCategoriasFn, listProdutosFn } from "@/lib/products.functions";
@@ -28,6 +28,8 @@ export const Route = createFileRoute("/produtos")({
       },
       { property: "og:title", content: "ACHAEBUSCA — Catálogo" },
       { property: "og:description", content: "Moda urbana, atendimento próximo, pedidos via WhatsApp." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   loader: async ({ context }) => {
@@ -162,13 +164,7 @@ function Home() {
             )}
           </div>
 
-          {!produtos.length ? (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card px-6 py-24 text-center shadow-soft">
               <div className="grid h-16 w-16 place-items-center rounded-full bg-primary/10 ring-4 ring-primary/5">
                 <PackageSearch className="h-7 w-7 text-primary" />
