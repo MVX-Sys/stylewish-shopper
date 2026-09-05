@@ -39,12 +39,23 @@ export type ProductListItem = Produto & {
   variacoes: VariacaoProduto[];
 };
 
+function isBackendUnavailable(error: unknown): boolean {
+  const message =
+    error && typeof error === "object" && "message" in error
+      ? String(error.message)
+      : String(error);
+  return /network|fetch|connection|unavailable|timeout/i.test(message);
+}
+
 export async function listCategorias(): Promise<Categoria[]> {
   const { data, error } = await supabase
     .from("categorias")
     .select("id,nome,slug,ordem")
     .order("ordem");
-  if (error) throw error;
+  if (error) {
+    if (isBackendUnavailable(error)) return [];
+    throw error;
+  }
   return data ?? [];
 }
 
@@ -55,7 +66,10 @@ export async function listProdutos(): Promise<ProductListItem[]> {
     .eq("ativo", true)
     .order("ordem", { ascending: true })
     .order("criado_em", { ascending: false });
-  if (error) throw error;
+  if (error) {
+    if (isBackendUnavailable(error)) return [];
+    throw error;
+  }
   return (data ?? []) as ProductListItem[];
 }
 
@@ -65,6 +79,9 @@ export async function getProduto(id: string): Promise<ProductListItem | null> {
     .select("*, imagens:imagens_produto(*), variacoes:variacoes_produto(*)")
     .eq("id", id)
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    if (isBackendUnavailable(error)) return null;
+    throw error;
+  }
   return data as ProductListItem | null;
 }

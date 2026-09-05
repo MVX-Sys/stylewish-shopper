@@ -40,15 +40,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
 
     // Use getSession first for speed, then getUser for security
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      if (!mounted) return;
-      if (s) {
-        setSession(s);
-        checkRole(s.user.id).finally(() => setLoading(false));
-      } else {
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: s } }) => {
+        if (!mounted) return;
+        if (s) {
+          setSession(s);
+          checkRole(s.user.id).finally(() => {
+            if (mounted) setLoading(false);
+          });
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setSession(null);
+        setRoleKind("cliente");
+        setPermissions([]);
         setLoading(false);
-      }
-    });
+      });
     
     const { data: sub } = supabase.auth.onAuthStateChange(async (event, s) => {
       if (!mounted) return;
@@ -57,7 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       
       if (s?.user) {
-        await checkRole(s.user.id);
+        try {
+          await checkRole(s.user.id);
+        } catch {
+          setRoleKind("cliente");
+          setPermissions([]);
+        }
         // Registra log apenas em eventos de login explícitos
         if (event === "SIGNED_IN") {
           const rolesRes = await supabase.from("user_roles").select("role").eq("user_id", s.user.id);
