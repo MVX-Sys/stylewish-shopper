@@ -366,7 +366,8 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
           const path = `${pid}/${crypto.randomUUID()}.${ext}`;
           const { error } = await supabase.storage
             .from("product-images")
-            .upload(path, img._file, { upsert: false });
+            .upload(path, img._file, { upsert: false, contentType: img._file.type, cacheControl: "31536000" });
+
           if (error) throw error;
           img.storage_path = path;
         }
