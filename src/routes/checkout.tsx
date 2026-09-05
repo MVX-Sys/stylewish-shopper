@@ -472,19 +472,7 @@ function CheckoutPage() {
                   onClick={() => enviarParaAtendente(a as any)}
                   className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50"
                 >
-                  <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-border group-hover:border-primary/30">
-                    {a.foto_path ? (
-                      <img
-                        src={supabase.storage.from("atendentes-v1-private").getPublicUrl(a.foto_path).data.publicUrl}
-                        alt={a.nome}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-full w-full place-items-center bg-primary/10 text-primary">
-                        <User className="h-8 w-8" />
-                      </div>
-                    )}
-                  </div>
+                  <AtendenteAvatar path={a.foto_path} nome={a.nome} />
                   <div className="text-center">
                     <p className="font-display text-xs font-semibold">{a.nome}</p>
                     <p className="text-[9px] text-muted-foreground uppercase">{a.cargo || "Vendedor"}</p>
