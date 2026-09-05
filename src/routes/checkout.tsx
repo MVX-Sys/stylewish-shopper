@@ -186,25 +186,47 @@ function CheckoutPage() {
         "",
         `*Forma de pagamento:* ${formaPagamento}`,
         observacoes ? `\n*Observações*\n${observacoes}` : "",
-        "",
-        "_(Acabei de baixar o PDF do meu pedido e o arquivo .zip com as imagens dos produtos, estou enviando em anexo aqui)_",
       ]
         .filter(Boolean)
         .join("\n");
 
       const encodedMsg = encodeURIComponent(msgContent);
       const whatsappUrl = `https://wa.me/${atendente.whatsapp.replace(/\D/g, "")}?text=${encodedMsg}`;
-      
+
+      // Downloads (PDF/zip) só no desktop e sem bloquear o redirecionamento
+      const isMobile =
+        typeof navigator !== "undefined" &&
+        /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+      if (!isMobile) {
+        try {
+          await downloadOrderPDF({
+            items,
+            total,
+            formaEnvio,
+            formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
+            formaPagamento,
+            endereco: formaEnvio === "ENTREGA" ? {} : undefined,
+            observacoes,
+            cupom: appliedCoupon
+              ? { codigo: appliedCoupon.codigo, desconto: appliedCoupon.valor_desconto }
+              : undefined,
+          }, true);
+          await downloadOrderImagesZip(items, "imagens-pedido");
+        } catch (e) {
+          console.error("Erro ao gerar anexos do pedido:", e);
+        }
+      }
+
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp…`);
-      window.location.href = whatsappUrl;
-      
       setShowAtendentes(false);
       clear();
-      setTimeout(() => nav({ to: "/perfil" }), 3000);
+      window.location.href = whatsappUrl;
     } catch (err: any) {
       console.error("Erro ao salvar pedido:", err);
       const errorMsg = err?.message || (typeof err === 'string' ? err : "");
       toast.error(`Erro ao processar pedido: ${errorMsg || "Tente novamente."}`);
+    } finally {
+      setEnviando(false);
     }
   };
 
