@@ -41,7 +41,7 @@ export const signImagesFn = createServerFn({ method: "POST" })
 
     const transform =
       data.width || data.quality
-        ? { width: data.width, quality: data.quality ?? 72, resize: "cover" as const }
+        ? { width: data.width, quality: data.quality ?? 72, resize: "contain" as const }
         : undefined;
 
     await Promise.all(

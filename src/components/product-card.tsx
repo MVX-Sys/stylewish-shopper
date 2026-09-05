@@ -56,7 +56,7 @@ export const ProductCard = memo(function ProductCard({
             fetchPriority={priority ? "high" : "low"}
             decoding="async"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
+            className="h-full w-full object-contain transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
           />
         ) : (
           <div className="skeleton h-full w-full" />
