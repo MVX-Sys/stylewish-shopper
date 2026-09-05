@@ -118,37 +118,19 @@ function CheckoutPage() {
 
   const atendentes = dbAtendentes || [];
 
+  const [enviando, setEnviando] = useState(false);
+
   const enviarParaAtendente = async (atendente: Atendente) => {
+    if (enviando) return;
+    setEnviando(true);
     try {
       if (!session) {
         toast.error("Você precisa estar logado para finalizar o pedido.");
         nav({ to: "/auth" });
         return;
       }
-      
-      const pdfBlob = await downloadOrderPDF({
-        items,
-        total,
-        formaEnvio,
-        formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
-        formaPagamento,
-        endereco: formaEnvio === "ENTREGA" ? {} : undefined,
-        observacoes,
-        cupom: appliedCoupon ? {
-          codigo: appliedCoupon.codigo,
-          desconto: appliedCoupon.valor_desconto
-        } : undefined,
-      }, true);
 
-      // Baixa também um .zip com as imagens de todos os produtos do pedido
-      try {
-        const ok = await downloadOrderImagesZip(items, "imagens-pedido");
-        if (ok) toast.success("Imagens dos produtos baixadas em .zip");
-      } catch (e) {
-        console.error("Erro ao gerar zip de imagens do pedido:", e);
-      }
-
-      const order = await fnCreateOrder({
+      await fnCreateOrder({
         data: {
           total: valorFinal,
           forma_envio: formaEnvio,
