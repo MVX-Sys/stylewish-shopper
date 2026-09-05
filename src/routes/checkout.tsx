@@ -469,8 +469,10 @@ function CheckoutPage() {
               {atendentes.map((a) => (
                 <button
                   key={a.id}
+                  type="button"
+                  disabled={enviando}
                   onClick={() => enviarParaAtendente(a as any)}
-                  className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50"
+                  className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50 disabled:opacity-60"
                 >
                   <AtendenteAvatar path={a.foto_path} nome={a.nome} />
                   <div className="text-center">
