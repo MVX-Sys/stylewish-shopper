@@ -44,7 +44,10 @@ export async function getSiteConfig(): Promise<SiteConfig> {
       const path = toStoragePath(s.media_url);
       let url: string | null = null;
       if (path) {
-        url = /^https?:\/\//i.test(path) ? path : await getImageUrl(path);
+        url = /^https?:\/\//i.test(path)
+          ? path
+          : await getImageUrl(path, s.tipo === "video" ? undefined : { width: 1600, quality: 74 });
+
       }
       return { ...s, media_path: path, media_url: url } as HeroSlide;
     }),

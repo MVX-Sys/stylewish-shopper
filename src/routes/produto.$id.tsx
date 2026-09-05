@@ -151,7 +151,7 @@ function ProductPage() {
     const paths = [...p.imagens]
       .sort((a: any, b: any) => (b.principal ? 1 : 0) - (a.principal ? 1 : 0) || a.ordem - b.ordem)
       .map((i) => i.storage_path);
-    Promise.all(paths.map(p => getImageUrl(p, { width: 800, quality: 85 }))).then(setImgs);
+    Promise.all(paths.map((sp) => getImageUrl(sp, { width: 1000, quality: 80 }))).then(setImgs);
   }, [p]);
 
   const matriz = useMemo(() => {
