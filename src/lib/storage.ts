@@ -14,7 +14,7 @@ type Entry = { url: string; expires: number };
 const cache = new Map<string, Entry>();
 const inflight = new Map<string, Promise<string>>();
 
-const LS_KEY = "img-url-cache-v2";
+const LS_KEY = "img-url-cache-v3";
 const EXPIRES_IN = 60 * 60 * 24 * 7; // 7 dias
 const SAFE_TTL = (EXPIRES_IN - 60 * 60 * 12) * 1000;
 
