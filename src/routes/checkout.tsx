@@ -118,37 +118,19 @@ function CheckoutPage() {
 
   const atendentes = dbAtendentes || [];
 
+  const [enviando, setEnviando] = useState(false);
+
   const enviarParaAtendente = async (atendente: Atendente) => {
+    if (enviando) return;
+    setEnviando(true);
     try {
       if (!session) {
         toast.error("Você precisa estar logado para finalizar o pedido.");
         nav({ to: "/auth" });
         return;
       }
-      
-      const pdfBlob = await downloadOrderPDF({
-        items,
-        total,
-        formaEnvio,
-        formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
-        formaPagamento,
-        endereco: formaEnvio === "ENTREGA" ? {} : undefined,
-        observacoes,
-        cupom: appliedCoupon ? {
-          codigo: appliedCoupon.codigo,
-          desconto: appliedCoupon.valor_desconto
-        } : undefined,
-      }, true);
 
-      // Baixa também um .zip com as imagens de todos os produtos do pedido
-      try {
-        const ok = await downloadOrderImagesZip(items, "imagens-pedido");
-        if (ok) toast.success("Imagens dos produtos baixadas em .zip");
-      } catch (e) {
-        console.error("Erro ao gerar zip de imagens do pedido:", e);
-      }
-
-      const order = await fnCreateOrder({
+      await fnCreateOrder({
         data: {
           total: valorFinal,
           forma_envio: formaEnvio,
@@ -204,25 +186,47 @@ function CheckoutPage() {
         "",
         `*Forma de pagamento:* ${formaPagamento}`,
         observacoes ? `\n*Observações*\n${observacoes}` : "",
-        "",
-        "_(Acabei de baixar o PDF do meu pedido e o arquivo .zip com as imagens dos produtos, estou enviando em anexo aqui)_",
       ]
         .filter(Boolean)
         .join("\n");
 
       const encodedMsg = encodeURIComponent(msgContent);
       const whatsappUrl = `https://wa.me/${atendente.whatsapp.replace(/\D/g, "")}?text=${encodedMsg}`;
-      
+
+      // Downloads (PDF/zip) só no desktop e sem bloquear o redirecionamento
+      const isMobile =
+        typeof navigator !== "undefined" &&
+        /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+      if (!isMobile) {
+        try {
+          await downloadOrderPDF({
+            items,
+            total,
+            formaEnvio,
+            formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
+            formaPagamento,
+            endereco: formaEnvio === "ENTREGA" ? {} : undefined,
+            observacoes,
+            cupom: appliedCoupon
+              ? { codigo: appliedCoupon.codigo, desconto: appliedCoupon.valor_desconto }
+              : undefined,
+          }, true);
+          await downloadOrderImagesZip(items, "imagens-pedido");
+        } catch (e) {
+          console.error("Erro ao gerar anexos do pedido:", e);
+        }
+      }
+
       toast.success(`Pedido salvo! Redirecionando para o WhatsApp…`);
-      window.location.href = whatsappUrl;
-      
       setShowAtendentes(false);
       clear();
-      setTimeout(() => nav({ to: "/perfil" }), 3000);
+      window.location.href = whatsappUrl;
     } catch (err: any) {
       console.error("Erro ao salvar pedido:", err);
       const errorMsg = err?.message || (typeof err === 'string' ? err : "");
       toast.error(`Erro ao processar pedido: ${errorMsg || "Tente novamente."}`);
+    } finally {
+      setEnviando(false);
     }
   };
 
@@ -465,22 +469,12 @@ function CheckoutPage() {
               {atendentes.map((a) => (
                 <button
                   key={a.id}
+                  type="button"
+                  disabled={enviando}
                   onClick={() => enviarParaAtendente(a as any)}
-                  className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50"
+                  className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50 disabled:opacity-60"
                 >
-                  <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-border group-hover:border-primary/30">
-                    {a.foto_path ? (
-                      <img
-                        src={supabase.storage.from("atendentes-v1-private").getPublicUrl(a.foto_path).data.publicUrl}
-                        alt={a.nome}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-full w-full place-items-center bg-primary/10 text-primary">
-                        <User className="h-8 w-8" />
-                      </div>
-                    )}
-                  </div>
+                  <AtendenteAvatar path={a.foto_path} nome={a.nome} />
                   <div className="text-center">
                     <p className="font-display text-xs font-semibold">{a.nome}</p>
                     <p className="text-[9px] text-muted-foreground uppercase">{a.cargo || "Vendedor"}</p>
@@ -581,6 +575,39 @@ function CheckoutItemRow({ item, itemsWithDiscount, appliedCoupon, items }: { it
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function AtendenteAvatar({ path, nome }: { path?: string | null; nome: string }) {
+  const [url, setUrl] = useState<string>("");
+
+  useEffect(() => {
+    let alive = true;
+    if (!path) {
+      setUrl("");
+      return;
+    }
+    supabase.storage
+      .from("atendentes-v1-private")
+      .createSignedUrl(path, 3600)
+      .then(({ data }) => {
+        if (alive && data?.signedUrl) setUrl(data.signedUrl);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [path]);
+
+  return (
+    <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-border group-hover:border-primary/30">
+      {url ? (
+        <img src={url} alt={nome} className="h-full w-full object-cover" />
+      ) : (
+        <div className="grid h-full w-full place-items-center bg-primary/10 text-primary">
+          <User className="h-8 w-8" />
+        </div>
+      )}
     </div>
   );
 }
