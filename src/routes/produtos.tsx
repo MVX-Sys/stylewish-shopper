@@ -190,7 +190,7 @@ function Home() {
                   className="animate-fade-in-up"
                   style={{ animationDelay: `${Math.min(idx * 40, 400)}ms` }}
                 >
-                  <ProductCard p={p} />
+                  <ProductCard p={p} priority={idx < 6} />
                 </div>
               ))}
             </div>

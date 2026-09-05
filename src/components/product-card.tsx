@@ -1,24 +1,39 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, memo } from "react";
 import { brl } from "@/lib/format";
-import { getImageUrl } from "@/lib/storage";
+import { getCachedImageUrl, getImageUrl } from "@/lib/storage";
 import { getPromoInfo, isEsgotado, type ProductListItem } from "@/lib/products";
 
-export const ProductCard = memo(function ProductCard({ p }: { p: ProductListItem }) {
-  const [img, setImg] = useState<string>("");
+const CARD_IMG = { width: 600, quality: 72 } as const;
+
+export const ProductCard = memo(function ProductCard({
+  p,
+  priority = false,
+}: {
+  p: ProductListItem;
+  priority?: boolean;
+}) {
   const esgotado = isEsgotado(p);
   const promo = getPromoInfo(p);
   const principal =
     p.imagens.find((i) => i.principal) ??
     [...p.imagens].sort((a, b) => a.ordem - b.ordem)[0];
 
+  const [img, setImg] = useState<string>(() =>
+    getCachedImageUrl(principal?.storage_path, CARD_IMG),
+  );
+
   useEffect(() => {
-    let alive = true;
-    if (principal) {
-      getImageUrl(principal.storage_path).then((u) => {
-        if (alive) setImg(u);
-      });
+    if (!principal) return;
+    const cached = getCachedImageUrl(principal.storage_path, CARD_IMG);
+    if (cached) {
+      setImg(cached);
+      return;
     }
+    let alive = true;
+    getImageUrl(principal.storage_path, CARD_IMG).then((u) => {
+      if (alive) setImg(u);
+    });
     return () => {
       alive = false;
     };
@@ -35,14 +50,18 @@ export const ProductCard = memo(function ProductCard({ p }: { p: ProductListItem
           <img
             src={img}
             alt={p.nome}
-            loading="lazy"
+            width={600}
+            height={750}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "low"}
             decoding="async"
-            sizes="(max-width: 640px) 50vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
           />
         ) : (
           <div className="skeleton h-full w-full" />
         )}
+
 
 
         {/* Subtle bottom gradient for legibility of badges/prices over image */}

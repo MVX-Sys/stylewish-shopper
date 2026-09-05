@@ -142,7 +142,7 @@ function AdminProductsList() {
     produtos.forEach((p) => {
       const img = p.imagens.find((i) => i.principal) ?? p.imagens[0];
       if (img && !thumbs[p.id])
-        getImageUrl(img.storage_path).then((u) =>
+        getImageUrl(img.storage_path, { width: 160, quality: 70 }).then((u) =>
           setThumbs((prev) => ({ ...prev, [p.id]: u })),
         );
     });

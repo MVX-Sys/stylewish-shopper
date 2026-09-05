@@ -146,13 +146,24 @@ function ProductPage() {
     }
   };
 
-  useEffect(() => {
-    if (!p) return;
-    const paths = [...p.imagens]
+  const imgPaths = useMemo(() => {
+    if (!p) return [] as string[];
+    return [...p.imagens]
       .sort((a: any, b: any) => (b.principal ? 1 : 0) - (a.principal ? 1 : 0) || a.ordem - b.ordem)
       .map((i) => i.storage_path);
-    Promise.all(paths.map(p => getImageUrl(p, { width: 800, quality: 85 }))).then(setImgs);
   }, [p]);
+
+  useEffect(() => {
+    if (imgPaths.length === 0) return;
+    let alive = true;
+    Promise.all(imgPaths.map((sp) => getImageUrl(sp, { width: 1000, quality: 80 }))).then((u) => {
+      if (alive) setImgs(u);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [imgPaths]);
+
 
   const matriz = useMemo(() => {
     if (!p) return { cores: [], tamanhos: [] as string[] };
@@ -236,10 +247,11 @@ function ProductPage() {
 
   const [downloading, setDownloading] = useState(false);
   const baixarAtual = async () => {
-    if (!imgs[mainIdx] || !p) return;
+    if (!imgPaths[mainIdx] || !p) return;
     try {
       setDownloading(true);
-      await downloadImage(imgs[mainIdx], `${p.nome}-${mainIdx + 1}`);
+      const original = await getImageUrl(imgPaths[mainIdx]);
+      await downloadImage(original, `${p.nome}-${mainIdx + 1}`);
       toast.success("Imagem baixada!");
     } catch {
       toast.error("Não foi possível baixar a imagem.");
@@ -248,12 +260,13 @@ function ProductPage() {
     }
   };
   const baixarTodas = async () => {
-    if (imgs.length === 0 || !p) return;
+    if (imgPaths.length === 0 || !p) return;
     try {
       setDownloading(true);
-      await downloadImagesAsZip(imgs, p.nome);
+      const originais = (await Promise.all(imgPaths.map((sp) => getImageUrl(sp)))).filter(Boolean);
+      await downloadImagesAsZip(originais, p.nome);
       toast.success(
-        imgs.length === 1 ? "Imagem baixada!" : `${imgs.length} imagens baixadas!`,
+        originais.length === 1 ? "Imagem baixada!" : `${originais.length} imagens baixadas!`,
       );
     } catch {
       toast.error("Não foi possível baixar as imagens.");
@@ -261,6 +274,7 @@ function ProductPage() {
       setDownloading(false);
     }
   };
+
 
   const [showQR, setShowQR] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState("");
@@ -338,11 +352,17 @@ function ProductPage() {
                     <img
                       src={imgs[mainIdx]}
                       alt={p.nome}
+                      width={1000}
+                      height={1333}
+                      fetchPriority="high"
+                      decoding="async"
+                      sizes="(max-width: 768px) 100vw, 60vw"
                       className="h-full w-full object-contain p-4"
                     />
                   ) : (
                     <div className="skeleton h-full w-full" />
                   )}
+
 
                   <div className="pointer-events-none absolute left-4 top-4 flex flex-col gap-1.5">
                     {p.novidade && (
