@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const cache = new Map<string, { url: string; expires: number }>();
+const inflight = new Map<string, Promise<string>>();
 
 export interface ImageOptions {
   width?: number;
@@ -10,42 +11,83 @@ export interface ImageOptions {
   resize?: 'cover' | 'contain' | 'fill';
 }
 
+const EXPIRES_IN = 60 * 60; // 1h
+
+// --- Batching: collect paths requested in the same tick into one API call ---
+let queue: { path: string; resolve: (u: string) => void }[] = [];
+let scheduled = false;
+
+function flush() {
+  const batch = queue;
+  queue = [];
+  scheduled = false;
+  const paths = [...new Set(batch.map((b) => b.path))];
+
+  const done = (urls: Map<string, string>) => {
+    const now = Date.now();
+    for (const p of paths) {
+      const url = urls.get(p) ?? "";
+      if (url) cache.set(p, { url, expires: now + 55 * 60_000 });
+      inflight.delete(p);
+    }
+    for (const b of batch) b.resolve(urls.get(b.path) ?? "");
+  };
+
+  supabase.storage
+    .from("product-images")
+    .createSignedUrls(paths, EXPIRES_IN)
+    .then(({ data, error }) => {
+      const urls = new Map<string, string>();
+      if (!error && data) {
+        for (const d of data) {
+          if (d.signedUrl && d.path) urls.set(d.path, d.signedUrl);
+        }
+      }
+      // Fallback to public URL for anything missing
+      for (const p of paths) {
+        if (!urls.get(p)) {
+          const { data: pub } = supabase.storage.from("product-images").getPublicUrl(p);
+          if (pub?.publicUrl) urls.set(p, pub.publicUrl);
+        }
+      }
+      done(urls);
+    })
+    .catch(() => done(new Map()));
+}
+
 export async function getImageUrl(
   path: string | null | undefined,
-  options?: ImageOptions
+  _options?: ImageOptions
 ): Promise<string> {
   if (!path) return "";
-  
-  const cacheKey = options ? `${path}:${JSON.stringify(options)}` : path;
+
   const now = Date.now();
-  const hit = cache.get(cacheKey);
+  const hit = cache.get(path);
   if (hit && hit.expires > now + 60_000) return hit.url;
 
-  // Try to use a signed URL if we're not sure if the bucket is public,
-  // or use getPublicUrl if we're certain it's public.
-  // Force a fresh session check to ensure we have the latest auth token for the request
-  const { data: { session: currentSession } } = await supabase.auth.getSession();
-  
-  // Use createSignedUrl to ensure access to the private bucket
-  const { data, error } = await supabase.storage
-    .from("product-images")
-    .createSignedUrl(path, 3600); // 1 hour expiry
-    
-  if (error) {
-    console.error("Error generating signed URL for", path, error);
-    // Fallback to public URL only if signed URL fails, though bucket is private
-    const { data: publicData } = supabase.storage.from("product-images").getPublicUrl(path);
-    return publicData?.publicUrl ?? "";
-  }
-    
-  const url = data?.signedUrl ?? "";
-  if (url) cache.set(cacheKey, { url, expires: now + 55 * 60_000 });
-  return url;
+  const pending = inflight.get(path);
+  if (pending) return pending;
+
+  const promise = new Promise<string>((resolve) => {
+    queue.push({ path, resolve });
+    if (!scheduled) {
+      scheduled = true;
+      queueMicrotask(flush);
+    }
+  });
+  inflight.set(path, promise);
+  return promise;
+}
+
+/** Aquece o cache de várias imagens de uma só vez (1 requisição). */
+export function prefetchImageUrls(paths: (string | null | undefined)[]) {
+  for (const p of paths) if (p) void getImageUrl(p);
 }
 
 export async function getImageUrls(paths: (string | null | undefined)[]): Promise<string[]> {
   return Promise.all(paths.map((p) => getImageUrl(p)));
 }
+
 
 export async function uploadImage(file: File): Promise<string> {
   const ext = file.name.split(".").pop() ?? "jpg";
