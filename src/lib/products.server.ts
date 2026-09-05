@@ -44,7 +44,7 @@ function isBackendUnavailable(error: unknown): boolean {
     error && typeof error === "object" && "message" in error
       ? String(error.message)
       : String(error);
-  return /network|fetch|connection|unavailable|timeout/i.test(message);
+  return /1016|network|fetch|connection|unavailable|timeout|paused/i.test(message);
 }
 
 export async function listCategorias(): Promise<Categoria[]> {
