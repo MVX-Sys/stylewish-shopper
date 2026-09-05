@@ -146,13 +146,24 @@ function ProductPage() {
     }
   };
 
-  useEffect(() => {
-    if (!p) return;
-    const paths = [...p.imagens]
+  const imgPaths = useMemo(() => {
+    if (!p) return [] as string[];
+    return [...p.imagens]
       .sort((a: any, b: any) => (b.principal ? 1 : 0) - (a.principal ? 1 : 0) || a.ordem - b.ordem)
       .map((i) => i.storage_path);
-    Promise.all(paths.map((sp) => getImageUrl(sp, { width: 1000, quality: 80 }))).then(setImgs);
   }, [p]);
+
+  useEffect(() => {
+    if (imgPaths.length === 0) return;
+    let alive = true;
+    Promise.all(imgPaths.map((sp) => getImageUrl(sp, { width: 1000, quality: 80 }))).then((u) => {
+      if (alive) setImgs(u);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [imgPaths]);
+
 
   const matriz = useMemo(() => {
     if (!p) return { cores: [], tamanhos: [] as string[] };
