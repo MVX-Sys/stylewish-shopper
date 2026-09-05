@@ -578,3 +578,36 @@ function CheckoutItemRow({ item, itemsWithDiscount, appliedCoupon, items }: { it
     </div>
   );
 }
+
+function AtendenteAvatar({ path, nome }: { path?: string | null; nome: string }) {
+  const [url, setUrl] = useState<string>("");
+
+  useEffect(() => {
+    let alive = true;
+    if (!path) {
+      setUrl("");
+      return;
+    }
+    supabase.storage
+      .from("atendentes-v1-private")
+      .createSignedUrl(path, 3600)
+      .then(({ data }) => {
+        if (alive && data?.signedUrl) setUrl(data.signedUrl);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [path]);
+
+  return (
+    <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-border group-hover:border-primary/30">
+      {url ? (
+        <img src={url} alt={nome} className="h-full w-full object-cover" />
+      ) : (
+        <div className="grid h-full w-full place-items-center bg-primary/10 text-primary">
+          <User className="h-8 w-8" />
+        </div>
+      )}
+    </div>
+  );
+}
