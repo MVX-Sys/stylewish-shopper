@@ -321,20 +321,24 @@ function AtendentesPage() {
                       accept="image/*,.heic,.heif,.webp,.avif"
                       className="hidden"
                       onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
+                        const original = e.target.files?.[0];
+                        if (!original) return;
 
                         try {
                           setIsUploading(true);
+                          const { processImageFile } = await import("@/lib/images");
+                          const file = await processImageFile(original);
                           const fileExt = file.name.split(".").pop();
                           const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
                           const { data: uploadData, error: uploadError } = await supabase.storage
                             .from("atendentes-v1-private")
                             .upload(filePath, file, {
-                              cacheControl: "0",
+                              contentType: file.type,
+                              cacheControl: "3600",
                               upsert: true
                             });
+
 
                           if (uploadError) {
                             console.error("Upload error detail:", uploadError);

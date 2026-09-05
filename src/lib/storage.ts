@@ -90,11 +90,13 @@ export async function getImageUrls(paths: (string | null | undefined)[]): Promis
 
 
 export async function uploadImage(file: File): Promise<string> {
-  const ext = file.name.split(".").pop() ?? "jpg";
+  const { processImageFile } = await import("@/lib/images");
+  const processed = await processImageFile(file);
+  const ext = processed.name.split(".").pop() ?? "webp";
   const path = `uploads/${crypto.randomUUID()}.${ext}`;
   const { error } = await supabase.storage
     .from("product-images")
-    .upload(path, file, { upsert: false });
+    .upload(path, processed, { upsert: false, contentType: processed.type, cacheControl: "31536000" });
   if (error) throw error;
   return path;
 }
