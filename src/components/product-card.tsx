@@ -13,9 +13,15 @@ export const ProductCard = memo(function ProductCard({ p }: { p: ProductListItem
     [...p.imagens].sort((a, b) => a.ordem - b.ordem)[0];
 
   useEffect(() => {
+    let alive = true;
     if (principal) {
-      getImageUrl(principal.storage_path, { width: 300, quality: 75 }).then(setImg);
+      getImageUrl(principal.storage_path).then((u) => {
+        if (alive) setImg(u);
+      });
     }
+    return () => {
+      alive = false;
+    };
   }, [principal]);
 
   return (
@@ -30,11 +36,14 @@ export const ProductCard = memo(function ProductCard({ p }: { p: ProductListItem
             src={img}
             alt={p.nome}
             loading="lazy"
+            decoding="async"
+            sizes="(max-width: 640px) 50vw, 25vw"
             className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
           />
         ) : (
           <div className="skeleton h-full w-full" />
         )}
+
 
         {/* Subtle bottom gradient for legibility of badges/prices over image */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
