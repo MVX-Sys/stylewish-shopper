@@ -604,7 +604,8 @@ function ProductPage() {
                                 const v = getVar(c.nome, t);
                                 const key = `${c.nome}||${t}`;
                                 const q = qtys[key] ?? 0;
-                                const disponivel = v && v.quantidade_estoque > 0;
+                                 const livre = disponivelDe(v as any);
+                                 const disponivel = v && livre > 0;
                                 if (!v)
                                   return (
                                     <td key={t} className="bg-muted/30 p-3 text-center text-muted-foreground/50">
