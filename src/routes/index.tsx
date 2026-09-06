@@ -300,8 +300,48 @@ function ProductSection({ title, highlightIndex, products, subtitle, isPromo, em
   );
 }
 
-function CategoriesSection({ categorias }: { categorias: Categoria[] }) {
+function CategoriesSection({ categorias, produtos }: { categorias: Categoria[]; produtos: ProductListItem[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Para cada categoria: produto com maior estoque total -> imagem principal
+  const capaPorCategoria = useMemo(() => {
+    const melhor = new Map<string, { estoque: number; path: string }>();
+    for (const p of produtos) {
+      if (!p.ativo || !p.categoria_id) continue;
+      const estoque = (p.variacoes ?? []).reduce((s, v) => s + (v.quantidade_estoque ?? 0), 0);
+      const imgs = [...(p.imagens ?? [])].sort(
+        (a, b) => Number(b.principal) - Number(a.principal) || a.ordem - b.ordem,
+      );
+      const path = imgs[0]?.storage_path;
+      if (!path) continue;
+      const atual = melhor.get(p.categoria_id);
+      if (!atual || estoque > atual.estoque) melhor.set(p.categoria_id, { estoque, path });
+    }
+    const out: Record<string, string> = {};
+    melhor.forEach((v, k) => (out[k] = v.path));
+    return out;
+  }, [produtos]);
+
+  const [urls, setUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let alive = true;
+    const paths = Object.values(capaPorCategoria);
+    if (paths.length === 0) return;
+    Promise.all(
+      Object.entries(capaPorCategoria).map(async ([catId, path]) => {
+        const url = await getImageUrl(path, { width: 600, quality: 70 });
+        return [catId, url] as const;
+      }),
+    ).then((pares) => {
+      if (!alive) return;
+      setUrls(Object.fromEntries(pares.filter(([, u]) => !!u)));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [capaPorCategoria]);
+
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
