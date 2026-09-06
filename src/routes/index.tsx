@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/product-card";
 import { listCategoriasFn, listProdutosFn } from "@/lib/products.functions";
 import { isEsgotado, type ProductListItem, type Categoria, getPromoInfo } from "@/lib/products";
 import { getSiteConfig } from "@/lib/config-site";
+import { getImageUrl } from "@/lib/storage";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -90,7 +91,7 @@ function Home() {
           emptyMessage="Não há ofertas disponíveis no momento"
         />
 
-        <CategoriesSection categorias={categorias} />
+        <CategoriesSection categorias={categorias} produtos={produtos} />
       </main>
 
       <SiteFooter />
@@ -300,8 +301,48 @@ function ProductSection({ title, highlightIndex, products, subtitle, isPromo, em
   );
 }
 
-function CategoriesSection({ categorias }: { categorias: Categoria[] }) {
+function CategoriesSection({ categorias, produtos }: { categorias: Categoria[]; produtos: ProductListItem[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Para cada categoria: produto com maior estoque total -> imagem principal
+  const capaPorCategoria = useMemo(() => {
+    const melhor = new Map<string, { estoque: number; path: string }>();
+    for (const p of produtos) {
+      if (!p.ativo || !p.categoria_id) continue;
+      const estoque = (p.variacoes ?? []).reduce((s, v) => s + (v.quantidade_estoque ?? 0), 0);
+      const imgs = [...(p.imagens ?? [])].sort(
+        (a, b) => Number(b.principal) - Number(a.principal) || a.ordem - b.ordem,
+      );
+      const path = imgs[0]?.storage_path;
+      if (!path) continue;
+      const atual = melhor.get(p.categoria_id);
+      if (!atual || estoque > atual.estoque) melhor.set(p.categoria_id, { estoque, path });
+    }
+    const out: Record<string, string> = {};
+    melhor.forEach((v, k) => (out[k] = v.path));
+    return out;
+  }, [produtos]);
+
+  const [urls, setUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let alive = true;
+    const paths = Object.values(capaPorCategoria);
+    if (paths.length === 0) return;
+    Promise.all(
+      Object.entries(capaPorCategoria).map(async ([catId, path]) => {
+        const url = await getImageUrl(path, { width: 600, quality: 70 });
+        return [catId, url] as const;
+      }),
+    ).then((pares) => {
+      if (!alive) return;
+      setUrls(Object.fromEntries(pares.filter(([, u]) => !!u)));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [capaPorCategoria]);
+
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -348,7 +389,16 @@ function CategoriesSection({ categorias }: { categorias: Categoria[] }) {
               search={{ cat: cat.slug }}
               className="group relative flex aspect-video min-w-[240px] flex-none snap-start items-center justify-center overflow-hidden rounded-2xl bg-muted transition-all hover:ring-2 hover:ring-primary md:min-w-[300px]"
             >
-              <div className="absolute inset-0 z-0 bg-navy/40 transition-colors group-hover:bg-navy/20" />
+              {urls[cat.id] && (
+                <img
+                  src={urls[cat.id]}
+                  alt={cat.nome}
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              )}
+              <div className="absolute inset-0 z-0 bg-navy/60 transition-colors group-hover:bg-navy/40" />
               <span className="relative z-10 font-display text-xl font-black uppercase tracking-tighter text-white transition-transform group-hover:scale-110">
                 {cat.nome}
               </span>
