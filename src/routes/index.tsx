@@ -90,7 +90,7 @@ function Home() {
           emptyMessage="Não há ofertas disponíveis no momento"
         />
 
-        <CategoriesSection categorias={categorias} />
+        <CategoriesSection categorias={categorias} produtos={produtos} />
       </main>
 
       <SiteFooter />
