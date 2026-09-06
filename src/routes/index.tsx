@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/product-card";
 import { listCategoriasFn, listProdutosFn } from "@/lib/products.functions";
 import { isEsgotado, type ProductListItem, type Categoria, getPromoInfo } from "@/lib/products";
 import { getSiteConfig } from "@/lib/config-site";
+import { getImageUrl } from "@/lib/storage";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
