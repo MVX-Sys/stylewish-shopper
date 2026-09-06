@@ -26,13 +26,13 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "ACHAEBUSCA — Estilo Urbano Sem Limites" },
+      { title: "ACHAEBUSCA — Atacado para todo o Brasil" },
       {
         name: "description",
-        content: "Acha & Busca Atacado - Moda masculina urbana premium.",
+        content: "Acha & Busca Atacado — atacado para todo o Brasil.",
       },
-      { property: "og:title", content: "ACHAEBUSCA — Home" },
-      { property: "og:description", content: "Moda masculina urbana premium, novidades e ofertas." },
+      { property: "og:title", content: "ACHAEBUSCA — Atacado para todo o Brasil" },
+      { property: "og:description", content: "Atacado para todo o Brasil: novidades e ofertas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
