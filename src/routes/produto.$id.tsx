@@ -75,7 +75,7 @@ function ProductPage() {
     queryFn: () => listCategoriasFn(),
     staleTime: 1000 * 60 * 30,
   });
-  const { add, setOpen } = useCart();
+  const { add, setOpen, items: cartItems } = useCart();
 
   const [imgs, setImgs] = useState<string[]>([]);
   const [mainIdx, setMainIdx] = useState(0);
