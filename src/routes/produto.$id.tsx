@@ -658,10 +658,8 @@ function ProductPage() {
                                             {q}
                                           </span>
                                           <button
-                                            onClick={() =>
-                                              setQ(key, Math.min(v.quantidade_estoque, q + 1))
-                                            }
-                                            disabled={q >= v.quantidade_estoque}
+                                            onClick={() => setQ(key, Math.min(livre, q + 1))}
+                                            disabled={q >= livre}
                                             className="grid h-8 w-7 place-items-center rounded-md hover:bg-background/10 disabled:opacity-40"
                                           >
                                             <Plus className="h-3 w-3" />
