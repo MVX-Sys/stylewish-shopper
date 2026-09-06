@@ -75,7 +75,7 @@ function ProductPage() {
     queryFn: () => listCategoriasFn(),
     staleTime: 1000 * 60 * 30,
   });
-  const { add, setOpen } = useCart();
+  const { add, setOpen, items: cartItems } = useCart();
 
   const [imgs, setImgs] = useState<string[]>([]);
   const [mainIdx, setMainIdx] = useState(0);
@@ -198,6 +198,18 @@ function ProductPage() {
   const getVar = (cor: string, tam: string) =>
     (p?.variacoes || []).find((v: any) => v.nome_cor === cor && v.tamanho === tam);
 
+  // Quantidade já reservada no carrinho por variação
+  const reservado = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const it of cartItems) {
+      m[it.variacaoId] = (m[it.variacaoId] ?? 0) + it.quantidade;
+    }
+    return m;
+  }, [cartItems]);
+
+  const disponivelDe = (v: { id: string; quantidade_estoque: number } | undefined) =>
+    v ? Math.max(0, v.quantidade_estoque - (reservado[v.id] ?? 0)) : 0;
+
   const setQ = (k: string, q: number) =>
     setQtys((prev) => ({ ...prev, [k]: Math.max(0, q) }));
 
@@ -221,6 +233,15 @@ function ProductPage() {
       const [cor, tam] = key.split("||");
       const v = getVar(cor, tam);
       if (!v) continue;
+      const livre = disponivelDe(v);
+      if (livre <= 0) {
+        toast.error(`${cor} · Tam ${tam}: sem estoque disponível (já está no seu carrinho).`);
+        continue;
+      }
+      if (q > livre) {
+        toast.error(`${cor} · Tam ${tam}: restam apenas ${livre} peça(s) disponíveis.`);
+        continue;
+      }
       add(
         {
           variacaoId: v.id,
@@ -583,27 +604,37 @@ function ProductPage() {
                                 const v = getVar(c.nome, t);
                                 const key = `${c.nome}||${t}`;
                                 const q = qtys[key] ?? 0;
-                                const disponivel = v && v.quantidade_estoque > 0;
+                                 const livre = disponivelDe(v as any);
+                                 const disponivel = v && livre > 0;
                                 if (!v)
                                   return (
                                     <td key={t} className="bg-muted/30 p-3 text-center text-muted-foreground/50">
                                       —
                                     </td>
                                   );
-                                if (!disponivel)
-                                  return (
-                                    <td key={t} className="p-2 text-center">
-                                      <button
-                                        type="button"
-                                        onClick={() => setRestock({ cor: c.nome, tam: t })}
-                                        title="Avise-me por WhatsApp quando repor"
-                                        className="mx-auto inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:border-brand hover:text-brand"
-                                      >
-                                        <Bell className="h-3 w-3" />
-                                        Avise-me
-                                      </button>
-                                    </td>
-                                  );
+                                 if (!disponivel)
+                                   return (
+                                     <td key={t} className="p-2 text-center">
+                                       {v.quantidade_estoque > 0 ? (
+                                         <span
+                                           title="Todo o estoque já está no seu carrinho"
+                                           className="mx-auto inline-flex items-center rounded-full border border-border bg-muted/50 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
+                                         >
+                                           No carrinho
+                                         </span>
+                                       ) : (
+                                         <button
+                                           type="button"
+                                           onClick={() => setRestock({ cor: c.nome, tam: t })}
+                                           title="Avise-me por WhatsApp quando repor"
+                                           className="mx-auto inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:border-brand hover:text-brand"
+                                         >
+                                           <Bell className="h-3 w-3" />
+                                           Avise-me
+                                         </button>
+                                       )}
+                                     </td>
+                                   );
                                 return (
                                   <td key={t} className="p-2">
                                     <div className="flex flex-col items-center gap-1">
@@ -627,10 +658,8 @@ function ProductPage() {
                                             {q}
                                           </span>
                                           <button
-                                            onClick={() =>
-                                              setQ(key, Math.min(v.quantidade_estoque, q + 1))
-                                            }
-                                            disabled={q >= v.quantidade_estoque}
+                                            onClick={() => setQ(key, Math.min(livre, q + 1))}
+                                            disabled={q >= livre}
                                             className="grid h-8 w-7 place-items-center rounded-md hover:bg-background/10 disabled:opacity-40"
                                           >
                                             <Plus className="h-3 w-3" />
