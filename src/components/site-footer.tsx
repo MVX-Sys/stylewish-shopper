@@ -1,5 +1,12 @@
 import { BRAND, WHATSAPP_DISPLAY, WHATSAPP_NUMBER } from "@/lib/config";
-import { MessageCircle, Instagram } from "lucide-react";
+import {
+  MessageCircle,
+  Instagram,
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import logoUrl from "@/assets/acha-busca-icon.png";
 
 const MVX_INSTAGRAM = "https://www.instagram.com/mvx_sistemas/";
