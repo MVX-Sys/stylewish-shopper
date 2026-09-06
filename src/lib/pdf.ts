@@ -227,6 +227,49 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
       doc.text(String(v.quantidade_estoque), 160, y);
       y += 2;
     }
+    y += 6;
+  }
+
+  const grupos = getGruposPersonalizacao(p.nome, categoriaNome);
+  if (grupos.length) {
+    if (y > 250) {
+      footer(doc);
+      doc.addPage();
+      header(doc, "Ficha do produto");
+      y = 32;
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("Personalizações disponíveis", 14, y);
+    y += 6;
+    for (const g of grupos) {
+      if (y > 270) {
+        footer(doc);
+        doc.addPage();
+        header(doc, "Ficha do produto");
+        y = 32;
+      }
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...MUTED);
+      doc.text(g.titulo.toUpperCase(), 14, y);
+      doc.setTextColor(...DARK);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      for (const o of g.opcoes) {
+        if (y > 275) {
+          footer(doc);
+          doc.addPage();
+          header(doc, "Ficha do produto");
+          y = 32;
+        }
+        doc.text(`• ${o.label}`, 18, y);
+        doc.text(`+ ${brl(o.preco)}`, 60, y);
+        y += 5;
+      }
+      y += 2;
+    }
   }
 
   footer(doc);
