@@ -388,7 +388,16 @@ function CategoriesSection({ categorias, produtos }: { categorias: Categoria[]; 
               search={{ cat: cat.slug }}
               className="group relative flex aspect-video min-w-[240px] flex-none snap-start items-center justify-center overflow-hidden rounded-2xl bg-muted transition-all hover:ring-2 hover:ring-primary md:min-w-[300px]"
             >
-              <div className="absolute inset-0 z-0 bg-navy/40 transition-colors group-hover:bg-navy/20" />
+              {urls[cat.id] && (
+                <img
+                  src={urls[cat.id]}
+                  alt={cat.nome}
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              )}
+              <div className="absolute inset-0 z-0 bg-navy/60 transition-colors group-hover:bg-navy/40" />
               <span className="relative z-10 font-display text-xl font-black uppercase tracking-tighter text-white transition-transform group-hover:scale-110">
                 {cat.nome}
               </span>
