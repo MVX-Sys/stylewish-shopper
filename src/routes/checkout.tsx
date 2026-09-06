@@ -557,6 +557,11 @@ function CheckoutItemRow({ item, itemsWithDiscount, appliedCoupon, items }: { it
             Personalizado
           </span>
         )}
+        {(item.personalizacoes?.length ?? 0) > 0 && (
+          <p className="mt-0.5 text-[10px] text-muted-foreground">
+            {formatPersonalizacoes(item)}
+          </p>
+        )}
         <div className="mt-1.5 flex items-center justify-between">
           <span className="text-[10px] font-medium text-muted-foreground">{item.quantidade}x</span>
           <div className="flex flex-col items-end">
