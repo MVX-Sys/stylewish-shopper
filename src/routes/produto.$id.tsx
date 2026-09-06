@@ -198,6 +198,18 @@ function ProductPage() {
   const getVar = (cor: string, tam: string) =>
     (p?.variacoes || []).find((v: any) => v.nome_cor === cor && v.tamanho === tam);
 
+  // Quantidade já reservada no carrinho por variação
+  const reservado = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const it of cartItems) {
+      m[it.variacaoId] = (m[it.variacaoId] ?? 0) + it.quantidade;
+    }
+    return m;
+  }, [cartItems]);
+
+  const disponivelDe = (v: { id: string; quantidade_estoque: number } | undefined) =>
+    v ? Math.max(0, v.quantidade_estoque - (reservado[v.id] ?? 0)) : 0;
+
   const setQ = (k: string, q: number) =>
     setQtys((prev) => ({ ...prev, [k]: Math.max(0, q) }));
 
