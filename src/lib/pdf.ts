@@ -316,7 +316,8 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       console.error("Error drawing QR code in PDF:", e);
     }
 
-    const desc = `${it.nome}\n${it.cor} · ${it.tamanho}`;
+    const perso = formatPersonalizacoes(it);
+    const desc = `${it.nome}\n${it.cor} · ${it.tamanho}${perso ? `\nPersonalização: ${perso}` : ""}`;
     const lines = doc.splitTextToSize(desc, 80);
     doc.text(String(it.quantidade), 18, y + 5);
     doc.text(lines, 75, y + 5);
