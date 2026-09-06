@@ -233,6 +233,15 @@ function ProductPage() {
       const [cor, tam] = key.split("||");
       const v = getVar(cor, tam);
       if (!v) continue;
+      const livre = disponivelDe(v);
+      if (livre <= 0) {
+        toast.error(`${cor} · Tam ${tam}: sem estoque disponível (já está no seu carrinho).`);
+        continue;
+      }
+      if (q > livre) {
+        toast.error(`${cor} · Tam ${tam}: restam apenas ${livre} peça(s) disponíveis.`);
+        continue;
+      }
       add(
         {
           variacaoId: v.id,
