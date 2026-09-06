@@ -612,20 +612,29 @@ function ProductPage() {
                                       —
                                     </td>
                                   );
-                                if (!disponivel)
-                                  return (
-                                    <td key={t} className="p-2 text-center">
-                                      <button
-                                        type="button"
-                                        onClick={() => setRestock({ cor: c.nome, tam: t })}
-                                        title="Avise-me por WhatsApp quando repor"
-                                        className="mx-auto inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:border-brand hover:text-brand"
-                                      >
-                                        <Bell className="h-3 w-3" />
-                                        Avise-me
-                                      </button>
-                                    </td>
-                                  );
+                                 if (!disponivel)
+                                   return (
+                                     <td key={t} className="p-2 text-center">
+                                       {v.quantidade_estoque > 0 ? (
+                                         <span
+                                           title="Todo o estoque já está no seu carrinho"
+                                           className="mx-auto inline-flex items-center rounded-full border border-border bg-muted/50 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
+                                         >
+                                           No carrinho
+                                         </span>
+                                       ) : (
+                                         <button
+                                           type="button"
+                                           onClick={() => setRestock({ cor: c.nome, tam: t })}
+                                           title="Avise-me por WhatsApp quando repor"
+                                           className="mx-auto inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:border-brand hover:text-brand"
+                                         >
+                                           <Bell className="h-3 w-3" />
+                                           Avise-me
+                                         </button>
+                                       )}
+                                     </td>
+                                   );
                                 return (
                                   <td key={t} className="p-2">
                                     <div className="flex flex-col items-center gap-1">
