@@ -46,6 +46,12 @@ export function SiteFooter() {
         </div>
       </div>
 
+      <div className="border-t border-white/15 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-center px-6">
+          <Dpad />
+        </div>
+      </div>
+
       <div className="border-t border-white/15">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-3 text-[11px] text-white/75 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} {BRAND}. Todos os direitos reservados.</p>
