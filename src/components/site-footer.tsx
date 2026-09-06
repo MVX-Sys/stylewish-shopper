@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { BRAND, WHATSAPP_DISPLAY, WHATSAPP_NUMBER } from "@/lib/config";
 import {
   MessageCircle,
