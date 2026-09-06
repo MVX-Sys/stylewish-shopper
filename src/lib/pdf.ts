@@ -5,7 +5,8 @@ import "jspdf-autotable";
 import { brl } from "./format";
 import { BRAND } from "./config";
 import type { ProductListItem } from "./products";
-import { type CartItem, itemPrecoEfetivo } from "./cart";
+import { type CartItem, itemPrecoEfetivo, formatPersonalizacoes } from "./cart";
+import { getGruposPersonalizacao } from "./personalizacao";
 
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
   if (!url) return "";
@@ -226,6 +227,49 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
       doc.text(String(v.quantidade_estoque), 160, y);
       y += 2;
     }
+    y += 6;
+  }
+
+  const grupos = getGruposPersonalizacao(p.nome, categoriaNome);
+  if (grupos.length) {
+    if (y > 250) {
+      footer(doc);
+      doc.addPage();
+      header(doc, "Ficha do produto");
+      y = 32;
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("Personalizações disponíveis", 14, y);
+    y += 6;
+    for (const g of grupos) {
+      if (y > 270) {
+        footer(doc);
+        doc.addPage();
+        header(doc, "Ficha do produto");
+        y = 32;
+      }
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...MUTED);
+      doc.text(g.titulo.toUpperCase(), 14, y);
+      doc.setTextColor(...DARK);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      for (const o of g.opcoes) {
+        if (y > 275) {
+          footer(doc);
+          doc.addPage();
+          header(doc, "Ficha do produto");
+          y = 32;
+        }
+        doc.text(`• ${o.label}`, 18, y);
+        doc.text(`+ ${brl(o.preco)}`, 60, y);
+        y += 5;
+      }
+      y += 2;
+    }
   }
 
   footer(doc);
@@ -316,7 +360,8 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       console.error("Error drawing QR code in PDF:", e);
     }
 
-    const desc = `${it.nome}\n${it.cor} · ${it.tamanho}`;
+    const perso = formatPersonalizacoes(it);
+    const desc = `${it.nome}\n${it.cor} · ${it.tamanho}${perso ? `\nPersonalização: ${perso}` : ""}`;
     const lines = doc.splitTextToSize(desc, 80);
     doc.text(String(it.quantidade), 18, y + 5);
     doc.text(lines, 75, y + 5);

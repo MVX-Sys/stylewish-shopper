@@ -1,6 +1,6 @@
 import { X, Minus, Plus, MessageCircle, Trash2, ShoppingBag, AlertCircle } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useCart, itemPrecoEfetivo, validarPersonalizacao } from "@/lib/cart";
+import { useCart, itemPrecoEfetivo, validarPersonalizacao, formatPersonalizacoes } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { getImageUrl } from "@/lib/storage";
 import { useEffect, useState } from "react";
@@ -177,6 +177,11 @@ function CartItemRow({ item: i, setQty, remove }: { item: any, setQty: any, remo
           <span className="mt-1 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
             Personalizado
           </span>
+        )}
+        {(i.personalizacoes?.length ?? 0) > 0 && (
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            {formatPersonalizacoes(i)}
+          </p>
         )}
         <div className="mt-2 flex items-center gap-1.5">
           <button

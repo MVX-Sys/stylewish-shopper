@@ -47,6 +47,16 @@ export function itemAdicionalPersonalizacao(
   return (i.personalizacoes ?? []).reduce((s, o) => s + (o.preco || 0), 0);
 }
 
+export function formatPersonalizacoes(
+  i: Pick<CartItem, "personalizado" | "personalizacoes">,
+): string {
+  const opts = i.personalizacoes ?? [];
+  if (!opts.length) return i.personalizado ? "Personalizado" : "";
+  return opts
+    .map((o) => `${o.label} (+${o.preco.toFixed(2).replace(".", ",")})`)
+    .join(", ");
+}
+
 export function itemPrecoBase(
   i: Pick<CartItem, "preco" | "personalizacoes">,
 ): number {
