@@ -178,6 +178,11 @@ function CartItemRow({ item: i, setQty, remove }: { item: any, setQty: any, remo
             Personalizado
           </span>
         )}
+        {(i.personalizacoes?.length ?? 0) > 0 && (
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            {formatPersonalizacoes(i)}
+          </p>
+        )}
         <div className="mt-2 flex items-center gap-1.5">
           <button
             onClick={() => setQty(i.key, i.quantidade - 1)}
