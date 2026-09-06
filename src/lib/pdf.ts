@@ -5,7 +5,8 @@ import "jspdf-autotable";
 import { brl } from "./format";
 import { BRAND } from "./config";
 import type { ProductListItem } from "./products";
-import { type CartItem, itemPrecoEfetivo } from "./cart";
+import { type CartItem, itemPrecoEfetivo, formatPersonalizacoes } from "./cart";
+import { getGruposPersonalizacao } from "./personalizacao";
 
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
   if (!url) return "";
