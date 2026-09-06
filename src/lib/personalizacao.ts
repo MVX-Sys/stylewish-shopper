@@ -5,9 +5,9 @@ export type OpcaoPersonalizacao = {
 };
 
 export const OPCOES_OCULOS: OpcaoPersonalizacao[] = [
-  { id: "oculos-2-hastes", label: "2 Hastes", preco: 1 },
+  { id: "oculos-2-hastes", label: "2 Hastes", preco: 2 },
   { id: "oculos-1-haste", label: "1 Haste", preco: 1 },
-  { id: "oculos-2-lentes", label: "2 Lentes", preco: 1 },
+  { id: "oculos-2-lentes", label: "2 Lentes", preco: 2 },
   { id: "oculos-1-lente", label: "1 Lente", preco: 1 },
 ];
 
