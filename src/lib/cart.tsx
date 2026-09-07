@@ -17,7 +17,13 @@ export type CartItem = {
   categoriaNome?: string | null;
   personalizado?: boolean;
   personalizacoes?: { id: string; label: string; preco: number }[];
+  estoque?: number | null;
 };
+
+// Limita a quantidade ao estoque conhecido da variação (quando informado)
+export function maxQtd(i: Pick<CartItem, "estoque">): number {
+  return typeof i.estoque === "number" && i.estoque >= 0 ? i.estoque : Infinity;
+}
 
 // Pedidos personalizados exigem no mínimo 10 peças da mesma categoria
 export const MIN_PECAS_PERSONALIZACAO = 10;
