@@ -264,7 +264,6 @@ function ProductPage() {
       );
     }
     setQtys({});
-    setOpen(true);
     toast.success("Adicionado ao carrinho!");
   };
 
