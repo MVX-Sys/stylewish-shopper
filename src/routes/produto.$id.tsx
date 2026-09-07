@@ -774,7 +774,7 @@ function ProductPage() {
         )}
       </main>
       <SiteFooter />
-      <CartDrawer />
+      <CartDrawer continueSearch={categoriaAtual ? { cat: categoriaAtual.slug } : undefined} />
 
       {restock && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
