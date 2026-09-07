@@ -116,68 +116,19 @@ export const listPedidos = createServerFn({ method: "GET" })
 
 export const updatePedidoStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((data: unknown) => z.object({ id: z.string().uuid(), status: z.string() }).parse(data))
+  .validator((data: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      status: z.enum(["pendente", "confirmado", "entregue", "cancelado"]),
+    }).parse(data),
+  )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-
-    // Se o status for "confirmado", vamos baixar o estoque, mas APENAS se não estava confirmado antes
-    if (data.status === "confirmado") {
-      // 1. Verificar status atual para evitar baixas duplicadas
-      const { data: pedidoAtual, error: pedidoErr } = await supabase
-        .from("pedidos")
-        .select("status")
-        .eq("id", data.id)
-        .single();
-      
-      if (pedidoErr) throw pedidoErr;
-      
-      // Se já estava confirmado, não fazemos nada com o estoque
-      if (pedidoAtual.status === "confirmado") {
-        const { error } = await supabase
-          .from("pedidos")
-          .update({ status: data.status })
-          .eq("id", data.id);
-        if (error) throw error;
-        return { success: true };
-      }
-
-      // 2. Buscar os itens do pedido
-      const { data: itens, error: itensErr } = await supabase
-        .from("pedidos_itens")
-        .select("quantidade, variacao_id")
-        .eq("pedido_id", data.id);
-
-      if (itensErr) throw itensErr;
-
-      // 3. Para cada item, subtrair do estoque da variação correspondente
-      for (const item of (itens || [])) {
-        if (item.variacao_id) {
-          // Usamos uma query de incremento negativo (decremento) via RPC se disponível, 
-          // ou garantimos a atomicidade via transação se possível. 
-          // Como estamos no worker, faremos um select for update se a lib suportasse, 
-          // mas vamos usar a lógica de verificação de estoque mínima.
-          const { data: varData, error: fetchVarErr } = await supabase
-            .from("variacoes_produto")
-            .select("quantidade_estoque")
-            .eq("id", item.variacao_id)
-            .single();
-
-          if (fetchVarErr) continue;
-
-          const novaQuantidade = Math.max(0, (varData?.quantidade_estoque || 0) - item.quantidade);
-
-          await supabase
-            .from("variacoes_produto")
-            .update({ quantidade_estoque: novaQuantidade })
-            .eq("id", item.variacao_id);
-        }
-      }
-    }
-
-    const { error } = await supabase
-      .from("pedidos")
-      .update({ status: data.status })
-      .eq("id", data.id);
+    // A rotina no banco cuida da baixa/devolução de estoque conforme o status.
+    const { error } = await (supabase as any).rpc("set_pedido_status", {
+      _pedido_id: data.id,
+      _status: data.status,
+    });
     if (error) throw error;
     return { success: true };
   });
