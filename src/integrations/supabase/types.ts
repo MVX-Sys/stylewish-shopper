@@ -576,6 +576,10 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      set_pedido_status: {
+        Args: { _pedido_id: string; _status: string }
+        Returns: undefined
+      }
       set_produtos_ordem: { Args: { _ids: string[] }; Returns: undefined }
     }
     Enums: {
