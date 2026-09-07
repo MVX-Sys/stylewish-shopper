@@ -7,10 +7,15 @@ import { useEffect, useState } from "react";
 import { VALOR_MINIMO_COMPRA } from "@/lib/config";
 import { toast } from "sonner";
 
-export function CartDrawer() {
+export function CartDrawer({ continueSearch }: { continueSearch?: { cat?: string } } = {}) {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
   const nav = useNavigate();
   const minAtingido = total >= VALOR_MINIMO_COMPRA;
+
+  const continuarComprando = () => {
+    setOpen(false);
+    nav({ to: "/produtos", search: continueSearch as never });
+  };
 
   const finalizar = () => {
     if (items.length === 0) return;
@@ -74,10 +79,7 @@ export function CartDrawer() {
                 Adicione peças ao carrinho para finalizar o pedido pelo WhatsApp.
               </p>
 <button
-                onClick={() => {
-                  setOpen(false);
-                  nav({ to: "/produtos" });
-                }}
+                onClick={continuarComprando}
                 className="mt-6 rounded-full border border-border px-5 py-2 text-sm font-medium transition-colors hover:bg-accent"
               >
                 Continuar comprando
@@ -126,10 +128,7 @@ export function CartDrawer() {
             </p>
             <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
 <button
-                onClick={() => {
-                  setOpen(false);
-                  nav({ to: "/produtos" });
-                }}
+                onClick={continuarComprando}
                 className="underline-offset-4 hover:text-foreground hover:underline"
               >
                 Continuar comprando
