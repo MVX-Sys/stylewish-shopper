@@ -195,8 +195,15 @@ function CartItemRow({ item: i, setQty, remove }: { item: any, setQty: any, remo
             {i.quantidade}
           </span>
           <button
-            onClick={() => setQty(i.key, i.quantidade + 1)}
-            className="grid h-7 w-7 place-items-center rounded-full border border-border transition-colors hover:bg-accent"
+            onClick={() => {
+              if (i.quantidade >= maxQtd(i)) {
+                toast.error(`Restam apenas ${i.estoque} peça(s) em estoque.`);
+                return;
+              }
+              setQty(i.key, i.quantidade + 1);
+            }}
+            disabled={i.quantidade >= maxQtd(i)}
+            className="grid h-7 w-7 place-items-center rounded-full border border-border transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Mais"
           >
             <Plus className="h-3 w-3" />
