@@ -17,7 +17,13 @@ export type CartItem = {
   categoriaNome?: string | null;
   personalizado?: boolean;
   personalizacoes?: { id: string; label: string; preco: number }[];
+  estoque?: number | null;
 };
+
+// Limita a quantidade ao estoque conhecido da variação (quando informado)
+export function maxQtd(i: Pick<CartItem, "estoque">): number {
+  return typeof i.estoque === "number" && i.estoque >= 0 ? i.estoque : Infinity;
+}
 
 // Pedidos personalizados exigem no mínimo 10 peças da mesma categoria
 export const MIN_PECAS_PERSONALIZACAO = 10;
@@ -124,19 +130,33 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const key = `${cartItem.variacaoId}|${item.cor}|${item.tamanho}${cartItem.personalizado ? `|perso:${perso}` : ""}`;
     setItems((prev) => {
       const idx = prev.findIndex((x) => x.key === key);
+      const limite = maxQtd(cartItem);
+      const outros = prev
+        .filter((x) => x.variacaoId === cartItem.variacaoId && x.key !== key)
+        .reduce((s, x) => s + x.quantidade, 0);
+      const atual = idx >= 0 ? prev[idx].quantidade : 0;
+      const permitido = Math.max(0, Math.min(atual + qty, limite - outros));
+      if (permitido <= 0) return prev;
       if (idx >= 0) {
         const copy = [...prev];
-        copy[idx] = { ...copy[idx], quantidade: copy[idx].quantidade + qty };
+        copy[idx] = { ...copy[idx], quantidade: permitido, estoque: cartItem.estoque };
         return copy;
       }
-      return [...prev, { ...cartItem, key, quantidade: qty }];
+      return [...prev, { ...cartItem, key, quantidade: permitido }];
     });
   };
 
   const setQty: CartCtx["setQty"] = (key, qty) => {
     setItems((prev) =>
       prev
-        .map((x) => (x.key === key ? { ...x, quantidade: Math.max(0, qty) } : x))
+        .map((x) => {
+          if (x.key !== key) return x;
+          const outros = prev
+            .filter((o) => o.variacaoId === x.variacaoId && o.key !== key)
+            .reduce((s, o) => s + o.quantidade, 0);
+          const limite = maxQtd(x) - outros;
+          return { ...x, quantidade: Math.max(0, Math.min(qty, limite)) };
+        })
         .filter((x) => x.quantidade > 0),
     );
   };

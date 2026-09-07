@@ -1,6 +1,6 @@
 import { X, Minus, Plus, MessageCircle, Trash2, ShoppingBag, AlertCircle } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useCart, itemPrecoEfetivo, validarPersonalizacao, formatPersonalizacoes } from "@/lib/cart";
+import { useCart, itemPrecoEfetivo, validarPersonalizacao, formatPersonalizacoes, maxQtd } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { getImageUrl } from "@/lib/storage";
 import { useEffect, useState } from "react";
@@ -195,8 +195,15 @@ function CartItemRow({ item: i, setQty, remove }: { item: any, setQty: any, remo
             {i.quantidade}
           </span>
           <button
-            onClick={() => setQty(i.key, i.quantidade + 1)}
-            className="grid h-7 w-7 place-items-center rounded-full border border-border transition-colors hover:bg-accent"
+            onClick={() => {
+              if (i.quantidade >= maxQtd(i)) {
+                toast.error(`Restam apenas ${i.estoque} peça(s) em estoque.`);
+                return;
+              }
+              setQty(i.key, i.quantidade + 1);
+            }}
+            disabled={i.quantidade >= maxQtd(i)}
+            className="grid h-7 w-7 place-items-center rounded-full border border-border transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Mais"
           >
             <Plus className="h-3 w-3" />
