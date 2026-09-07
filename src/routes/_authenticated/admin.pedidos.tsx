@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -321,20 +322,28 @@ function PedidosAdminPage() {
                         <div className="flex items-center gap-3">
                           <select 
                             value={pedido.status}
-                            disabled={pedido.status === "confirmado" || pedido.status === "entregue"}
                             onChange={async (e) => {
-                              const newStatus = e.target.value;
-                              const confirmMsg = newStatus === "confirmado" 
-                                ? "Ao confirmar este pedido, o estoque dos produtos será baixado automaticamente. Deseja continuar?"
-                                : `Deseja alterar o status para "${newStatus}"?`;
+                              const newStatus = e.target.value as "pendente" | "confirmado" | "entregue" | "cancelado";
+                              const jaBaixado = pedido.status === "confirmado" || pedido.status === "entregue";
+                              const confirmMsg =
+                                newStatus === "confirmado" || newStatus === "entregue"
+                                  ? jaBaixado
+                                    ? `Deseja alterar o status para "${newStatus}"?`
+                                    : "Ao confirmar este pedido, o estoque dos produtos será baixado automaticamente. Deseja continuar?"
+                                  : jaBaixado
+                                    ? `As peças deste pedido voltarão para o estoque. Deseja alterar o status para "${newStatus}"?`
+                                    : `Deseja alterar o status para "${newStatus}"?`;
 
                               if (!window.confirm(confirmMsg)) return;
 
                               try {
                                 await updateStatus({ data: { id: pedido.id, status: newStatus } });
                                 qc.invalidateQueries({ queryKey: ["admin-pedidos"] });
+                                qc.invalidateQueries({ queryKey: ["admin-produtos"] });
+                                toast.success("Status atualizado.");
                               } catch (err) {
                                 console.error("Erro ao atualizar status:", err);
+                                toast.error("Não foi possível atualizar o status do pedido.");
                               }
                             }}
                             className="rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
