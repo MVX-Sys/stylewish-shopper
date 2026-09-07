@@ -257,6 +257,7 @@ function ProductPage() {
           categoriaId: p.categoria_id ?? null,
           categoriaNome: categoriaAtual?.nome ?? null,
           personalizado,
+          personalizacoes: personalizado ? opcoesPersoSelecionadas : [],
           estoque: v.quantidade_estoque,
         },
         q,
