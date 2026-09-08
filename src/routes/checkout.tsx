@@ -183,8 +183,9 @@ function CheckoutPage() {
         ...linhas,
         "",
         `*Total dos itens:* ${brl(total)}`,
-        appliedCoupon ? `*Cupom aplicado:* ${appliedCoupon.codigo} (-${appliedCoupon.valor_desconto}%)` : "",
+        appliedCoupon ? `*Cupom aplicado:* ${appliedCoupon.codigo}` : "",
         appliedCoupon ? `*Desconto:* -${brl(discountAmount)}` : "",
+
         `*Total final:* ${brl(valorFinal)}`,
         "",
         `*Forma de envio:* ${formaEnvio === "ENTREGA" ? "ENTREGA (Transportadora a combinar)" : "Retirada no local"}`,
@@ -207,16 +208,17 @@ function CheckoutPage() {
         try {
           await downloadOrderPDF({
             items,
-            total,
+            total: valorFinal,
             formaEnvio,
             formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
             formaPagamento,
             endereco: formaEnvio === "ENTREGA" ? {} : undefined,
             observacoes,
             cupom: appliedCoupon
-              ? { codigo: appliedCoupon.codigo, desconto: appliedCoupon.valor_desconto }
+              ? { codigo: appliedCoupon.codigo, desconto: discountAmount }
               : undefined,
           }, true);
+
           await downloadOrderImagesZip(items, "imagens-pedido");
         } catch (e) {
           console.error("Erro ao gerar anexos do pedido:", e);
@@ -430,14 +432,15 @@ function CheckoutPage() {
                   if (items.length === 0) return;
                   downloadOrderPDF({
                     items,
-                    total,
+                    total: valorFinal,
                     formaEnvio,
                     formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
                     formaPagamento,
                     endereco: formaEnvio === "ENTREGA" ? {} : undefined,
                     observacoes,
-                    cupom: appliedCoupon ? { codigo: appliedCoupon.codigo, desconto: appliedCoupon.valor_desconto } : undefined
+                    cupom: appliedCoupon ? { codigo: appliedCoupon.codigo, desconto: discountAmount } : undefined
                   });
+
                 }}
                 disabled={items.length === 0}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background py-3 text-xs font-semibold transition-colors hover:bg-accent disabled:opacity-40"
