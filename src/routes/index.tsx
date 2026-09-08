@@ -45,18 +45,19 @@ function Home() {
   const { data: config } = useQuery({
     queryKey: ["site-config"],
     queryFn: getSiteConfig,
-    staleTime: 1000 * 60 * 20,
+    staleTime: 1000 * 60 * 2,
     refetchInterval: 1000 * 60 * 30, // renova as URLs assinadas do banner antes de expirarem
   });
   const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
     queryFn: () => listCategoriasFn(),
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5,
   });
   const { data: produtos = [] } = useSuspenseQuery({
     queryKey: ["produtos"],
     queryFn: () => listProdutosFn(),
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 30,
+
   });
 
   const novidades = useMemo(() => 

@@ -401,9 +401,10 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
   if (order.cupom) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text(`Cupom: ${order.cupom.codigo} (-${order.cupom.desconto}%)`, 14, y);
+    doc.text(`Cupom: ${order.cupom.codigo} (desconto de ${brl(order.cupom.desconto)})`, 14, y);
     y += 6;
   }
+
 
   // Envio / pagamento
   doc.setFont("helvetica", "bold");

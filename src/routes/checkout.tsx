@@ -59,17 +59,20 @@ function CheckoutPage() {
 
     items.forEach(item => {
       const pId = item.produtoId.toLowerCase();
-      // Em um sistema real, o categoria_id do produto também seria verificado aqui.
-      const isProductAllowed = allowedProductIds.length === 0 || 
-        allowedProductIds.some((aid: string) => pId.includes(aid) || aid.includes(pId));
-      
-      const isCategoryAllowed = allowedCategoryIds.length === 0;
+      const cId = (item.categoriaId || "").toLowerCase();
+
+      const isProductAllowed = allowedProductIds.length === 0 ||
+        allowedProductIds.includes(pId);
+
+      const isCategoryAllowed = allowedCategoryIds.length === 0 ||
+        (!!cId && allowedCategoryIds.includes(cId));
 
       if (isProductAllowed && isCategoryAllowed) {
         totalEligible += itemPrecoEfetivo(item) * item.quantidade;
         eligibleItemKeys.add(item.key);
       }
     });
+
 
     if (totalEligible === 0) return { discountAmount: 0, itemsWithDiscount: new Set<string>() };
 
@@ -153,9 +156,11 @@ function CheckoutPage() {
               preco_unitario: itemPrecoEfetivo(i),
               nome: i.nome,
               cor: i.cor,
-              tamanho: i.tamanho
+              tamanho: i.tamanho,
+              personalizacoes: (i.personalizacoes ?? []).map((o) => o.id)
             };
           })
+
         }
       });
 
@@ -178,8 +183,9 @@ function CheckoutPage() {
         ...linhas,
         "",
         `*Total dos itens:* ${brl(total)}`,
-        appliedCoupon ? `*Cupom aplicado:* ${appliedCoupon.codigo} (-${appliedCoupon.valor_desconto}%)` : "",
+        appliedCoupon ? `*Cupom aplicado:* ${appliedCoupon.codigo}` : "",
         appliedCoupon ? `*Desconto:* -${brl(discountAmount)}` : "",
+
         `*Total final:* ${brl(valorFinal)}`,
         "",
         `*Forma de envio:* ${formaEnvio === "ENTREGA" ? "ENTREGA (Transportadora a combinar)" : "Retirada no local"}`,
@@ -202,16 +208,17 @@ function CheckoutPage() {
         try {
           await downloadOrderPDF({
             items,
-            total,
+            total: valorFinal,
             formaEnvio,
             formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
             formaPagamento,
             endereco: formaEnvio === "ENTREGA" ? {} : undefined,
             observacoes,
             cupom: appliedCoupon
-              ? { codigo: appliedCoupon.codigo, desconto: appliedCoupon.valor_desconto }
+              ? { codigo: appliedCoupon.codigo, desconto: discountAmount }
               : undefined,
           }, true);
+
           await downloadOrderImagesZip(items, "imagens-pedido");
         } catch (e) {
           console.error("Erro ao gerar anexos do pedido:", e);
@@ -350,18 +357,21 @@ function CheckoutPage() {
                             return;
                           }
 
-                          // Verificação inicial de produtos permitidos
-                          if (res.cupom.produtos_ids && res.cupom.produtos_ids.length > 0) {
-                            const allowedIds = res.cupom.produtos_ids.map((id: string) => id.toLowerCase());
+                          // Verificação inicial de produtos/categorias permitidos
+                          const allowedIds = (res.cupom.produtos_ids || []).map((id: string) => id.toLowerCase());
+                          const allowedCats = (res.cupom.categorias_ids || []).map((id: string) => id.toLowerCase());
+                          if (allowedIds.length > 0 || allowedCats.length > 0) {
                             const hasAllowed = items.some(item => {
-                              const pId = item.produtoId.toLowerCase();
-                              return allowedIds.some(aid => pId.includes(aid) || aid.includes(pId));
+                              const okP = allowedIds.length === 0 || allowedIds.includes(item.produtoId.toLowerCase());
+                              const okC = allowedCats.length === 0 || allowedCats.includes((item.categoriaId || "").toLowerCase());
+                              return okP && okC;
                             });
                             if (!hasAllowed) {
                               toast.error("Cupom não aplicável a estes produtos.");
                               return;
                             }
                           }
+
 
                           setAppliedCoupon(res.cupom);
                           toast.success("Cupom aplicado!");
@@ -425,14 +435,15 @@ function CheckoutPage() {
                   if (items.length === 0) return;
                   downloadOrderPDF({
                     items,
-                    total,
+                    total: valorFinal,
                     formaEnvio,
                     formaEntrega: formaEnvio === "ENTREGA" ? "TRANSPORTADORA A COMBINAR" : undefined,
                     formaPagamento,
                     endereco: formaEnvio === "ENTREGA" ? {} : undefined,
                     observacoes,
-                    cupom: appliedCoupon ? { codigo: appliedCoupon.codigo, desconto: appliedCoupon.valor_desconto } : undefined
+                    cupom: appliedCoupon ? { codigo: appliedCoupon.codigo, desconto: discountAmount } : undefined
                   });
+
                 }}
                 disabled={items.length === 0}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background py-3 text-xs font-semibold transition-colors hover:bg-accent disabled:opacity-40"

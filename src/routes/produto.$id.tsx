@@ -68,12 +68,13 @@ function ProductPage() {
   const { data: p } = useSuspenseQuery({
     queryKey: ["produto", id],
     queryFn: () => getProdutoFn({ data: id }),
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 30,
   });
   const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
     queryFn: () => listCategoriasFn(),
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5,
+
   });
   const { add, items: cartItems } = useCart();
 

@@ -52,12 +52,13 @@ function Home() {
   const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
     queryFn: () => listCategoriasFn(),
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5,
   });
   const { data: produtos = [] } = useSuspenseQuery({
     queryKey: ["produtos"],
     queryFn: () => listProdutosFn(),
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 30,
+
   });
 
   const [filters, setFilters] = useState<Filters>({
