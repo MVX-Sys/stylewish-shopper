@@ -59,17 +59,20 @@ function CheckoutPage() {
 
     items.forEach(item => {
       const pId = item.produtoId.toLowerCase();
-      // Em um sistema real, o categoria_id do produto também seria verificado aqui.
-      const isProductAllowed = allowedProductIds.length === 0 || 
-        allowedProductIds.some((aid: string) => pId.includes(aid) || aid.includes(pId));
-      
-      const isCategoryAllowed = allowedCategoryIds.length === 0;
+      const cId = (item.categoriaId || "").toLowerCase();
+
+      const isProductAllowed = allowedProductIds.length === 0 ||
+        allowedProductIds.includes(pId);
+
+      const isCategoryAllowed = allowedCategoryIds.length === 0 ||
+        (!!cId && allowedCategoryIds.includes(cId));
 
       if (isProductAllowed && isCategoryAllowed) {
         totalEligible += itemPrecoEfetivo(item) * item.quantidade;
         eligibleItemKeys.add(item.key);
       }
     });
+
 
     if (totalEligible === 0) return { discountAmount: 0, itemsWithDiscount: new Set<string>() };
 
