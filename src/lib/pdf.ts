@@ -383,7 +383,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       doc.setFontSize(10);
     }
     
-    const rowHeight = Math.max(lines.length * 5 + 8, 20);
+    const rowHeight = Math.max(lines.length * 5 + 12, 24);
     y += rowHeight;
     doc.setDrawColor(...LINE);
     doc.line(14, y - 2, 196, y - 2);
