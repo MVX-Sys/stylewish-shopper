@@ -37,9 +37,12 @@ function OrdersPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "pendente": return { label: "Pendente", color: "bg-yellow-100 text-yellow-700", icon: Clock };
-      case "aprovado": return { label: "Aprovado", color: "bg-green-100 text-green-700", icon: CheckCircle };
-      case "enviado": return { label: "Enviado", color: "bg-blue-100 text-blue-700", icon: Truck };
+      case "confirmado":
+      case "aprovado": return { label: "Confirmado", color: "bg-green-100 text-green-700", icon: CheckCircle };
+      case "entregue":
+      case "enviado": return { label: "Entregue", color: "bg-blue-100 text-blue-700", icon: Truck };
       case "cancelado": return { label: "Cancelado", color: "bg-red-100 text-red-700", icon: XCircle };
+
       default: return { label: status, color: "bg-gray-100 text-gray-700", icon: Package };
     }
   };
