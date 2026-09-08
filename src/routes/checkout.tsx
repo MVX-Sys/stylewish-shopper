@@ -357,18 +357,21 @@ function CheckoutPage() {
                             return;
                           }
 
-                          // Verificação inicial de produtos permitidos
-                          if (res.cupom.produtos_ids && res.cupom.produtos_ids.length > 0) {
-                            const allowedIds = res.cupom.produtos_ids.map((id: string) => id.toLowerCase());
+                          // Verificação inicial de produtos/categorias permitidos
+                          const allowedIds = (res.cupom.produtos_ids || []).map((id: string) => id.toLowerCase());
+                          const allowedCats = (res.cupom.categorias_ids || []).map((id: string) => id.toLowerCase());
+                          if (allowedIds.length > 0 || allowedCats.length > 0) {
                             const hasAllowed = items.some(item => {
-                              const pId = item.produtoId.toLowerCase();
-                              return allowedIds.some(aid => pId.includes(aid) || aid.includes(pId));
+                              const okP = allowedIds.length === 0 || allowedIds.includes(item.produtoId.toLowerCase());
+                              const okC = allowedCats.length === 0 || allowedCats.includes((item.categoriaId || "").toLowerCase());
+                              return okP && okC;
                             });
                             if (!hasAllowed) {
                               toast.error("Cupom não aplicável a estes produtos.");
                               return;
                             }
                           }
+
 
                           setAppliedCoupon(res.cupom);
                           toast.success("Cupom aplicado!");
