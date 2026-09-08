@@ -367,8 +367,23 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     doc.text(lines, 75, y + 5);
     doc.text(brl(itemPrecoEfetivo(it)), 160, y + 5);
     doc.text(brl(itemPrecoEfetivo(it) * it.quantidade), 196, y + 5, { align: "right" });
+
+    // Link clicável para a página do produto
+    const productUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/produto/${it.produtoId}`
+        : `/produto/${it.produtoId}`;
+    if (typeof window !== "undefined") {
+      doc.link(75, y, 85, lines.length * 5 + 6, { url: productUrl });
+      const linkY = y + 5 + lines.length * 5;
+      doc.setFontSize(8);
+      doc.setTextColor(37, 99, 235);
+      doc.textWithLink("Ver produto na loja", 75, linkY, { url: productUrl });
+      doc.setTextColor(...DARK);
+      doc.setFontSize(10);
+    }
     
-    const rowHeight = Math.max(lines.length * 5 + 8, 20);
+    const rowHeight = Math.max(lines.length * 5 + 12, 24);
     y += rowHeight;
     doc.setDrawColor(...LINE);
     doc.line(14, y - 2, 196, y - 2);
