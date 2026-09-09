@@ -8,55 +8,59 @@ import { type CartItem, itemPrecoEfetivo, formatPersonalizacoes } from "./cart";
 import { getGruposPersonalizacao } from "./personalizacao";
 import { supabase } from "@/integrations/supabase/client";
 
-// Transforma o caminho salvo no banco de dados em uma URL pública acessível
-function getImageUrl(path: string | null | undefined): string | null {
-  if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
-    return path;
-  }
-  return supabase.storage.from("produtos").getPublicUrl(path).data.publicUrl;
-}
-
-// Extrai a imagem quebrando o CORS e força o formato JPEG para o jsPDF aceitar imagens WebP
-const getBase64Image = async (url: string): Promise<string> => {
-  if (!url) return "";
-  
-  const convertToJpeg = (img: HTMLImageElement): string => {
-    const canvas = document.createElement("canvas");
-    let width = img.width;
-    let height = img.height;
-    const MAX_WIDTH = 600;
-    
-    if (width > MAX_WIDTH) {
-      height = Math.round((height * MAX_WIDTH) / width);
-      width = MAX_WIDTH;
-    }
-    
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return "";
-    
-    // Fundo branco para substituir qualquer transparência
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, width, height);
-    ctx.drawImage(img, 0, 0, width, height);
-    return canvas.toDataURL("image/jpeg", 0.9);
-  };
-
+// Extrai a imagem contornando bloqueios de CORS e força o formato JPEG para o jsPDF
+const getSafeImageData = async (pathOrUrl: string | null | undefined): Promise<string> => {
+  if (!pathOrUrl) return "";
   try {
-    // 1. Tenta baixar o arquivo bruto (Blob) para anular bloqueios de Canvas Tainted
-    const response = await fetch(url, { mode: 'cors' });
-    if (!response.ok) throw new Error("Fetch failed");
-    const blob = await response.blob();
+    let blob: Blob;
+    let path = pathOrUrl;
     
-    return new Promise((resolve) => {
+    // Se for URL completa do supabase, extrai o path relativo
+    if (path.includes('/storage/v1/object/public/produtos/')) {
+      path = path.split('/storage/v1/object/public/produtos/')[1].split('?')[0];
+    }
+
+    if (!path.startsWith('http') && !path.startsWith('data:')) {
+      // Usa o SDK para fazer o download bruto (anula bloqueios CORS de Canvas Tainted)
+      const { data, error } = await supabase.storage.from('produtos').download(path);
+      if (error || !data) throw error;
+      blob = data;
+    } else if (path.startsWith('http')) {
+      // Fallback para URLs externas (ex: placeholder)
+      const res = await fetch(path, { mode: 'cors' });
+      if (!res.ok) throw new Error("Fetch failed");
+      blob = await res.blob();
+    } else {
+      return path; // Já é base64
+    }
+
+    // Converte o Blob para JPEG via Canvas 
+    return await new Promise((resolve) => {
       const objectUrl = URL.createObjectURL(blob);
       const img = new Image();
       img.onload = () => {
-        const data = convertToJpeg(img);
+        const canvas = document.createElement("canvas");
+        // Limita o tamanho para evitar PDFs gigantescos
+        let width = img.width;
+        let height = img.height;
+        const MAX_WIDTH = 500;
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.fillStyle = "#FFFFFF"; // Substitui fundos transparentes por branco
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.8));
+        } else {
+          resolve("");
+        }
         URL.revokeObjectURL(objectUrl);
-        resolve(data);
       };
       img.onerror = () => {
         URL.revokeObjectURL(objectUrl);
@@ -65,14 +69,8 @@ const getBase64Image = async (url: string): Promise<string> => {
       img.src = objectUrl;
     });
   } catch (err) {
-    // 2. Fallback via injeção de DOM caso o fetch seja bloqueado nativamente
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.crossOrigin = "Anonymous";
-      img.onload = () => resolve(convertToJpeg(img));
-      img.onerror = () => resolve("");
-      img.src = `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
-    });
+    console.error("Erro no processamento da imagem para o PDF:", err);
+    return "";
   }
 };
 
@@ -127,14 +125,13 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
 
   try {
     const mainImage = p.imagens?.find((img) => img.principal) || p.imagens?.[0];
-    const imageUrl = getImageUrl(mainImage?.storage_path);
+    const imagePath = mainImage?.storage_path;
     
-    if (imageUrl) {
-      const imgDataUrl = await getBase64Image(imageUrl);
+    if (imagePath) {
+      const imgDataUrl = await getSafeImageData(imagePath);
       
       if (imgDataUrl) {
         const imgSize = 40;
-        // Agora o formato é sempre JPEG devido a conversão nativa
         doc.addImage(imgDataUrl, 'JPEG', 14, y, imgSize, imgSize, undefined, 'FAST');
         imageAdded = true;
       }
@@ -284,7 +281,7 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
           header(doc, "Ficha do produto");
           y = 32;
         }
-        doc.text(`o ${o.label}`, 18, y);
+        doc.text(`• ${o.label}`, 18, y);
         doc.text(`+ ${brl(o.preco)}`, 60, y);
         y += 5;
       }
@@ -359,24 +356,24 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     }
     
     try {
-      let imageUrl = getImageUrl(it.foto);
+      let imagePath = it.foto;
       
-      // Fallback: se a URL for inexistente porque o carrinho é muito antigo, busca direto na tabela
-      if (!imageUrl) {
+      // Fallback robusto: busca a imagem no banco de dados se não existir no item do carrinho
+      if (!imagePath) {
         const produtoDb = await getProduto(it.produtoId);
         const mainImage = produtoDb?.imagens?.find((img) => img.principal) || produtoDb?.imagens?.[0];
-        imageUrl = getImageUrl(mainImage?.storage_path);
+        imagePath = mainImage?.storage_path;
       }
 
-      if (imageUrl) {
-        const imgDataUrl = await getBase64Image(imageUrl);
+      if (imagePath) {
+        const imgDataUrl = await getSafeImageData(imagePath);
         if (imgDataUrl) {
           const imgSize = 18;
           doc.addImage(imgDataUrl, 'JPEG', 32, y - 4, imgSize, imgSize, undefined, 'FAST');
         }
       }
     } catch (e) {
-      console.error("Erro ao processar imagem no PDF:", e);
+      console.error("Erro ao desenhar imagem do produto no PDF:", e);
     }
 
     const perso = formatPersonalizacoes(it);
