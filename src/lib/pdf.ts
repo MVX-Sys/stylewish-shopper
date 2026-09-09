@@ -11,43 +11,68 @@ import { supabase } from "@/integrations/supabase/client";
 // Transforma o caminho salvo no banco de dados em uma URL pública acessível
 function getImageUrl(path: string | null | undefined): string | null {
   if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://")) {
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
     return path;
   }
   return supabase.storage.from("produtos").getPublicUrl(path).data.publicUrl;
 }
 
-// Converte a imagem da URL para Base64 (formato exigido pelo jsPDF)
-const fetchImageAsBase64 = async (url: string): Promise<string> => {
+// Extrai a imagem quebrando o CORS e força o formato JPEG para o jsPDF aceitar imagens WebP
+const getBase64Image = async (url: string): Promise<string> => {
   if (!url) return "";
+  
+  const convertToJpeg = (img: HTMLImageElement): string => {
+    const canvas = document.createElement("canvas");
+    let width = img.width;
+    let height = img.height;
+    const MAX_WIDTH = 600;
+    
+    if (width > MAX_WIDTH) {
+      height = Math.round((height * MAX_WIDTH) / width);
+      width = MAX_WIDTH;
+    }
+    
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return "";
+    
+    // Fundo branco para substituir qualquer transparência
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
+    return canvas.toDataURL("image/jpeg", 0.9);
+  };
+
   try {
-    const separator = url.includes('?') ? '&' : '?';
-    const proxyUrl = `${url}${separator}t=${Date.now()}`;
-    
-    const response = await fetch(proxyUrl, { 
-      mode: 'cors', 
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) return "";
-    
+    // 1. Tenta baixar o arquivo bruto (Blob) para anular bloqueios de Canvas Tainted
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) throw new Error("Fetch failed");
     const blob = await response.blob();
+    
     return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        if (result && result.startsWith('data:image')) {
-          resolve(result);
-        } else {
-          resolve("");
-        }
+      const objectUrl = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        const data = convertToJpeg(img);
+        URL.revokeObjectURL(objectUrl);
+        resolve(data);
       };
-      reader.onerror = () => resolve("");
-      reader.readAsDataURL(blob);
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve("");
+      };
+      img.src = objectUrl;
     });
-  } catch (error) {
-    console.error("Erro ao converter imagem:", error);
-    return "";
+  } catch (err) {
+    // 2. Fallback via injeção de DOM caso o fetch seja bloqueado nativamente
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = () => resolve(convertToJpeg(img));
+      img.onerror = () => resolve("");
+      img.src = `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    });
   }
 };
 
@@ -105,12 +130,12 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
     const imageUrl = getImageUrl(mainImage?.storage_path);
     
     if (imageUrl) {
-      const imgDataUrl = await fetchImageAsBase64(imageUrl);
+      const imgDataUrl = await getBase64Image(imageUrl);
       
       if (imgDataUrl) {
         const imgSize = 40;
-        const format = imgDataUrl.toLowerCase().includes('png') ? 'PNG' : 'JPEG';
-        doc.addImage(imgDataUrl, format, 14, y, imgSize, imgSize, undefined, 'FAST');
+        // Agora o formato é sempre JPEG devido a conversão nativa
+        doc.addImage(imgDataUrl, 'JPEG', 14, y, imgSize, imgSize, undefined, 'FAST');
         imageAdded = true;
       }
     }
@@ -259,7 +284,7 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
           header(doc, "Ficha do produto");
           y = 32;
         }
-        doc.text(`• ${o.label}`, 18, y);
+        doc.text(`o ${o.label}`, 18, y);
         doc.text(`+ ${brl(o.preco)}`, 60, y);
         y += 5;
       }
@@ -336,7 +361,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     try {
       let imageUrl = getImageUrl(it.foto);
       
-      // FALLBACK: Se o item estiver sem foto salva no carrinho, busca direto no BD
+      // Fallback: se a URL for inexistente porque o carrinho é muito antigo, busca direto na tabela
       if (!imageUrl) {
         const produtoDb = await getProduto(it.produtoId);
         const mainImage = produtoDb?.imagens?.find((img) => img.principal) || produtoDb?.imagens?.[0];
@@ -344,11 +369,10 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       }
 
       if (imageUrl) {
-        const imgDataUrl = await fetchImageAsBase64(imageUrl);
+        const imgDataUrl = await getBase64Image(imageUrl);
         if (imgDataUrl) {
           const imgSize = 18;
-          const format = imgDataUrl.toLowerCase().includes('png') ? 'PNG' : 'JPEG';
-          doc.addImage(imgDataUrl, format, 32, y - 4, imgSize, imgSize, undefined, 'FAST');
+          doc.addImage(imgDataUrl, 'JPEG', 32, y - 4, imgSize, imgSize, undefined, 'FAST');
         }
       }
     } catch (e) {
@@ -618,7 +642,7 @@ export function downloadProductsCSV(rows: ProductExportRow[]) {
     lines.push(
       [
         p.nome,
-        p.categoriaNome ?? "",
+        p.categoriaNome ?? "-",
         p.preco.toFixed(2).replace(".", ","),
         p.ativo ? "Sim" : "Não",
         p.novidade ? "Sim" : "Não",
@@ -848,7 +872,7 @@ export function downloadProductsXLSX(rows: ProductExportRow[]) {
       .join(" | ");
     return [
       p.nome,
-      p.categoriaNome ?? "",
+      p.categoriaNome ?? "-",
       p.preco,
       p.ativo ? "Sim" : "Não",
       p.novidade ? "Sim" : "Não",
