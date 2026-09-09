@@ -6,11 +6,11 @@ import { BRAND } from "./config";
 import type { ProductListItem } from "./products";
 import { type CartItem, itemPrecoEfetivo, formatPersonalizacoes } from "./cart";
 import { getGruposPersonalizacao } from "./personalizacao";
+import { supabase } from "@/integrations/supabase/client";
 
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
   if (!url) return "";
   try {
-    // Add cache busting and ensure anonymous cross-origin
     const separator = url.includes('?') ? '&' : '?';
     const proxyUrl = `${url}${separator}t=${Date.now()}`;
     
@@ -83,7 +83,7 @@ function footer(doc: jsPDF) {
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(
-    `${BRAND} · Documento gerado em ${new Date().toLocaleString("pt-BR")}`,
+    `${BRAND} - Documento gerado em ${new Date().toLocaleString("pt-BR")}`,
     14,
     h - 9,
   );
@@ -98,8 +98,10 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
 
   let imageAdded = false;
   try {
-    // Tenta pegar a URL da imagem. Ajuste o nome da propriedade caso seu tipo ProductListItem use outro nome (ex: p.image_url)
-    const imageUrl = (p as any).imagem_url || (p as any).imagem || (p as any).image_url;
+    const mainImage = p.imagens?.find((img) => img.principal) || p.imagens?.[0];
+    const imageUrl = mainImage 
+      ? supabase.storage.from("produtos").getPublicUrl(mainImage.storage_path).data.publicUrl 
+      : null;
     
     if (imageUrl) {
       const imgDataUrl = await fetchImageAsBase64(imageUrl);
@@ -164,7 +166,7 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   const desc = p.descricao?.trim() || "Sem descrição cadastrada.";
-  // Preserva quebras de linha substituindo \n por um marcador ou tratando cada linha
+  
   const lines = desc.split(/\r?\n/);
   for (const line of lines) {
     const splitLines = doc.splitTextToSize(line, 182);
@@ -185,7 +187,6 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
     doc.text("Grade de Variações", 14, y);
     y += 6;
 
-    // Table header
     doc.setFillColor(249, 250, 251);
     doc.rect(14, y - 4, 182, 7, "F");
     doc.setFontSize(9);
@@ -209,7 +210,6 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
       doc.line(14, y + 1, 196, y + 1);
       y += 5;
       
-      // Color dot
       if (v.hex_cor) {
         doc.setFillColor(v.hex_cor);
         doc.setDrawColor(...LINE);
@@ -308,7 +308,6 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
   doc.setTextColor(...DARK);
   y += 8;
 
-  // Items table
   doc.setFillColor(249, 250, 251);
   doc.rect(14, y - 4, 182, 7, "F");
   doc.setFont("helvetica", "bold");
@@ -332,10 +331,8 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       y = 32;
     }
     
-    // Insere a imagem do produto
     try {
-      // Ajuste o nome da propriedade caso seu tipo CartItem use outro nome (ex: it.image_url)
-      const imageUrl = (it as any).imagem_url || (it as any).imagem || (it as any).image_url;
+      const imageUrl = it.foto;
       if (imageUrl) {
         const imgDataUrl = await fetchImageAsBase64(imageUrl);
         if (imgDataUrl) {
@@ -349,14 +346,13 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     }
 
     const perso = formatPersonalizacoes(it);
-    const desc = `${it.nome}\n${it.cor} · ${it.tamanho}${perso ? `\nPersonalização: ${perso}` : ""}`;
+    const desc = `${it.nome}\n${it.cor} - ${it.tamanho}${perso ? `\nPersonalização: ${perso}` : ""}`;
     const lines = doc.splitTextToSize(desc, 80);
     doc.text(String(it.quantidade), 18, y + 5);
     doc.text(lines, 75, y + 5);
     doc.text(brl(itemPrecoEfetivo(it)), 160, y + 5);
     doc.text(brl(itemPrecoEfetivo(it) * it.quantidade), 196, y + 5, { align: "right" });
 
-    // Link clicável para a página do produto
     const productUrl =
       typeof window !== "undefined"
         ? `${window.location.origin}/produto/${it.produtoId}`
@@ -393,7 +389,6 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     y += 6;
   }
 
-  // Envio / pagamento
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("Envio e pagamento", 14, y);
@@ -714,8 +709,6 @@ export function downloadProductsPDF(rows: ProductExportRow[]) {
   const stamp = new Date().toISOString().slice(0, 10);
   doc.save(`produtos-${slugify(BRAND)}-${stamp}.pdf`);
 }
-
-// ---- Generic tabular export ----
 
 export type TableColumn = { label: string; width: number };
 
