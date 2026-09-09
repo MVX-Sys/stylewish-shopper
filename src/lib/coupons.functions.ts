@@ -87,10 +87,10 @@ export const deleteCupon = createServerFn({ method: "POST" })
   });
 
 export const validateCupon = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ codigo: z.string().min(1) }).parse(d))
-  .handler(async ({ data }) => {
-    const { supabase: supabaseClient } = await import("@/integrations/supabase/client");
-    const { data: cupom, error } = await supabaseClient
+  .handler(async ({ data, context }) => {
+    const { data: cupom, error } = await context.supabase
       .from("cupons")
       .select("*")
       .eq("codigo", data.codigo.toUpperCase())
