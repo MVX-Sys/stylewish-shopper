@@ -1,6 +1,5 @@
 import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
-import QRCode from "qrcode";
 import "jspdf-autotable";
 import { brl } from "./format";
 import { BRAND } from "./config";
@@ -97,32 +96,27 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
 
   let y = 32;
 
-  // Replace image with QR Code
-  let qrCodeAdded = false;
+  let imageAdded = false;
   try {
-    const qrContent = typeof window !== 'undefined' 
-      ? `${window.location.origin}/produto/${p.id}` 
-      : p.id;
-    const qrDataUrl = await QRCode.toDataURL(qrContent, {
-      margin: 1,
-      width: 200,
-      color: {
-        dark: "#111827",
-        light: "#FFFFFF"
-      }
-    });
+    // Tenta pegar a URL da imagem. Ajuste o nome da propriedade caso seu tipo ProductListItem use outro nome (ex: p.image_url)
+    const imageUrl = (p as any).imagem_url || (p as any).imagem || (p as any).image_url;
     
-    if (qrDataUrl) {
-      const qrSize = 40;
-      doc.addImage(qrDataUrl, "PNG", 14, y, qrSize, qrSize, undefined, 'FAST');
-      qrCodeAdded = true;
+    if (imageUrl) {
+      const imgDataUrl = await fetchImageAsBase64(imageUrl);
+      
+      if (imgDataUrl) {
+        const imgSize = 40;
+        const format = imgDataUrl.toLowerCase().includes('png') ? 'PNG' : 'JPEG';
+        doc.addImage(imgDataUrl, format, 14, y, imgSize, imgSize, undefined, 'FAST');
+        imageAdded = true;
+      }
     }
   } catch (e) {
-    console.error("Error generating QR code for product PDF:", e);
+    console.error("Error adding product image to PDF:", e);
   }
 
-  const contentX = qrCodeAdded ? 60 : 14;
-  const contentWidth = qrCodeAdded ? 136 : 182;
+  const contentX = imageAdded ? 60 : 14;
+  const contentWidth = imageAdded ? 136 : 182;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
@@ -321,7 +315,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
   doc.setFontSize(9);
   doc.setTextColor(...MUTED);
   doc.text("QTD", 18, y);
-  doc.text("QR CODE", 32, y);
+  doc.text("IMAGEM", 32, y);
   doc.text("PRODUTO", 75, y);
   doc.text("UNIT.", 160, y);
   doc.text("SUBTOTAL", 196, y, { align: "right" });
@@ -338,26 +332,20 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       y = 32;
     }
     
-    // Add product QR Code instead of image
+    // Insere a imagem do produto
     try {
-      const qrContent = typeof window !== 'undefined' 
-        ? `${window.location.origin}/produto/${it.produtoId}` 
-        : it.produtoId;
-      const qrDataUrl = await QRCode.toDataURL(qrContent, {
-        margin: 1,
-        width: 100,
-        color: {
-          dark: "#111827",
-          light: "#FFFFFF"
+      // Ajuste o nome da propriedade caso seu tipo CartItem use outro nome (ex: it.image_url)
+      const imageUrl = (it as any).imagem_url || (it as any).imagem || (it as any).image_url;
+      if (imageUrl) {
+        const imgDataUrl = await fetchImageAsBase64(imageUrl);
+        if (imgDataUrl) {
+          const imgSize = 18;
+          const format = imgDataUrl.toLowerCase().includes('png') ? 'PNG' : 'JPEG';
+          doc.addImage(imgDataUrl, format, 32, y - 4, imgSize, imgSize, undefined, 'FAST');
         }
-      });
-      
-      if (qrDataUrl) {
-        const qrSize = 18;
-        doc.addImage(qrDataUrl, "PNG", 32, y - 4, qrSize, qrSize, undefined, 'FAST');
       }
     } catch (e) {
-      console.error("Error drawing QR code in PDF:", e);
+      console.error("Error drawing product image in PDF:", e);
     }
 
     const perso = formatPersonalizacoes(it);
@@ -405,7 +393,6 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     y += 6;
   }
 
-
   // Envio / pagamento
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
@@ -432,7 +419,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     const e = order.endereco;
     const linhas = [
       e.cep ? `CEP: ${e.cep}` : null,
-      e.logradouro ? `${e.logradouro}, ${e.numero}${e.complemento ? ` — ${e.complemento}` : ""}` : null,
+      e.logradouro ? `${e.logradouro}, ${e.numero}${e.complemento ? ` - ${e.complemento}` : ""}` : null,
       e.bairro ? `Bairro: ${e.bairro}` : null,
       e.cidade && e.estado ? `Cidade/UF: ${e.cidade}/${e.estado}` : null,
       e.referencia ? `Referência: ${e.referencia}` : null,
@@ -700,7 +687,7 @@ export function downloadProductsPDF(rows: ProductExportRow[]) {
       : "Ativo";
     const cells = [
       p.nome,
-      p.categoriaNome ?? "—",
+      p.categoriaNome ?? "-",
       brl(p.preco),
       String(estoque),
       statusLabel,
@@ -896,4 +883,3 @@ export function downloadRelatorioVendasPDF(
   footer(doc);
   doc.save(`${filename}.pdf`);
 }
-
