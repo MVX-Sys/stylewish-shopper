@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import "jspdf-autotable";
 import { brl } from "./format";
 import { BRAND } from "./config";
-import type { ProductListItem } from "./products";
+import { getProduto, type ProductListItem } from "./products";
 import { type CartItem, itemPrecoEfetivo, formatPersonalizacoes } from "./cart";
 import { getGruposPersonalizacao } from "./personalizacao";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,34 +17,38 @@ function getImageUrl(path: string | null | undefined): string | null {
   return supabase.storage.from("produtos").getPublicUrl(path).data.publicUrl;
 }
 
-// Carrega a imagem e converte para Base64 usando Canvas (evita bloqueios de CORS mais comuns que o Fetch)
-const getBase64Image = (url: string): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "Anonymous"; // Essencial para imagens hospedadas externamente/Supabase
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(img, 0, 0);
-        try {
-          resolve(canvas.toDataURL("image/png"));
-        } catch (e) {
-          console.error("Erro no Canvas toDataURL:", e);
+// Converte a imagem da URL para Base64 (formato exigido pelo jsPDF)
+const fetchImageAsBase64 = async (url: string): Promise<string> => {
+  if (!url) return "";
+  try {
+    const separator = url.includes('?') ? '&' : '?';
+    const proxyUrl = `${url}${separator}t=${Date.now()}`;
+    
+    const response = await fetch(proxyUrl, { 
+      mode: 'cors', 
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) return "";
+    
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        if (result && result.startsWith('data:image')) {
+          resolve(result);
+        } else {
           resolve("");
         }
-      } else {
-        resolve("");
-      }
-    };
-    img.onerror = () => {
-      console.error("Falha ao carregar a imagem para o PDF:", url);
-      resolve("");
-    };
-    img.src = url;
-  });
+      };
+      reader.onerror = () => resolve("");
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error("Erro ao converter imagem:", error);
+    return "";
+  }
 };
 
 const ORANGE: [number, number, number] = [255, 85, 0];
@@ -95,17 +99,18 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
 
   let y = 32;
   let imageAdded = false;
-  
+
   try {
     const mainImage = p.imagens?.find((img) => img.principal) || p.imagens?.[0];
     const imageUrl = getImageUrl(mainImage?.storage_path);
     
     if (imageUrl) {
-      const imgDataUrl = await getBase64Image(imageUrl);
+      const imgDataUrl = await fetchImageAsBase64(imageUrl);
       
       if (imgDataUrl) {
         const imgSize = 40;
-        doc.addImage(imgDataUrl, 'PNG', 14, y, imgSize, imgSize, undefined, 'FAST');
+        const format = imgDataUrl.toLowerCase().includes('png') ? 'PNG' : 'JPEG';
+        doc.addImage(imgDataUrl, format, 14, y, imgSize, imgSize, undefined, 'FAST');
         imageAdded = true;
       }
     }
@@ -329,12 +334,21 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     }
     
     try {
-      const imageUrl = getImageUrl(it.foto);
+      let imageUrl = getImageUrl(it.foto);
+      
+      // FALLBACK: Se o item estiver sem foto salva no carrinho, busca direto no BD
+      if (!imageUrl) {
+        const produtoDb = await getProduto(it.produtoId);
+        const mainImage = produtoDb?.imagens?.find((img) => img.principal) || produtoDb?.imagens?.[0];
+        imageUrl = getImageUrl(mainImage?.storage_path);
+      }
+
       if (imageUrl) {
-        const imgDataUrl = await getBase64Image(imageUrl);
+        const imgDataUrl = await fetchImageAsBase64(imageUrl);
         if (imgDataUrl) {
           const imgSize = 18;
-          doc.addImage(imgDataUrl, 'PNG', 32, y - 4, imgSize, imgSize, undefined, 'FAST');
+          const format = imgDataUrl.toLowerCase().includes('png') ? 'PNG' : 'JPEG';
+          doc.addImage(imgDataUrl, format, 32, y - 4, imgSize, imgSize, undefined, 'FAST');
         }
       }
     } catch (e) {
