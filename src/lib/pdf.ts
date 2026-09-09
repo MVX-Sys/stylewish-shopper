@@ -8,44 +8,43 @@ import { type CartItem, itemPrecoEfetivo, formatPersonalizacoes } from "./cart";
 import { getGruposPersonalizacao } from "./personalizacao";
 import { supabase } from "@/integrations/supabase/client";
 
-const fetchImageAsBase64 = async (url: string): Promise<string> => {
-  if (!url) return "";
-  try {
-    const separator = url.includes('?') ? '&' : '?';
-    const proxyUrl = `${url}${separator}t=${Date.now()}`;
-    
-    const response = await fetch(proxyUrl, { 
-      mode: 'cors', 
-      credentials: 'omit',
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) {
-      console.warn(`Failed to fetch image: ${response.status} ${response.statusText}`);
-      return "";
-    }
-    
-    const blob = await response.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        if (result && result.startsWith('data:image')) {
-          resolve(result);
-        } else {
+// Transforma o caminho salvo no banco de dados em uma URL pública acessível
+function getImageUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  return supabase.storage.from("produtos").getPublicUrl(path).data.publicUrl;
+}
+
+// Carrega a imagem e converte para Base64 usando Canvas (evita bloqueios de CORS mais comuns que o Fetch)
+const getBase64Image = (url: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous"; // Essencial para imagens hospedadas externamente/Supabase
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        try {
+          resolve(canvas.toDataURL("image/png"));
+        } catch (e) {
+          console.error("Erro no Canvas toDataURL:", e);
           resolve("");
         }
-      };
-      reader.onerror = () => {
-        console.error("FileReader error");
+      } else {
         resolve("");
-      };
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    console.error("Error fetching image for PDF:", error);
-    return "";
-  }
+      }
+    };
+    img.onerror = () => {
+      console.error("Falha ao carregar a imagem para o PDF:", url);
+      resolve("");
+    };
+    img.src = url;
+  });
 };
 
 const ORANGE: [number, number, number] = [255, 85, 0];
@@ -95,26 +94,23 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
   header(doc, "Ficha do produto");
 
   let y = 32;
-
   let imageAdded = false;
+  
   try {
     const mainImage = p.imagens?.find((img) => img.principal) || p.imagens?.[0];
-    const imageUrl = mainImage 
-      ? supabase.storage.from("produtos").getPublicUrl(mainImage.storage_path).data.publicUrl 
-      : null;
+    const imageUrl = getImageUrl(mainImage?.storage_path);
     
     if (imageUrl) {
-      const imgDataUrl = await fetchImageAsBase64(imageUrl);
+      const imgDataUrl = await getBase64Image(imageUrl);
       
       if (imgDataUrl) {
         const imgSize = 40;
-        const format = imgDataUrl.toLowerCase().includes('png') ? 'PNG' : 'JPEG';
-        doc.addImage(imgDataUrl, format, 14, y, imgSize, imgSize, undefined, 'FAST');
+        doc.addImage(imgDataUrl, 'PNG', 14, y, imgSize, imgSize, undefined, 'FAST');
         imageAdded = true;
       }
     }
   } catch (e) {
-    console.error("Error adding product image to PDF:", e);
+    console.error("Erro ao adicionar imagem do produto ao PDF:", e);
   }
 
   const contentX = imageAdded ? 60 : 14;
@@ -323,6 +319,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
+  
   for (const it of order.items) {
     if (y > 240) {
       footer(doc);
@@ -332,22 +329,22 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     }
     
     try {
-      const imageUrl = it.foto;
+      const imageUrl = getImageUrl(it.foto);
       if (imageUrl) {
-        const imgDataUrl = await fetchImageAsBase64(imageUrl);
+        const imgDataUrl = await getBase64Image(imageUrl);
         if (imgDataUrl) {
           const imgSize = 18;
-          const format = imgDataUrl.toLowerCase().includes('png') ? 'PNG' : 'JPEG';
-          doc.addImage(imgDataUrl, format, 32, y - 4, imgSize, imgSize, undefined, 'FAST');
+          doc.addImage(imgDataUrl, 'PNG', 32, y - 4, imgSize, imgSize, undefined, 'FAST');
         }
       }
     } catch (e) {
-      console.error("Error drawing product image in PDF:", e);
+      console.error("Erro ao processar imagem no PDF:", e);
     }
 
     const perso = formatPersonalizacoes(it);
     const desc = `${it.nome}\n${it.cor} - ${it.tamanho}${perso ? `\nPersonalização: ${perso}` : ""}`;
     const lines = doc.splitTextToSize(desc, 80);
+    
     doc.text(String(it.quantidade), 18, y + 5);
     doc.text(lines, 75, y + 5);
     doc.text(brl(itemPrecoEfetivo(it)), 160, y + 5);
@@ -357,6 +354,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       typeof window !== "undefined"
         ? `${window.location.origin}/produto/${it.produtoId}`
         : `/produto/${it.produtoId}`;
+        
     if (typeof window !== "undefined") {
       doc.link(75, y, 85, lines.length * 5 + 6, { url: productUrl });
       const linkY = y + 5 + lines.length * 5;
