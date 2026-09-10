@@ -1,75 +1,50 @@
 import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
+import QRCode from "qrcode";
 import "jspdf-autotable";
 import { brl } from "./format";
 import { BRAND } from "./config";
-import { getProduto, type ProductListItem } from "./products";
+import type { ProductListItem } from "./products";
 import { type CartItem, itemPrecoEfetivo, formatPersonalizacoes } from "./cart";
 import { getGruposPersonalizacao } from "./personalizacao";
-import { supabase } from "@/integrations/supabase/client";
 
-// Extrai a imagem contornando bloqueios de CORS e força o formato JPEG para o jsPDF
-const getSafeImageData = async (pathOrUrl: string | null | undefined): Promise<string> => {
-  if (!pathOrUrl) return "";
+const fetchImageAsBase64 = async (url: string): Promise<string> => {
+  if (!url) return "";
   try {
-    let blob: Blob;
-    let path = pathOrUrl;
+    // Add cache busting and ensure anonymous cross-origin
+    const separator = url.includes('?') ? '&' : '?';
+    const proxyUrl = `${url}${separator}t=${Date.now()}`;
     
-    // Se for URL completa do supabase, extrai o path relativo
-    if (path.includes('/storage/v1/object/public/produtos/')) {
-      path = path.split('/storage/v1/object/public/produtos/')[1].split('?')[0];
+    const response = await fetch(proxyUrl, { 
+      mode: 'cors', 
+      credentials: 'omit',
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      console.warn(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      return "";
     }
-
-    if (!path.startsWith('http') && !path.startsWith('data:')) {
-      // Usa o SDK para fazer o download bruto (anula bloqueios CORS de Canvas Tainted)
-      const { data, error } = await supabase.storage.from('produtos').download(path);
-      if (error || !data) throw error;
-      blob = data;
-    } else if (path.startsWith('http')) {
-      // Fallback para URLs externas (ex: placeholder)
-      const res = await fetch(path, { mode: 'cors' });
-      if (!res.ok) throw new Error("Fetch failed");
-      blob = await res.blob();
-    } else {
-      return path; // Já é base64
-    }
-
-    // Converte o Blob para JPEG via Canvas 
-    return await new Promise((resolve) => {
-      const objectUrl = URL.createObjectURL(blob);
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        // Limita o tamanho para evitar PDFs gigantescos
-        let width = img.width;
-        let height = img.height;
-        const MAX_WIDTH = 500;
-        if (width > MAX_WIDTH) {
-          height = Math.round((height * MAX_WIDTH) / width);
-          width = MAX_WIDTH;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.fillStyle = "#FFFFFF"; // Substitui fundos transparentes por branco
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL("image/jpeg", 0.8));
+    
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        if (result && result.startsWith('data:image')) {
+          resolve(result);
         } else {
           resolve("");
         }
-        URL.revokeObjectURL(objectUrl);
       };
-      img.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
+      reader.onerror = () => {
+        console.error("FileReader error");
         resolve("");
       };
-      img.src = objectUrl;
+      reader.readAsDataURL(blob);
     });
-  } catch (err) {
-    console.error("Erro no processamento da imagem para o PDF:", err);
+  } catch (error) {
+    console.error("Error fetching image for PDF:", error);
     return "";
   }
 };
@@ -109,7 +84,7 @@ function footer(doc: jsPDF) {
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(
-    `${BRAND} - Documento gerado em ${new Date().toLocaleString("pt-BR")}`,
+    `${BRAND} · Documento gerado em ${new Date().toLocaleString("pt-BR")}`,
     14,
     h - 9,
   );
@@ -121,27 +96,33 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
   header(doc, "Ficha do produto");
 
   let y = 32;
-  let imageAdded = false;
 
+  // Replace image with QR Code
+  let qrCodeAdded = false;
   try {
-    const mainImage = p.imagens?.find((img) => img.principal) || p.imagens?.[0];
-    const imagePath = mainImage?.storage_path;
-    
-    if (imagePath) {
-      const imgDataUrl = await getSafeImageData(imagePath);
-      
-      if (imgDataUrl) {
-        const imgSize = 40;
-        doc.addImage(imgDataUrl, 'JPEG', 14, y, imgSize, imgSize, undefined, 'FAST');
-        imageAdded = true;
+    const qrContent = typeof window !== 'undefined' 
+      ? `${window.location.origin}/produto/${p.id}` 
+      : p.id;
+    const qrDataUrl = await QRCode.toDataURL(qrContent, {
+      margin: 1,
+      width: 200,
+      color: {
+        dark: "#111827",
+        light: "#FFFFFF"
       }
+    });
+    
+    if (qrDataUrl) {
+      const qrSize = 40;
+      doc.addImage(qrDataUrl, "PNG", 14, y, qrSize, qrSize, undefined, 'FAST');
+      qrCodeAdded = true;
     }
   } catch (e) {
-    console.error("Erro ao adicionar imagem do produto ao PDF:", e);
+    console.error("Error generating QR code for product PDF:", e);
   }
 
-  const contentX = imageAdded ? 60 : 14;
-  const contentWidth = imageAdded ? 136 : 182;
+  const contentX = qrCodeAdded ? 60 : 14;
+  const contentWidth = qrCodeAdded ? 136 : 182;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
@@ -189,7 +170,7 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   const desc = p.descricao?.trim() || "Sem descrição cadastrada.";
-  
+  // Preserva quebras de linha substituindo \n por um marcador ou tratando cada linha
   const lines = desc.split(/\r?\n/);
   for (const line of lines) {
     const splitLines = doc.splitTextToSize(line, 182);
@@ -210,6 +191,7 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
     doc.text("Grade de Variações", 14, y);
     y += 6;
 
+    // Table header
     doc.setFillColor(249, 250, 251);
     doc.rect(14, y - 4, 182, 7, "F");
     doc.setFontSize(9);
@@ -233,6 +215,7 @@ export async function downloadProductPDF(p: ProductListItem, categoriaNome?: str
       doc.line(14, y + 1, 196, y + 1);
       y += 5;
       
+      // Color dot
       if (v.hex_cor) {
         doc.setFillColor(v.hex_cor);
         doc.setDrawColor(...LINE);
@@ -331,13 +314,14 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
   doc.setTextColor(...DARK);
   y += 8;
 
+  // Items table
   doc.setFillColor(249, 250, 251);
   doc.rect(14, y - 4, 182, 7, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...MUTED);
   doc.text("QTD", 18, y);
-  doc.text("IMAGEM", 32, y);
+  doc.text("QR CODE", 32, y);
   doc.text("PRODUTO", 75, y);
   doc.text("UNIT.", 160, y);
   doc.text("SUBTOTAL", 196, y, { align: "right" });
@@ -346,7 +330,6 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  
   for (const it of order.items) {
     if (y > 240) {
       footer(doc);
@@ -355,41 +338,41 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
       y = 32;
     }
     
+    // Add product QR Code instead of image
     try {
-      let imagePath = it.foto;
-      
-      // Fallback robusto: busca a imagem no banco de dados se não existir no item do carrinho
-      if (!imagePath) {
-        const produtoDb = await getProduto(it.produtoId);
-        const mainImage = produtoDb?.imagens?.find((img) => img.principal) || produtoDb?.imagens?.[0];
-        imagePath = mainImage?.storage_path;
-      }
-
-      if (imagePath) {
-        const imgDataUrl = await getSafeImageData(imagePath);
-        if (imgDataUrl) {
-          const imgSize = 18;
-          doc.addImage(imgDataUrl, 'JPEG', 32, y - 4, imgSize, imgSize, undefined, 'FAST');
+      const qrContent = typeof window !== 'undefined' 
+        ? `${window.location.origin}/produto/${it.produtoId}` 
+        : it.produtoId;
+      const qrDataUrl = await QRCode.toDataURL(qrContent, {
+        margin: 1,
+        width: 100,
+        color: {
+          dark: "#111827",
+          light: "#FFFFFF"
         }
+      });
+      
+      if (qrDataUrl) {
+        const qrSize = 18;
+        doc.addImage(qrDataUrl, "PNG", 32, y - 4, qrSize, qrSize, undefined, 'FAST');
       }
     } catch (e) {
-      console.error("Erro ao desenhar imagem do produto no PDF:", e);
+      console.error("Error drawing QR code in PDF:", e);
     }
 
     const perso = formatPersonalizacoes(it);
-    const desc = `${it.nome}\n${it.cor} - ${it.tamanho}${perso ? `\nPersonalização: ${perso}` : ""}`;
+    const desc = `${it.nome}\n${it.cor} · ${it.tamanho}${perso ? `\nPersonalização: ${perso}` : ""}`;
     const lines = doc.splitTextToSize(desc, 80);
-    
     doc.text(String(it.quantidade), 18, y + 5);
     doc.text(lines, 75, y + 5);
     doc.text(brl(itemPrecoEfetivo(it)), 160, y + 5);
     doc.text(brl(itemPrecoEfetivo(it) * it.quantidade), 196, y + 5, { align: "right" });
 
+    // Link clicável para a página do produto
     const productUrl =
       typeof window !== "undefined"
         ? `${window.location.origin}/produto/${it.produtoId}`
         : `/produto/${it.produtoId}`;
-        
     if (typeof window !== "undefined") {
       doc.link(75, y, 85, lines.length * 5 + 6, { url: productUrl });
       const linkY = y + 5 + lines.length * 5;
@@ -422,6 +405,8 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     y += 6;
   }
 
+
+  // Envio / pagamento
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("Envio e pagamento", 14, y);
@@ -447,7 +432,7 @@ export async function downloadOrderPDF(order: OrderPDFPayload, download = true):
     const e = order.endereco;
     const linhas = [
       e.cep ? `CEP: ${e.cep}` : null,
-      e.logradouro ? `${e.logradouro}, ${e.numero}${e.complemento ? ` - ${e.complemento}` : ""}` : null,
+      e.logradouro ? `${e.logradouro}, ${e.numero}${e.complemento ? ` — ${e.complemento}` : ""}` : null,
       e.bairro ? `Bairro: ${e.bairro}` : null,
       e.cidade && e.estado ? `Cidade/UF: ${e.cidade}/${e.estado}` : null,
       e.referencia ? `Referência: ${e.referencia}` : null,
@@ -639,7 +624,7 @@ export function downloadProductsCSV(rows: ProductExportRow[]) {
     lines.push(
       [
         p.nome,
-        p.categoriaNome ?? "-",
+        p.categoriaNome ?? "",
         p.preco.toFixed(2).replace(".", ","),
         p.ativo ? "Sim" : "Não",
         p.novidade ? "Sim" : "Não",
@@ -715,7 +700,7 @@ export function downloadProductsPDF(rows: ProductExportRow[]) {
       : "Ativo";
     const cells = [
       p.nome,
-      p.categoriaNome ?? "-",
+      p.categoriaNome ?? "—",
       brl(p.preco),
       String(estoque),
       statusLabel,
@@ -742,6 +727,8 @@ export function downloadProductsPDF(rows: ProductExportRow[]) {
   const stamp = new Date().toISOString().slice(0, 10);
   doc.save(`produtos-${slugify(BRAND)}-${stamp}.pdf`);
 }
+
+// ---- Generic tabular export ----
 
 export type TableColumn = { label: string; width: number };
 
@@ -869,7 +856,7 @@ export function downloadProductsXLSX(rows: ProductExportRow[]) {
       .join(" | ");
     return [
       p.nome,
-      p.categoriaNome ?? "-",
+      p.categoriaNome ?? "",
       p.preco,
       p.ativo ? "Sim" : "Não",
       p.novidade ? "Sim" : "Não",
