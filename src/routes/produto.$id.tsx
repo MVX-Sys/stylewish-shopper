@@ -370,7 +370,7 @@ function ProductPage() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_400px] md:gap-8">
               {/* Gallery (Thumbs + Main) */}
               <div className="flex flex-col gap-4">
-                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-white">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl">
                   {imgs[mainIdx] ? (
                     <img
                       src={imgs[mainIdx]}
@@ -380,7 +380,7 @@ function ProductPage() {
                       fetchPriority="high"
                       decoding="async"
                       sizes="(max-width: 768px) 100vw, 60vw"
-                      className="h-full w-full object-contain p-4"
+                      className="h-full w-full object-contain"
                     />
                   ) : (
                     <div className="skeleton h-full w-full" />
@@ -415,13 +415,13 @@ function ProductPage() {
                     <button
                       key={i}
                       onClick={() => setMainIdx(i)}
-                      className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all bg-white ${
+                      className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                         i === mainIdx
                           ? "border-foreground ring-2 ring-foreground/10"
-                          : "border-border opacity-70 hover:opacity-100"
+                          : "border-transparent opacity-70 hover:opacity-100"
                       }`}
                     >
-                      <img src={u} alt="" className="h-full w-full object-contain p-1" />
+                      <img src={u} alt="" className="h-full w-full object-contain" />
                     </button>
                   ))}
                 </div>
