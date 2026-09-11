@@ -643,26 +643,26 @@ function ProductPage() {
                                       {q === 0 ? (
                                         <button
                                           onClick={() => setQ(key, 1)}
-                                          className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg border border-border transition-all hover:border-foreground hover:bg-foreground hover:text-background"
+                                          className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg border border-border transition-all hover:border-foreground hover:bg-foreground hover:text-background"
                                           aria-label="Adicionar"
                                         >
-                                          <Plus className="h-4 w-4" />
+                                          <Plus className="h-3.5 w-3.5" />
                                         </button>
                                       ) : (
                                         <div className="mx-auto flex items-center justify-center gap-0.5 rounded-lg bg-foreground p-0.5 text-background">
                                           <button
                                             onClick={() => setQ(key, q - 1)}
-                                            className="grid h-8 w-7 place-items-center rounded-md hover:bg-background/10"
+                                            className="grid h-7 w-6 place-items-center rounded-md hover:bg-background/10"
                                           >
                                             <Minus className="h-3 w-3" />
                                           </button>
-                                          <span className="w-6 text-center text-xs font-semibold tabular-nums">
+                                          <span className="w-5 text-center text-xs font-semibold tabular-nums">
                                             {q}
                                           </span>
                                           <button
                                             onClick={() => setQ(key, Math.min(livre, q + 1))}
                                             disabled={q >= livre}
-                                            className="grid h-8 w-7 place-items-center rounded-md hover:bg-background/10 disabled:opacity-40"
+                                            className="grid h-7 w-6 place-items-center rounded-md hover:bg-background/10 disabled:opacity-40"
                                           >
                                             <Plus className="h-3 w-3" />
                                           </button>
