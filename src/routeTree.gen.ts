@@ -307,7 +307,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/produtos/novo'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
