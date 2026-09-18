@@ -120,7 +120,7 @@ function HeroSection({ config }: { config?: any }) {
   const prevSlide = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
 
   return (
-    <section className="relative h-[85vh] min-h-[600px] w-full overflow-hidden bg-navy">
+    <section className="relative aspect-[2/1] w-full overflow-hidden bg-navy md:aspect-auto md:h-[85vh] md:min-h-[600px]">
       <AnimatePresence mode="wait">
         {slides.map((slide: any, index: number) => index === current && (
           <motion.div
@@ -140,13 +140,13 @@ function HeroSection({ config }: { config?: any }) {
                   loop 
                   muted 
                   playsInline 
-                  className="h-full w-full object-cover opacity-50"
+                  className="h-full w-full object-contain opacity-50 md:object-cover"
                 />
               ) : slide.tipo === 'image' && slide.media_url ? (
-                <img 
-                  src={slide.media_url} 
-                  alt={slide.titulo} 
-                  className="h-full w-full object-cover opacity-50"
+                <img
+                  src={slide.media_url}
+                  alt={slide.titulo}
+                  className="h-full w-full object-contain opacity-50 md:object-cover"
                   loading={index === 0 ? "eager" : "lazy"}
                   fetchPriority={index === 0 ? "high" : "auto"}
                 />
@@ -193,18 +193,6 @@ function HeroSection({ config }: { config?: any }) {
                 </motion.p>
               )}
               
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.7, duration: 0.8 }}
-              >
-                <Link
-                  to="/produtos"
-                  className="btn-shine mt-12 inline-block rounded-full bg-primary px-10 py-4 text-lg font-bold uppercase tracking-widest text-white shadow-premium transition-transform hover:scale-105 active:scale-95"
-                >
-                  Ver todos os produtos
-                </Link>
-              </motion.div>
             </div>
           </motion.div>
         ))}
