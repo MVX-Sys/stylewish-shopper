@@ -168,7 +168,8 @@ function CheckoutPage() {
         const perso = formatPersonalizacoes(i);
         const variacao = `Cor ${i.cor}, Tam ${i.tamanho}${perso ? `, PERSONALIZAÇÃO: ${perso}` : ""}`;
         const preco = itemPrecoEfetivo(i);
-        return `• ${i.quantidade}x ${i.nome} — ${variacao} — ${brl(preco)} (subtotal ${brl(preco * i.quantidade)})`;
+        const codigo = (i as any).codigo ? `[${(i as any).codigo}] ` : "";
+        return `• ${codigo}${i.quantidade}x ${i.nome} — ${variacao} — ${brl(preco)} (subtotal ${brl(preco * i.quantidade)})`;
       });
 
       const enderecoLinhas =
@@ -182,7 +183,7 @@ function CheckoutPage() {
         "*Itens*",
         ...linhas,
         "",
-        `*Total dos itens:* ${brl(total)}`,
+        `*Total de itens:* ${items.reduce((s, i) => s + i.quantidade, 0)}`,
         appliedCoupon ? `*Cupom aplicado:* ${appliedCoupon.codigo}` : "",
         appliedCoupon ? `*Desconto:* -${brl(discountAmount)}` : "",
 
