@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
+import { getRestockWhatsapp, setRestockWhatsapp } from "@/lib/restock-number";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
 import {
@@ -15,6 +16,7 @@ import {
   RotateCcw,
   ExternalLink,
   Package,
+  Phone,
 } from "lucide-react";
 import { downloadTableCSV, downloadTablePDF, downloadTableXLSX } from "@/lib/pdf";
 import { ExportMenu } from "@/components/export-menu";
@@ -182,6 +184,50 @@ function SolicitacoesPage() {
     });
   };
 
+  // ---- Janela de seleção de destinatários ----
+  const [avisoBase, setAvisoBase] = useState<Solicitacao | null>(null);
+  const [selecionados, setSelecionados] = useState<string[]>([]);
+  const [numeroExtra, setNumeroExtra] = useState("");
+
+  const candidatos = useMemo(() => {
+    if (!avisoBase) return [] as Solicitacao[];
+    return itens.filter(
+      (s) => s.produto_id === avisoBase.produto_id && s.status !== "cancelada",
+    );
+  }, [itens, avisoBase]);
+
+  const abrirJanelaAviso = (s: Solicitacao) => {
+    setAvisoBase(s);
+    setSelecionados([s.id]);
+    setNumeroExtra("");
+  };
+
+  const toggleSelecionado = (id: string) =>
+    setSelecionados((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+
+  const enviarAvisos = () => {
+    if (!avisoBase) return;
+    const alvos = candidatos.filter((c) => selecionados.includes(c.id));
+    const extra = normalizeWhatsapp(numeroExtra);
+    if (alvos.length === 0 && !extra) {
+      return toast.error("Selecione ao menos um destinatário.");
+    }
+    alvos.forEach((c) => abrirWhatsApp(c, true));
+    if (extra) {
+      const msg = buildMessage(avisoBase, true);
+      window.open(
+        `https://wa.me/${extra}?text=${encodeURIComponent(msg)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+    }
+    toast.success(`Mensagem aberta para ${alvos.length + (extra ? 1 : 0)} contato(s).`);
+    setAvisoBase(null);
+  };
+
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -196,6 +242,7 @@ function SolicitacoesPage() {
             Contate clientes assim que houver reposição de estoque.
           </p>
         </div>
+        <NumeroAviso />
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -377,7 +424,7 @@ function SolicitacoesPage() {
 
                 <div className="flex flex-wrap items-center justify-end gap-1.5">
                   <button
-                    onClick={() => abrirWhatsApp(s, true)}
+                    onClick={() => abrirJanelaAviso(s)}
                     title="Avisar que foi reposto"
                     className="inline-flex items-center gap-1.5 rounded-full bg-success px-3 py-2 text-xs font-semibold text-success-foreground hover:opacity-90"
                   >
@@ -443,6 +490,162 @@ function SolicitacoesPage() {
           </ul>
         )}
       </div>
+
+      {avisoBase && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"
+          onClick={() => setAvisoBase(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-xl"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="font-display text-lg font-semibold">Avisar reposição</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {avisoBase.produtos?.nome ?? "Produto"} · escolha quem receberá o aviso.
+                </p>
+              </div>
+              <button
+                onClick={() => setAvisoBase(null)}
+                className="rounded-full p-1.5 text-muted-foreground hover:bg-accent"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 max-h-64 space-y-1 overflow-y-auto">
+              {candidatos.map((c) => (
+                <label
+                  key={c.id}
+                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm hover:bg-accent"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selecionados.includes(c.id)}
+                    onChange={() => toggleSelecionado(c.id)}
+                    className="h-4 w-4"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium">{c.cliente_nome}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {c.cliente_whatsapp} · {c.cor}/{c.tamanho}
+                    </span>
+                  </span>
+                </label>
+              ))}
+              {candidatos.length === 0 && (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  Nenhum cliente aguardando este produto.
+                </p>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <label className="text-xs font-medium text-muted-foreground">
+                Outro número (opcional)
+              </label>
+              <input
+                value={numeroExtra}
+                onChange={(e) => setNumeroExtra(e.target.value)}
+                placeholder="(00) 00000-0000"
+                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-foreground"
+              />
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setAvisoBase(null)}
+                className="rounded-full border border-border px-4 py-2 text-sm font-medium hover:bg-accent"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={enviarAvisos}
+                className="inline-flex items-center gap-1.5 rounded-full bg-success px-4 py-2 text-sm font-semibold text-success-foreground hover:opacity-90"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Enviar aviso
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NumeroAviso() {
+  const qc = useQueryClient();
+  const { data: numero = "" } = useQuery({
+    queryKey: ["restock-whatsapp"],
+    queryFn: getRestockWhatsapp,
+  });
+  const [editando, setEditando] = useState(false);
+  const [valor, setValor] = useState("");
+  const [salvando, setSalvando] = useState(false);
+
+  const salvar = async () => {
+    try {
+      setSalvando(true);
+      await setRestockWhatsapp(valor);
+      await qc.invalidateQueries({ queryKey: ["restock-whatsapp"] });
+      toast.success("Número de aviso atualizado.");
+      setEditando(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível salvar.");
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <Phone className="h-4 w-4" /> Número que recebe os avisos
+      </div>
+      {editando ? (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <input
+            value={valor}
+            onChange={(e) => setValor(e.target.value)}
+            placeholder="5581997480691"
+            className="w-48 rounded-full border border-input bg-background px-3 py-1.5 text-sm outline-none focus:border-foreground"
+          />
+          <button
+            onClick={salvar}
+            disabled={salvando}
+            className="rounded-full bg-brand px-3 py-1.5 text-sm font-medium text-brand-foreground disabled:opacity-60"
+          >
+            Salvar
+          </button>
+          <button
+            onClick={() => setEditando(false)}
+            className="rounded-full border border-input px-3 py-1.5 text-sm"
+          >
+            Cancelar
+          </button>
+        </div>
+      ) : (
+        <div className="mt-2 flex items-center gap-3">
+          <p className="font-display text-lg font-semibold tabular-nums">
+            {numero || "—"}
+          </p>
+          <button
+            onClick={() => {
+              setValor(numero);
+              setEditando(true);
+            }}
+            className="rounded-full border border-input px-3 py-1.5 text-sm"
+          >
+            Alterar
+          </button>
+        </div>
+      )}
+      <p className="mt-2 text-xs text-muted-foreground">
+        Com DDI e DDD, apenas números.
+      </p>
     </div>
   );
 }
