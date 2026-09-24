@@ -28,7 +28,9 @@ type SortKey =
   | "menor-preco"
   | "maior-preco"
   | "menor-estoque"
-  | "maior-estoque";
+  | "maior-estoque"
+  | "codigo-asc"
+  | "codigo-desc";
 
 function AdminProductsList() {
   const qc = useQueryClient();
@@ -221,6 +223,8 @@ function AdminProductsList() {
     const sorted = [...list];
     sorted.sort((a, b) => {
       switch (sort) {
+        case "codigo-asc": return String((a as any).hash_id ?? "").localeCompare(String((b as any).hash_id ?? ""), "pt-BR", { numeric: true });
+        case "codigo-desc": return String((b as any).hash_id ?? "").localeCompare(String((a as any).hash_id ?? ""), "pt-BR", { numeric: true });
         case "nome-asc": return a.nome.localeCompare(b.nome);
         case "nome-desc": return b.nome.localeCompare(a.nome);
         case "menor-preco": return a.preco - b.preco;
@@ -517,6 +521,8 @@ function AdminProductsList() {
                 <option value="ordem">Ordem de exibição (manual)</option>
                 <option value="recentes">Mais recentes</option>
                 <option value="antigos">Mais antigos</option>
+                <option value="codigo-asc">Código (A–Z)</option>
+                <option value="codigo-desc">Código (Z–A)</option>
                 <option value="nome-asc">Nome (A–Z)</option>
                 <option value="nome-desc">Nome (Z–A)</option>
                 <option value="menor-preco">Menor preço</option>
@@ -1107,24 +1113,6 @@ function AdminProductsList() {
                               >
                                 <GripVertical className="h-4 w-4" />
                               </span>
-                              <button
-                                onClick={() => moverProduto(p.id, -1)}
-                                disabled={reordering || idx === 0}
-                                className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-30"
-                                title="Mover para cima"
-                                aria-label="Mover para cima"
-                              >
-                                <ChevronUp className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() => moverProduto(p.id, 1)}
-                                disabled={reordering || idx === filtered.length - 1}
-                                className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-30"
-                                title="Mover para baixo"
-                                aria-label="Mover para baixo"
-                              >
-                                <ChevronDown className="h-4 w-4" />
-                              </button>
                             </div>
                           )}
                           <button
