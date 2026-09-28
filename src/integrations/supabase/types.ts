@@ -56,6 +56,7 @@ export type Database = {
           cargo: string | null
           criado_em: string | null
           foto_path: string | null
+          horario: string | null
           id: string
           nome: string
           whatsapp: string
@@ -65,6 +66,7 @@ export type Database = {
           cargo?: string | null
           criado_em?: string | null
           foto_path?: string | null
+          horario?: string | null
           id?: string
           nome: string
           whatsapp: string
@@ -74,6 +76,7 @@ export type Database = {
           cargo?: string | null
           criado_em?: string | null
           foto_path?: string | null
+          horario?: string | null
           id?: string
           nome?: string
           whatsapp?: string

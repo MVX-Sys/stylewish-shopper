@@ -33,10 +33,10 @@ export const OPCOES_SANDALIA_REGULAGEM: OpcaoPersonalizacao[] = [
   { id: "birken-calcanhar", label: "Calcanhar", preco: 1 },
 ];
 
-// Bermudas
+// Bermudas: personalização única (+R$5), sem opções internas —
+// os detalhes são combinados em contato com o cliente.
 export const OPCOES_BERMUDA: OpcaoPersonalizacao[] = [
-  { id: "bermuda-dtf", label: "DTF", preco: 3 },
-  { id: "bermuda-bordado", label: "Bordado", preco: 5 },
+  { id: "bermuda-personalizada", label: "Personalizada", preco: 5 },
 ];
 
 const norm = (s?: string | null) =>

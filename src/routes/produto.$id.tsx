@@ -625,24 +625,39 @@ function ProductPage() {
                                  if (!disponivel)
                                    return (
                                      <td key={t} className="p-2 text-center">
-                                       {v.quantidade_estoque > 0 ? (
-                                         <span
-                                           title="Todo o estoque já está no seu carrinho"
-                                           className="mx-auto inline-flex items-center rounded-full border border-border bg-muted/50 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
-                                         >
-                                           No carrinho
-                                         </span>
-                                       ) : (
-                                         <button
-                                           type="button"
-                                           onClick={() => setRestock({ cor: c.nome, tam: t })}
-                                           title="Avise-me por WhatsApp quando repor"
-                                           className="mx-auto inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:border-brand hover:text-brand"
-                                         >
-                                           <Bell className="h-3 w-3" />
-                                           Avise-me
-                                         </button>
-                                       )}
+                                       <div className="flex flex-col items-center gap-1">
+                                         {v.quantidade_estoque > 0 ? (
+                                           <>
+                                             <span
+                                               title="Todo o estoque já está no seu carrinho"
+                                               className="mx-auto inline-flex items-center rounded-full border border-border bg-muted/50 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
+                                             >
+                                               No carrinho
+                                             </span>
+                                             <span
+                                               title="Estoque disponível"
+                                               className="text-[9px] font-medium tabular-nums text-muted-foreground"
+                                             >
+                                               {livre} disp.
+                                             </span>
+                                           </>
+                                         ) : (
+                                           <>
+                                             <button
+                                               type="button"
+                                               onClick={() => setRestock({ cor: c.nome, tam: t })}
+                                               title="Avise-me por WhatsApp quando repor"
+                                               className="mx-auto inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:border-brand hover:text-brand"
+                                             >
+                                               <Bell className="h-3 w-3" />
+                                               Avise-me
+                                             </button>
+                                             <span className="text-[9px] font-medium tabular-nums text-muted-foreground">
+                                               Esgotado
+                                             </span>
+                                           </>
+                                         )}
+                                       </div>
                                      </td>
                                    );
                                 return (
@@ -676,6 +691,12 @@ function ProductPage() {
                                           </button>
                                         </div>
                                       )}
+                                      <span
+                                        title="Estoque disponível"
+                                        className="text-[9px] font-medium tabular-nums text-muted-foreground"
+                                      >
+                                        {livre} disp.
+                                      </span>
                                     </div>
                                   </td>
                                 );
@@ -704,6 +725,11 @@ function ProductPage() {
                         Pedido mínimo de {MIN_PECAS_PERSONALIZACAO} peças da categoria
                         {categoriaAtual?.nome ? ` ${categoriaAtual.nome}` : ""} para produtos personalizados.
                       </span>
+                      {gruposPerso.some((g) => g.opcoes.some((o) => o.id.startsWith("bermuda-"))) && (
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          Personalizações são definidas em contato.
+                        </span>
+                      )}
                     </span>
                   </label>
                   {personalizado && gruposPerso.length > 0 && (
