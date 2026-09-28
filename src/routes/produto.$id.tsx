@@ -9,7 +9,7 @@ import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart, MIN_PECAS_PERSONALIZACAO } from "@/lib/cart";
-import { getGruposPersonalizacao } from "@/lib/personalizacao";
+import { getGruposPersonalizacao, isBermudaPersonalizavel, OPCAO_BERMUDA } from "@/lib/personalizacao";
 import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X, Share2, Copy, Check, QrCode } from "lucide-react";
 import React from "react";
 const downloadProductPDF = async (p: any) => {
@@ -106,12 +106,23 @@ function ProductPage() {
       ),
     [p, categoriaAtual],
   );
-  const opcoesPersoSelecionadas = useMemo(
+  const ehBermuda = useMemo(
     () =>
-      gruposPerso
+      isBermudaPersonalizavel(
+        p?.nome,
+        categoriaAtual?.nome,
+        (p as any)?.personalizacao_tipo ?? null,
+      ),
+    [p, categoriaAtual],
+  );
+  const opcoesPersoSelecionadas = useMemo(
+    () => [
+      ...gruposPerso
         .flatMap((g) => g.opcoes)
         .filter((o) => persoSel.includes(o.id)),
-    [gruposPerso, persoSel],
+      ...(personalizado && ehBermuda ? [OPCAO_BERMUDA] : []),
+    ],
+    [gruposPerso, persoSel, personalizado, ehBermuda],
   );
   const adicionalPerso = opcoesPersoSelecionadas.reduce((s, o) => s + o.preco, 0);
 
@@ -710,7 +721,7 @@ function ProductPage() {
                 )}
 
                 <div
-                  className={`rounded-2xl border border-border bg-card p-4 ${gruposPerso.length === 0 ? "hidden" : ""}`}
+                  className={`rounded-2xl border border-border bg-card p-4 ${gruposPerso.length === 0 && !ehBermuda ? "hidden" : ""}`}
                 >
                   <label className="flex cursor-pointer items-start gap-3">
                     <input
@@ -725,10 +736,15 @@ function ProductPage() {
                         Pedido mínimo de {MIN_PECAS_PERSONALIZACAO} peças da categoria
                         {categoriaAtual?.nome ? ` ${categoriaAtual.nome}` : ""} para produtos personalizados.
                       </span>
-                      {gruposPerso.some((g) => g.opcoes.some((o) => o.id.startsWith("bermuda-"))) && (
-                        <span className="mt-1 block text-xs text-muted-foreground">
-                          Personalizações são definidas em contato.
-                        </span>
+                      {ehBermuda && (
+                        <>
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            Personalizações são definidas em contato.
+                          </span>
+                          <span className="mt-1 block text-xs font-semibold text-primary">
+                            + {brl(OPCAO_BERMUDA.preco)} por peça
+                          </span>
+                        </>
                       )}
                     </span>
                   </label>
