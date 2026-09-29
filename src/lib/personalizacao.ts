@@ -128,3 +128,41 @@ export function getGruposPersonalizacao(
 
   return [];
 }
+
+// ================= Personalizações definidas por produto =================
+// Cada produto guarda a lista de personalizações disponíveis (coluna
+// produtos.personalizacoes). As listas acima servem apenas como atalhos
+// ("modelos") no formulário do admin.
+
+export type OpcaoProduto = OpcaoPersonalizacao & { grupo?: string };
+
+export const MODELOS_PERSONALIZACAO: GrupoPersonalizacao[] = [
+  { titulo: "Óculos", opcoes: OPCOES_OCULOS },
+  { titulo: "Case", opcoes: OPCOES_CASE },
+  { titulo: "Lenço", opcoes: OPCOES_LENCO },
+  { titulo: "Sandália com pala", opcoes: OPCOES_SANDALIA_PALA },
+  { titulo: "Sandália com regulagem", opcoes: OPCOES_SANDALIA_REGULAGEM },
+  { titulo: "Bermuda", opcoes: [OPCAO_BERMUDA] },
+];
+
+export function parsePersonalizacoes(raw: unknown): OpcaoProduto[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((o: any) => o && typeof o.id === "string" && typeof o.label === "string")
+    .map((o: any) => ({
+      id: o.id,
+      label: o.label,
+      preco: Math.max(0, Number(o.preco) || 0),
+      grupo: typeof o.grupo === "string" ? o.grupo : "",
+    }));
+}
+
+export function agruparPersonalizacoes(opcoes: OpcaoProduto[]): GrupoPersonalizacao[] {
+  const m = new Map<string, OpcaoPersonalizacao[]>();
+  for (const o of opcoes) {
+    const g = o.grupo?.trim() || "Opções";
+    if (!m.has(g)) m.set(g, []);
+    m.get(g)!.push({ id: o.id, label: o.label, preco: o.preco });
+  }
+  return [...m.entries()].map(([titulo, opcoes]) => ({ titulo, opcoes }));
+}

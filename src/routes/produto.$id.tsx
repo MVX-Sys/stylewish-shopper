@@ -9,7 +9,7 @@ import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
 import { useCart, MIN_PECAS_PERSONALIZACAO } from "@/lib/cart";
-import { getGruposPersonalizacao, isBermudaPersonalizavel, OPCAO_BERMUDA } from "@/lib/personalizacao";
+import { parsePersonalizacoes, agruparPersonalizacoes } from "@/lib/personalizacao";
 import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X, Share2, Copy, Check, QrCode } from "lucide-react";
 import React from "react";
 const downloadProductPDF = async (p: any) => {
@@ -69,7 +69,9 @@ function ProductPage() {
   const { data: p } = useSuspenseQuery({
     queryKey: ["produto", id],
     queryFn: () => getProdutoFn({ data: id }),
-    staleTime: 1000 * 30,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
   });
   const { data: categorias = [] } = useSuspenseQuery({
     queryKey: ["categorias"],
@@ -97,32 +99,22 @@ function ProductPage() {
     [p, categorias],
   );
 
+  const opcoesProduto = useMemo(() => parsePersonalizacoes((p as any)?.personalizacoes), [p]);
+  // Com uma única opção, o botão "Personalizar" já aplica o acréscimo (detalhes em contato)
+  const opcaoUnica = opcoesProduto.length === 1 ? opcoesProduto[0] : null;
+  const ehBermuda = !!opcaoUnica;
   const gruposPerso = useMemo(
-    () =>
-      getGruposPersonalizacao(
-        p?.nome,
-        categoriaAtual?.nome,
-        (p as any)?.personalizacao_tipo ?? null,
-      ),
-    [p, categoriaAtual],
-  );
-  const ehBermuda = useMemo(
-    () =>
-      isBermudaPersonalizavel(
-        p?.nome,
-        categoriaAtual?.nome,
-        (p as any)?.personalizacao_tipo ?? null,
-      ),
-    [p, categoriaAtual],
+    () => (opcoesProduto.length > 1 ? agruparPersonalizacoes(opcoesProduto) : []),
+    [opcoesProduto],
   );
   const opcoesPersoSelecionadas = useMemo(
     () => [
       ...gruposPerso
         .flatMap((g) => g.opcoes)
         .filter((o) => persoSel.includes(o.id)),
-      ...(personalizado && ehBermuda ? [OPCAO_BERMUDA] : []),
+      ...(personalizado && opcaoUnica ? [{ id: opcaoUnica.id, label: opcaoUnica.label, preco: opcaoUnica.preco }] : []),
     ],
-    [gruposPerso, persoSel, personalizado, ehBermuda],
+    [gruposPerso, persoSel, personalizado, opcaoUnica],
   );
   const adicionalPerso = opcoesPersoSelecionadas.reduce((s, o) => s + o.preco, 0);
 
@@ -742,7 +734,7 @@ function ProductPage() {
                             Personalizações são definidas em contato.
                           </span>
                           <span className="mt-1 block text-xs font-semibold text-primary">
-                            + {brl(OPCAO_BERMUDA.preco)} por peça
+                            + {brl(opcaoUnica?.preco ?? 0)} por peça
                           </span>
                         </>
                       )}

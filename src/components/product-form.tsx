@@ -7,6 +7,7 @@ import { getImageUrl } from "@/lib/storage";
 import { Trash2, Plus, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
+import { MODELOS_PERSONALIZACAO, parsePersonalizacoes, type OpcaoProduto } from "@/lib/personalizacao";
 
 type VarRow = {
   id?: string;
@@ -121,6 +122,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
   const [precoPromocional, setPrecoPromocional] = useState<string>("");
   const [promocaoAte, setPromocaoAte] = useState<string>("");
   const [ativo, setAtivo] = useState(true);
+  const [persos, setPersos] = useState<OpcaoProduto[]>([]);
   const [imgs, setImgs] = useState<ImgRow[]>([]);
   const [vars, setVars] = useState<VarRow[]>([]);
   const [saving, setSaving] = useState(false);
@@ -137,6 +139,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
     setCategoriaId(existing.categoria_id ?? "");
     setCodigoBase(((existing as any).codigo_base as string) ?? (existing.hash_id ?? "").slice(0, 3));
     
+    setPersos(parsePersonalizacoes((existing as any).personalizacoes));
     setNovidade(existing.novidade);
     setPromocao(existing.promocao);
     setPrecoPromocional(
@@ -356,6 +359,9 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         preco_promocional: precoPromoNum,
         promocao_ate: promoAteIso,
         ativo,
+        personalizacoes: persos
+          .map((o) => ({ ...o, label: o.label.trim(), grupo: (o.grupo ?? "").trim(), preco: Math.max(0, Number(o.preco) || 0) }))
+          .filter((o) => o.label) as any,
       };
       if (pid) {
         const { error } = await supabase.from("produtos").update(payload).eq("id", pid);
@@ -772,6 +778,8 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
             )}
           </Card>
 
+          <PersonalizacoesCard value={persos} onChange={setPersos} />
+
           <Card title="Visibilidade">
             <div className="space-y-2.5">
               {[
@@ -889,3 +897,111 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+
+function PersonalizacoesCard({
+  value,
+  onChange,
+}: {
+  value: OpcaoProduto[];
+  onChange: (v: OpcaoProduto[]) => void;
+}) {
+  const has = (id: string) => value.some((o) => o.id === id);
+  const toggleModelo = (grupo: string, o: { id: string; label: string; preco: number }) =>
+    onChange(has(o.id) ? value.filter((x) => x.id !== o.id) : [...value, { ...o, grupo }]);
+  const upd = (i: number, patch: Partial<OpcaoProduto>) =>
+    onChange(value.map((o, j) => (j === i ? { ...o, ...patch } : o)));
+  const addCustom = () =>
+    onChange([...value, { id: `custom-${Date.now().toString(36)}`, label: "", preco: 0, grupo: "" }]);
+
+  return (
+    <Card
+      title="Personalizações"
+      action={
+        <button
+          type="button"
+          onClick={addCustom}
+          className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+        >
+          <Plus className="h-3.5 w-3.5" /> Nova opção
+        </button>
+      }
+    >
+      <p className="text-xs text-muted-foreground">
+        Escolha quais personalizações este produto oferece e o preço de cada uma (acréscimo por peça).
+        Sem opções, o produto não é personalizável. Com apenas uma opção, o cliente só marca
+        "Personalizar" e os detalhes são combinados em contato.
+      </p>
+
+      <details className="rounded-lg border border-border bg-background p-3">
+        <summary className="cursor-pointer text-xs font-semibold">Adicionar a partir de modelos</summary>
+        <div className="mt-3 space-y-3">
+          {MODELOS_PERSONALIZACAO.map((g) => (
+            <div key={g.titulo}>
+              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {g.titulo}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {g.opcoes.map((o) => (
+                  <button
+                    key={o.id}
+                    type="button"
+                    onClick={() => toggleModelo(g.titulo, o)}
+                    className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                      has(o.id)
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border hover:bg-accent"
+                    }`}
+                  >
+                    {o.label} · R$ {o.preco}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </details>
+
+      {value.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border p-3 text-center text-xs text-muted-foreground">
+          Nenhuma personalização disponível para este produto.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {value.map((o, i) => (
+            <li key={o.id} className="grid grid-cols-[1fr_1fr_90px_auto] items-center gap-2">
+              <input
+                value={o.grupo ?? ""}
+                onChange={(e) => upd(i, { grupo: e.target.value })}
+                placeholder="Grupo (ex: Óculos)"
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              />
+              <input
+                value={o.label}
+                onChange={(e) => upd(i, { label: e.target.value })}
+                placeholder="Nome da opção"
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              />
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={o.preco}
+                onChange={(e) => upd(i, { preco: Number(e.target.value) })}
+                aria-label="Preço"
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => onChange(value.filter((_, j) => j !== i))}
+                className="rounded-md p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label="Remover opção"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
