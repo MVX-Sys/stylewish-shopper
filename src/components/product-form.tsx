@@ -384,21 +384,41 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         preco_promocional: precoPromoNum,
         promocao_ate: promoAteIso,
         ativo,
-        personalizacoes: persos
-          .map((o) => ({ ...o, label: o.label.trim(), grupo: (o.grupo ?? "").trim(), preco: Math.max(0, Number(o.preco) || 0) }))
-          .filter((o) => o.label) as any,
       };
+      const personalizacoesPayload = persos
+        .map((o) => ({
+          id: String(o.id),
+          label: o.label.trim(),
+          grupo: (o.grupo ?? "").trim(),
+          preco: Math.round(Math.max(0, Number(o.preco) || 0) * 100) / 100,
+        }))
+        .filter((o) => o.label);
       if (pid) {
         const { error } = await supabase.from("produtos").update(payload).eq("id", pid);
-        if (error) throw new Error("Erro ao salvar produto e personalizações: " + error.message);
+        if (error) throw new Error("Erro ao salvar produto: " + error.message);
       } else {
         const { data, error } = await supabase
           .from("produtos")
           .insert(payload)
           .select("id")
           .single();
-        if (error) throw error;
+        if (error) throw new Error("Erro ao criar produto: " + error.message);
         pid = data.id;
+      }
+
+      // Save customizations separately so a problem here never blocks the product.
+      // Retries once after a short pause if the server hasn't picked up the column yet.
+      let persoSaveErr: { message: string } | null = null;
+      for (let tentativa = 0; tentativa < 3; tentativa++) {
+        const { error } = await supabase
+          .from("produtos")
+          .update({ personalizacoes: personalizacoesPayload as any })
+          .eq("id", pid!);
+        persoSaveErr = error;
+        if (!error) break;
+        console.error("[personalizacoes] falha ao salvar", error);
+        if (!/schema cache|personalizacoes/i.test(error.message)) break;
+        await new Promise((r) => setTimeout(r, 1500));
       }
 
       // upload new images
@@ -492,17 +512,26 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       }
 
       // confirm customizations were persisted
-      const { data: salvo, error: persoErr } = await supabase
-        .from("produtos")
-        .select("personalizacoes")
-        .eq("id", pid!)
-        .single();
-      const esperadas = payload.personalizacoes.length;
-      const gravadas = Array.isArray((salvo as any)?.personalizacoes)
-        ? (salvo as any).personalizacoes.length
-        : -1;
+      const esperadas = personalizacoesPayload.length;
+      let persoErr: { message: string } | null = persoSaveErr;
+      let gravadas = -1;
+      if (!persoErr) {
+        const { data: salvo, error } = await supabase
+          .from("produtos")
+          .select("personalizacoes")
+          .eq("id", pid!)
+          .single();
+        persoErr = error;
+        gravadas = Array.isArray((salvo as any)?.personalizacoes)
+          ? (salvo as any).personalizacoes.length
+          : -1;
+      }
       if (persoErr || gravadas !== esperadas) {
-        toast.error("Produto salvo, mas as personalizações não foram gravadas. Tente salvar novamente.");
+        toast.error(
+          "Produto salvo, mas as personalizações não foram gravadas. Recarregue a página e salve novamente." +
+            (persoErr ? ` (${persoErr.message})` : ""),
+          { duration: 10000 },
+        );
       } else {
         toast.success(
           esperadas === 0
