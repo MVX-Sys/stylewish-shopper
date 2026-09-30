@@ -390,7 +390,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
       };
       if (pid) {
         const { error } = await supabase.from("produtos").update(payload).eq("id", pid);
-        if (error) throw error;
+        if (error) throw new Error("Erro ao salvar produto e personalizações: " + error.message);
       } else {
         const { data, error } = await supabase
           .from("produtos")
@@ -445,19 +445,70 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         }
       }
 
-      // sync variations: replace-all approach
-      await supabase.from("variacoes_produto").delete().eq("produto_id", pid);
-      if (vars.length) {
-        const { error } = await supabase.from("variacoes_produto").insert(
-          vars.map((v) => ({
-            produto_id: pid,
+      // sync variations: update existing, insert new, delete removed
+      // (keeps ids stable so carts and past orders stay linked)
+      const { data: existingVars, error: exVarErr } = await supabase
+        .from("variacoes_produto")
+        .select("id")
+        .eq("produto_id", pid!);
+      if (exVarErr) throw new Error("Erro ao carregar o estoque atual: " + exVarErr.message);
+      const keepVarIds = new Set(vars.map((v) => v.id).filter(Boolean) as string[]);
+      const removedVarIds = (existingVars ?? []).map((r) => r.id).filter((id) => !keepVarIds.has(id));
+      for (const id of removedVarIds) {
+        const { error } = await supabase.from("variacoes_produto").delete().eq("id", id);
+        if (error) {
+          // Referenced by past orders: can't delete, so zero its stock instead
+          const { error: zeroErr } = await supabase
+            .from("variacoes_produto")
+            .update({ quantidade_estoque: 0 })
+            .eq("id", id);
+          if (zeroErr) throw new Error("Erro ao remover variação: " + zeroErr.message);
+        }
+      }
+      for (const v of vars.filter((x) => x.id)) {
+        const { error } = await supabase
+          .from("variacoes_produto")
+          .update({
             nome_cor: v.nome_cor,
             hex_cor: v.hex_cor,
             tamanho: v.tamanho,
-            quantidade_estoque: v.quantidade_estoque,
+            quantidade_estoque: Math.max(0, Math.floor(Number(v.quantidade_estoque) || 0)),
+          })
+          .eq("id", v.id!);
+        if (error) throw new Error("Erro ao salvar estoque: " + error.message);
+      }
+      const novas = vars.filter((x) => !x.id);
+      if (novas.length) {
+        const { error } = await supabase.from("variacoes_produto").insert(
+          novas.map((v) => ({
+            produto_id: pid!,
+            nome_cor: v.nome_cor,
+            hex_cor: v.hex_cor,
+            tamanho: v.tamanho,
+            quantidade_estoque: Math.max(0, Math.floor(Number(v.quantidade_estoque) || 0)),
           })),
         );
-        if (error) throw error;
+        if (error) throw new Error("Erro ao salvar estoque: " + error.message);
+      }
+
+      // confirm customizations were persisted
+      const { data: salvo, error: persoErr } = await supabase
+        .from("produtos")
+        .select("personalizacoes")
+        .eq("id", pid!)
+        .single();
+      const esperadas = payload.personalizacoes.length;
+      const gravadas = Array.isArray((salvo as any)?.personalizacoes)
+        ? (salvo as any).personalizacoes.length
+        : -1;
+      if (persoErr || gravadas !== esperadas) {
+        toast.error("Produto salvo, mas as personalizações não foram gravadas. Tente salvar novamente.");
+      } else {
+        toast.success(
+          esperadas === 0
+            ? "Personalizações salvas: produto sem personalização."
+            : `Personalizações salvas: ${esperadas} ${esperadas === 1 ? "opção" : "opções"}.`,
+        );
       }
 
       toast.success("Produto salvo!");

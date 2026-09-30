@@ -152,6 +152,54 @@ export type Database = {
         }
         Relationships: []
       }
+      estoque_historico: {
+        Row: {
+          cor: string | null
+          criado_em: string
+          diferenca: number
+          id: string
+          origem: string
+          produto_id: string | null
+          produto_nome: string | null
+          quantidade_anterior: number
+          quantidade_nova: number
+          tamanho: string | null
+          user_email: string | null
+          user_id: string | null
+          variacao_id: string | null
+        }
+        Insert: {
+          cor?: string | null
+          criado_em?: string
+          diferenca?: number
+          id?: string
+          origem?: string
+          produto_id?: string | null
+          produto_nome?: string | null
+          quantidade_anterior?: number
+          quantidade_nova?: number
+          tamanho?: string | null
+          user_email?: string | null
+          user_id?: string | null
+          variacao_id?: string | null
+        }
+        Update: {
+          cor?: string | null
+          criado_em?: string
+          diferenca?: number
+          id?: string
+          origem?: string
+          produto_id?: string | null
+          produto_nome?: string | null
+          quantidade_anterior?: number
+          quantidade_nova?: number
+          tamanho?: string | null
+          user_email?: string | null
+          user_id?: string | null
+          variacao_id?: string | null
+        }
+        Relationships: []
+      }
       hero_slides: {
         Row: {
           ativo: boolean
