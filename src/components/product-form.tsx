@@ -527,10 +527,13 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
           : -1;
       }
       if (persoErr || gravadas !== esperadas) {
+        const semColuna = !!persoErr && /schema cache|personalizacoes/i.test(persoErr.message);
         toast.error(
-          "Produto salvo, mas as personalizações não foram gravadas. Recarregue a página e salve novamente." +
-            (persoErr ? ` (${persoErr.message})` : ""),
-          { duration: 10000 },
+          semColuna
+            ? "Produto salvo, mas o banco desta versão do site ainda não tem o campo de personalizações. Publique a versão mais recente do site e tente novamente."
+            : "Produto salvo, mas as personalizações não foram gravadas. Recarregue a página e salve novamente." +
+                (persoErr ? ` (${persoErr.message})` : ""),
+          { duration: 12000 },
         );
       } else {
         toast.success(
