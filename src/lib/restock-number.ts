@@ -55,3 +55,29 @@ export async function setRestockWhatsappList(numeros: string[]): Promise<void> {
 export async function setRestockWhatsapp(numero: string): Promise<void> {
   await setRestockWhatsappList([numero]);
 }
+
+export type RestockModo = "rodizio" | "todos";
+
+export async function getRestockModo(): Promise<RestockModo> {
+  const { data } = await supabase.from("site_config").select("restock_modo").eq("id", "current").maybeSingle();
+  return ((data as any)?.restock_modo as RestockModo) === "todos" ? "todos" : "rodizio";
+}
+
+export async function setRestockModo(modo: RestockModo): Promise<void> {
+  const { error } = await supabase.from("site_config").update({ restock_modo: modo } as any).eq("id", "current");
+  if (error) throw error;
+}
+
+/** Destinos deste aviso: no rodízio, um número por vez (A, B, C, A...). */
+export async function getRestockDestinos(): Promise<string[]> {
+  try {
+    const { data, error } = await (supabase as any).rpc("next_restock_whatsapp");
+    if (error) throw error;
+    const lista = ((data as string[] | null) ?? []).map(limpar).filter(validar);
+    if (lista.length > 0) return lista;
+  } catch {
+    // cai no padrão abaixo
+  }
+  const todos = await getRestockWhatsappList();
+  return todos.slice(0, 1);
+}

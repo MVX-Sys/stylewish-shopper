@@ -3,7 +3,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
-import { getRestockWhatsappList, setRestockWhatsappList } from "@/lib/restock-number";
+import {
+  getRestockWhatsappList,
+  setRestockWhatsappList,
+  getRestockModo,
+  setRestockModo,
+  type RestockModo,
+} from "@/lib/restock-number";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
 import {
@@ -582,6 +588,16 @@ function NumeroAviso() {
     queryKey: ["restock-whatsapp"],
     queryFn: getRestockWhatsappList,
   });
+  const { data: modo = "rodizio" } = useQuery({ queryKey: ["restock-modo"], queryFn: getRestockModo });
+  const trocarModo = async (m: RestockModo) => {
+    try {
+      await setRestockModo(m);
+      await qc.invalidateQueries({ queryKey: ["restock-modo"] });
+      toast.success(m === "rodizio" ? "Avisos em rodízio: um número por vez." : "Avisos para todos os números.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível alterar.");
+    }
+  };
   const [editando, setEditando] = useState(false);
   const [lista, setLista] = useState<string[]>([]);
   const [novo, setNovo] = useState("");
@@ -694,8 +710,23 @@ function NumeroAviso() {
           </button>
         </div>
       )}
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-xs text-muted-foreground">Envio:</span>
+        {(["rodizio", "todos"] as const).map((m) => (
+          <button
+            key={m}
+            onClick={() => trocarModo(m)}
+            className={`rounded-full border px-3 py-1.5 text-xs ${modo === m ? "border-foreground bg-foreground text-background" : "border-input"}`}
+          >
+            {m === "rodizio" ? "Um número por vez (rodízio)" : "Todos os números"}
+          </button>
+        ))}
+      </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        Com DDI e DDD, apenas números. Todos os números da lista recebem o aviso.
+        Com DDI e DDD, apenas números.{" "}
+        {modo === "rodizio"
+          ? "Cada pedido vai para um número, em sequência: o 1º para o primeiro, o 2º para o segundo, e assim por diante."
+          : "Todos os números da lista recebem cada aviso."}
       </p>
     </div>
   );

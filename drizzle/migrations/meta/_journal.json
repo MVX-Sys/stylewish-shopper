@@ -50,6 +50,13 @@
       "when": 1791207113558,
       "tag": "0006_restock_whatsapp_multiple_numbers",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791207809088,
+      "tag": "0007_restock_rodizio",
+      "breakpoints": true
     }
   ]
 }
