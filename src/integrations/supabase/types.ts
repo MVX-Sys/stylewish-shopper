@@ -457,6 +457,10 @@ export type Database = {
           hero_title: string | null
           hero_type: string
           id: string
+          manutencao_ativa: boolean
+          manutencao_fim: string | null
+          manutencao_inicio: string | null
+          manutencao_mensagem: string | null
           restock_modo: string
           restock_rodizio_idx: number
           restock_whatsapp: string | null
@@ -469,6 +473,10 @@ export type Database = {
           hero_title?: string | null
           hero_type?: string
           id?: string
+          manutencao_ativa?: boolean
+          manutencao_fim?: string | null
+          manutencao_inicio?: string | null
+          manutencao_mensagem?: string | null
           restock_modo?: string
           restock_rodizio_idx?: number
           restock_whatsapp?: string | null
@@ -481,6 +489,10 @@ export type Database = {
           hero_title?: string | null
           hero_type?: string
           id?: string
+          manutencao_ativa?: boolean
+          manutencao_fim?: string | null
+          manutencao_inicio?: string | null
+          manutencao_mensagem?: string | null
           restock_modo?: string
           restock_rodizio_idx?: number
           restock_whatsapp?: string | null

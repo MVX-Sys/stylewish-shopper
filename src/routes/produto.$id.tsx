@@ -641,12 +641,6 @@ function ProductPage() {
                                              >
                                                No carrinho
                                              </span>
-                                             <span
-                                               title="Estoque disponível"
-                                               className="text-[9px] font-medium tabular-nums text-muted-foreground"
-                                             >
-                                               {livre} disp.
-                                             </span>
                                            </>
                                          ) : (
                                            <>
@@ -698,12 +692,6 @@ function ProductPage() {
                                           </button>
                                         </div>
                                       )}
-                                      <span
-                                        title="Estoque disponível"
-                                        className="text-[9px] font-medium tabular-nums text-muted-foreground"
-                                      >
-                                        {livre} disp.
-                                      </span>
                                     </div>
                                   </td>
                                 );

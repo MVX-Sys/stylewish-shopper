@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
 import { canAccess, hasAdminPanelAccess, type PermissionKey } from "@/lib/permissions";
-import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Menu, Ticket, Settings, Tags, Boxes } from "lucide-react";
+import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Menu, Ticket, Settings, Tags, Boxes, Wrench } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -37,6 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/admin/backup", label: "Backup", icon: <Database className="h-4 w-4" />, perm: "backup.manage" },
   { to: "/admin/auditoria", label: "Auditoria", icon: <History className="h-4 w-4" />, perm: "auditoria.view" },
   { to: "/admin/avancado", label: "Avançado", icon: <Settings className="h-4 w-4" />, perm: "admin.advanced" },
+  { to: "/admin/manutencao", label: "Manutenção", icon: <Wrench className="h-4 w-4" />, perm: "admin.advanced" },
 ];
 
 function AdminLayout() {
