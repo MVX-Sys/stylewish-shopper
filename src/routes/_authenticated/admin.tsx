@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/config";
 import { canAccess, hasAdminPanelAccess, type PermissionKey } from "@/lib/permissions";
-import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Menu, Ticket, Settings, Tags, Boxes, Wrench } from "lucide-react";
+import { LogOut, Package, Loader2, ExternalLink, Bell, History, Users, Database, UserPlus, TrendingUp, Menu, Ticket, Settings, Tags, Boxes, Wrench, RefreshCw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,6 +23,8 @@ type NavItem = {
   icon: React.ReactNode;
   perm: PermissionKey;
   exact?: boolean;
+  /** Abas técnicas ficam no segundo menu (à direita). Novas abas técnicas: marque tech: true. */
+  tech?: boolean;
 };
 
 const NAV_ITEMS: NavItem[] = [
@@ -34,10 +36,11 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/admin/cupons", label: "Cupons", icon: <Ticket className="h-4 w-4" />, perm: "cupons.manage" },
   { to: "/admin/solicitacoes", label: "Reposições", icon: <Bell className="h-4 w-4" />, perm: "solicitacoes.manage" },
   { to: "/admin/usuarios", label: "Usuários", icon: <Users className="h-4 w-4" />, perm: "usuarios.manage" },
-  { to: "/admin/backup", label: "Backup", icon: <Database className="h-4 w-4" />, perm: "backup.manage" },
-  { to: "/admin/auditoria", label: "Auditoria", icon: <History className="h-4 w-4" />, perm: "auditoria.view" },
-  { to: "/admin/avancado", label: "Avançado", icon: <Settings className="h-4 w-4" />, perm: "admin.advanced" },
-  { to: "/admin/manutencao", label: "Manutenção", icon: <Wrench className="h-4 w-4" />, perm: "admin.advanced" },
+  { to: "/admin/gestaoclick", label: "Gestão Click", icon: <RefreshCw className="h-4 w-4" />, perm: "produtos.manage", tech: true },
+  { to: "/admin/backup", label: "Backup", icon: <Database className="h-4 w-4" />, perm: "backup.manage", tech: true },
+  { to: "/admin/auditoria", label: "Auditoria", icon: <History className="h-4 w-4" />, perm: "auditoria.view", tech: true },
+  { to: "/admin/avancado", label: "Avançado", icon: <Settings className="h-4 w-4" />, perm: "admin.advanced", tech: true },
+  { to: "/admin/manutencao", label: "Manutenção", icon: <Wrench className="h-4 w-4" />, perm: "admin.advanced", tech: true },
 ];
 
 function AdminLayout() {
@@ -62,6 +65,8 @@ function AdminLayout() {
   }
 
   const visibleNav = NAV_ITEMS.filter((n) => canAccess(roleKind, permissions, n.perm));
+  const mainNav = visibleNav.filter((n) => !n.tech);
+  const techNav = visibleNav.filter((n) => n.tech);
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -79,26 +84,35 @@ function AdminLayout() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-2 overflow-hidden sm:gap-4">
-            <Select
-              value={location.pathname}
-              onValueChange={(value) => nav({ to: value })}
-            >
-              <SelectTrigger className="h-9 min-w-[140px] max-w-[200px] rounded-full bg-accent/50 border-none shadow-none focus:ring-1 focus:ring-primary/20">
-                <Menu className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Menu" />
-              </SelectTrigger>
-              <SelectContent>
-                {visibleNav.map((item) => (
-                  <SelectItem key={item.to} value={item.to}>
-                    <div className="flex items-center gap-2">
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-2 overflow-hidden">
+            {[mainNav, techNav].map((group, gi) =>
+              group.length === 0 ? null : (
+                <Select
+                  key={gi}
+                  value={group.some((i) => i.to === location.pathname) ? location.pathname : ""}
+                  onValueChange={(value) => nav({ to: value })}
+                >
+                  <SelectTrigger className="h-9 min-w-[110px] max-w-[200px] rounded-full bg-accent/50 border-none shadow-none focus:ring-1 focus:ring-primary/20">
+                    {gi === 0 ? (
+                      <Menu className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                    ) : (
+                      <Wrench className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                    <SelectValue placeholder={gi === 0 ? "Menu" : "Técnico"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {group.map((item) => (
+                      <SelectItem key={item.to} value={item.to}>
+                        <div className="flex items-center gap-2">
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ),
+            )}
           </div>
 
           <div className="ml-auto flex items-center gap-1">
