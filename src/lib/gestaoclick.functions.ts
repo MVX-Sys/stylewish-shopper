@@ -124,3 +124,27 @@ export const aplicarRestauracaoGc = createServerFn({ method: "POST" })
     const { aplicarRestauracao } = await import("./gestaoclick.server");
     return await aplicarRestauracao(context.supabase, data.mudancas);
   });
+
+export const listImportaveisGc = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context);
+    const { gcListImportaveis } = await import("./gestaoclick.server");
+    return await gcListImportaveis(context.supabase);
+  });
+
+export const importarSelecionadosGc = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ itens: z.array(z.object({
+    gcId: z.string().min(1).max(40), nome: z.string().min(1).max(300), preco: z.number().min(0).max(1e7),
+    codigo: z.string().regex(/^[A-Za-z0-9]{1,20}$/),
+    imagemUrls: z.array(z.string().url().max(2000)).max(10),
+    storagePaths: z.array(z.string().regex(/^gc-import\/[A-Za-z0-9-]+\.[a-z0-9]{2,5}$/)).max(10),
+    cores: z.array(z.object({ nome: z.string().min(1).max(40), hex: z.string().regex(/^#[0-9a-fA-F]{6}$/), estoque: z.number().int().min(0).max(1e7) })).max(30),
+    estoque: z.number().int().min(0).max(1e7), ativo: z.boolean(),
+  })).min(1).max(12) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context);
+    const { importarSelecionados } = await import("./gestaoclick.server");
+    return await importarSelecionados(context.supabase, data.itens);
+  });
