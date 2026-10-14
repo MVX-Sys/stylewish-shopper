@@ -436,6 +436,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pix_chaves: {
+        Row: {
+          ativo: boolean
+          banco: string | null
+          chave: string
+          cidade: string | null
+          criado_em: string
+          id: string
+          nome_recebedor: string
+          principal: boolean
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean
+          banco?: string | null
+          chave: string
+          cidade?: string | null
+          criado_em?: string
+          id?: string
+          nome_recebedor: string
+          principal?: boolean
+          tipo: string
+        }
+        Update: {
+          ativo?: boolean
+          banco?: string | null
+          chave?: string
+          cidade?: string | null
+          criado_em?: string
+          id?: string
+          nome_recebedor?: string
+          principal?: boolean
+          tipo?: string
+        }
+        Relationships: []
+      }
       produtos: {
         Row: {
           ativo: boolean
@@ -509,6 +545,8 @@ export type Database = {
       }
       site_config: {
         Row: {
+          destaques_novidades: string[]
+          destaques_ofertas: string[]
           hero_media_url: string | null
           hero_subtitle: string | null
           hero_title: string | null
@@ -525,6 +563,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          destaques_novidades?: string[]
+          destaques_ofertas?: string[]
           hero_media_url?: string | null
           hero_subtitle?: string | null
           hero_title?: string | null
@@ -541,6 +581,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          destaques_novidades?: string[]
+          destaques_ofertas?: string[]
           hero_media_url?: string | null
           hero_subtitle?: string | null
           hero_title?: string | null
