@@ -25,6 +25,7 @@ type NavItem = {
   exact?: boolean;
   /** Abas técnicas ficam no segundo menu (à direita). Novas abas técnicas: marque tech: true. */
   tech?: boolean;
+  adminOnly?: boolean;
 };
 
 const NAV_ITEMS: NavItem[] = [
@@ -40,6 +41,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/admin/usuarios", label: "Usuários", icon: <Users className="h-4 w-4" />, perm: "usuarios.manage" },
   { to: "/admin/gestaoclick", label: "Gestão Click", icon: <RefreshCw className="h-4 w-4" />, perm: "produtos.manage", tech: true },
   { to: "/admin/backup", label: "Backup", icon: <Database className="h-4 w-4" />, perm: "backup.manage", tech: true },
+  { to: "/admin/exportar", label: "Exportar dados", icon: <Database className="h-4 w-4" />, perm: "backup.manage", tech: true, adminOnly: true },
   { to: "/admin/auditoria", label: "Auditoria", icon: <History className="h-4 w-4" />, perm: "auditoria.view", tech: true },
   { to: "/admin/manutencao", label: "Manutenção", icon: <Wrench className="h-4 w-4" />, perm: "admin.advanced", tech: true },
 ];
@@ -65,7 +67,7 @@ function AdminLayout() {
     );
   }
 
-  const visibleNav = NAV_ITEMS.filter((n) => canAccess(roleKind, permissions, n.perm));
+  const visibleNav = NAV_ITEMS.filter((n) => (!n.adminOnly || roleKind === "admin") && canAccess(roleKind, permissions, n.perm));
   const mainNav = visibleNav.filter((n) => !n.tech);
   const techNav = visibleNav.filter((n) => n.tech);
 

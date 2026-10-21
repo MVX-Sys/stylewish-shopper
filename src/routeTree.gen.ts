@@ -29,6 +29,7 @@ import { Route as AuthenticatedAdminCategoriasRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminCuponsRouteImport } from './routes/_authenticated/admin.cupons'
 import { Route as AuthenticatedAdminDestaquesRouteImport } from './routes/_authenticated/admin.destaques'
 import { Route as AuthenticatedAdminEstoqueRouteImport } from './routes/_authenticated/admin.estoque'
+import { Route as AuthenticatedAdminExportarRouteImport } from './routes/_authenticated/admin.exportar'
 import { Route as AuthenticatedAdminGestaoclickRouteImport } from './routes/_authenticated/admin.gestaoclick'
 import { Route as AuthenticatedAdminManutencaoRouteImport } from './routes/_authenticated/admin.manutencao'
 import { Route as AuthenticatedAdminPedidosRouteImport } from './routes/_authenticated/admin.pedidos'
@@ -145,6 +146,12 @@ const AuthenticatedAdminEstoqueRoute =
     path: '/estoque',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminExportarRoute =
+  AuthenticatedAdminExportarRouteImport.update({
+    id: '/exportar',
+    path: '/exportar',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminGestaoclickRoute =
   AuthenticatedAdminGestaoclickRouteImport.update({
     id: '/gestaoclick',
@@ -218,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/admin/destaques': typeof AuthenticatedAdminDestaquesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
+  '/admin/exportar': typeof AuthenticatedAdminExportarRoute
   '/admin/gestaoclick': typeof AuthenticatedAdminGestaoclickRoute
   '/admin/manutencao': typeof AuthenticatedAdminManutencaoRoute
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRoute
@@ -247,6 +255,7 @@ export interface FileRoutesByTo {
   '/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/admin/destaques': typeof AuthenticatedAdminDestaquesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
+  '/admin/exportar': typeof AuthenticatedAdminExportarRoute
   '/admin/gestaoclick': typeof AuthenticatedAdminGestaoclickRoute
   '/admin/manutencao': typeof AuthenticatedAdminManutencaoRoute
   '/admin/pedidos': typeof AuthenticatedAdminPedidosRoute
@@ -279,6 +288,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cupons': typeof AuthenticatedAdminCuponsRoute
   '/_authenticated/admin/destaques': typeof AuthenticatedAdminDestaquesRoute
   '/_authenticated/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
+  '/_authenticated/admin/exportar': typeof AuthenticatedAdminExportarRoute
   '/_authenticated/admin/gestaoclick': typeof AuthenticatedAdminGestaoclickRoute
   '/_authenticated/admin/manutencao': typeof AuthenticatedAdminManutencaoRoute
   '/_authenticated/admin/pedidos': typeof AuthenticatedAdminPedidosRoute
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/admin/cupons'
     | '/admin/destaques'
     | '/admin/estoque'
+    | '/admin/exportar'
     | '/admin/gestaoclick'
     | '/admin/manutencao'
     | '/admin/pedidos'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/admin/cupons'
     | '/admin/destaques'
     | '/admin/estoque'
+    | '/admin/exportar'
     | '/admin/gestaoclick'
     | '/admin/manutencao'
     | '/admin/pedidos'
@@ -371,6 +383,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cupons'
     | '/_authenticated/admin/destaques'
     | '/_authenticated/admin/estoque'
+    | '/_authenticated/admin/exportar'
     | '/_authenticated/admin/gestaoclick'
     | '/_authenticated/admin/manutencao'
     | '/_authenticated/admin/pedidos'
@@ -539,6 +552,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEstoqueRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/exportar': {
+      id: '/_authenticated/admin/exportar'
+      path: '/exportar'
+      fullPath: '/admin/exportar'
+      preLoaderRoute: typeof AuthenticatedAdminExportarRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/gestaoclick': {
       id: '/_authenticated/admin/gestaoclick'
       path: '/gestaoclick'
@@ -613,6 +633,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCuponsRoute: typeof AuthenticatedAdminCuponsRoute
   AuthenticatedAdminDestaquesRoute: typeof AuthenticatedAdminDestaquesRoute
   AuthenticatedAdminEstoqueRoute: typeof AuthenticatedAdminEstoqueRoute
+  AuthenticatedAdminExportarRoute: typeof AuthenticatedAdminExportarRoute
   AuthenticatedAdminGestaoclickRoute: typeof AuthenticatedAdminGestaoclickRoute
   AuthenticatedAdminManutencaoRoute: typeof AuthenticatedAdminManutencaoRoute
   AuthenticatedAdminPedidosRoute: typeof AuthenticatedAdminPedidosRoute
@@ -633,6 +654,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCuponsRoute: AuthenticatedAdminCuponsRoute,
   AuthenticatedAdminDestaquesRoute: AuthenticatedAdminDestaquesRoute,
   AuthenticatedAdminEstoqueRoute: AuthenticatedAdminEstoqueRoute,
+  AuthenticatedAdminExportarRoute: AuthenticatedAdminExportarRoute,
   AuthenticatedAdminGestaoclickRoute: AuthenticatedAdminGestaoclickRoute,
   AuthenticatedAdminManutencaoRoute: AuthenticatedAdminManutencaoRoute,
   AuthenticatedAdminPedidosRoute: AuthenticatedAdminPedidosRoute,
