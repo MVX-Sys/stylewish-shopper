@@ -8,6 +8,8 @@ import { getPromoInfo, isEsgotado, type Categoria, type ProductListItem, type Va
 import { listCategoriasFn, getProdutoFn } from "@/lib/products.functions";
 import { downloadImage, downloadImagesAsZip, getImageUrl } from "@/lib/storage";
 import { brl } from "@/lib/format";
+import { useAuth } from "@/lib/auth";
+import { LoginParaVerPreco } from "@/components/login-para-ver-preco";
 import { useCart, MIN_PECAS_PERSONALIZACAO } from "@/lib/cart";
 import { parsePersonalizacoes, agruparPersonalizacoes } from "@/lib/personalizacao";
 import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X, Share2, Copy, Check, QrCode } from "lucide-react";
@@ -36,7 +38,7 @@ import {
 
 export const Route = createFileRoute("/produto/$id")({
   loader: async ({ params, context }) => {
-    await Promise.all([
+    const [produto] = await Promise.all([
       context.queryClient.ensureQueryData({
         queryKey: ["produto", params.id],
         queryFn: () => getProdutoFn({ data: params.id }),
@@ -46,13 +48,29 @@ export const Route = createFileRoute("/produto/$id")({
         queryFn: () => listCategoriasFn(),
       }),
     ]);
+    const prod = produto as ProductListItem | null;
+    return { nome: prod?.nome ?? null, marca: prod?.marca ?? null, descricao: prod?.descricao ?? null };
   },
-  head: ({ params }) => ({
-    meta: [
-      { title: `Produto — ACHAEBUSCA` },
-      { name: "description", content: `Detalhes do produto ${params.id} na ACHAEBUSCA.` },
-    ],
-  }),
+  head: ({ params, loaderData }) => {
+    const nome = loaderData?.nome ?? "Produto";
+    const title = `${nome}${loaderData?.marca ? ` ${loaderData.marca}` : ""} — ACHAEBUSCA`;
+    const raw = (loaderData?.descricao ?? "").replace(/\s+/g, " ").trim();
+    const description = raw
+      ? raw.slice(0, 155)
+      : `${nome} na ACHAEBUSCA — moda masculina com compra fácil pelo WhatsApp.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: `/produto/${params.id}` },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: `/produto/${params.id}` }],
+    };
+  },
   component: ProductPage,
   errorComponent: ({ error }) => (
     <div className="p-10 text-center text-sm text-muted-foreground">
@@ -66,6 +84,7 @@ export const Route = createFileRoute("/produto/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
+  const logado = !!useAuth().session;
   const { data: p } = useSuspenseQuery({
     queryKey: ["produto", id],
     queryFn: () => getProdutoFn({ data: id }),
@@ -534,7 +553,9 @@ function ProductPage() {
                   <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-[32px]">
                     {p.nome}
                   </h1>
-                  {promo?.ativa ? (
+                  {!logado ? (
+                    <LoginParaVerPreco className="mt-5" />
+                  ) : promo?.ativa ? (
                     <div className="mt-5 space-y-1.5">
                       <div className="flex items-baseline gap-3">
                         <p className="font-display text-3xl font-extrabold tabular-nums text-primary md:text-4xl">
@@ -569,9 +590,6 @@ function ProductPage() {
                         </p>
                         <span className="text-xs text-muted-foreground">/ peça</span>
                       </div>
-                      <p className="mt-1.5 text-xs text-muted-foreground">
-                        ou em até 3x sem juros no combinado
-                      </p>
                     </>
                   )}
                 </div>
@@ -783,7 +801,7 @@ function ProductPage() {
                       {totalItens} pç{totalItens === 1 ? "" : "s"} · subtotal
                     </p>
                     <p className="font-display text-lg font-bold tabular-nums sm:text-xl">
-                      {brl(subtotal)}
+                      {logado ? brl(subtotal) : "—"}
                     </p>
                   </div>
                   <button

@@ -330,7 +330,15 @@ function BackupPage() {
             .upsert(c as never, { onConflict: "id" });
           if (error) throw error;
         }
-      for (const c of chunks(preview.produtos))
+      // O banco gera hash_id = codigo_base + letra da cor. Ao inserir, o produto
+      // ainda não tem variações (letra "X"), então produtos com o mesmo código
+      // colidem. Inserimos com um código temporário único e depois restauramos
+      // o código e o hash_id originais do backup.
+      const tempProdutos = preview.produtos.map((p: any, i: number) => {
+        const base = String(p.codigo_base ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "") || "P";
+        return { ...p, codigo_base: `${base}TMP${i}R${Date.now().toString(36).toUpperCase()}` };
+      });
+      for (const c of chunks(tempProdutos))
         if (c.length) {
           const { error } = await supabase
             .from("produtos")
@@ -351,6 +359,18 @@ function BackupPage() {
             .upsert(c as never, { onConflict: "id" });
           if (error) throw error;
         }
+      for (const c of chunks(preview.produtos as any[], 10)) {
+        const results = await Promise.all(
+          c.map((p: any) =>
+            supabase
+              .from("produtos")
+              .update({ codigo_base: p.codigo_base, hash_id: p.hash_id } as never)
+              .eq("id", p.id),
+          ),
+        );
+        const failed = results.find((r) => r.error);
+        if (failed?.error) throw failed.error;
+      }
 
       await logAudit({
         acao: "backup_import",

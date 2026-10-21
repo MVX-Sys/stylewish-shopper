@@ -17,7 +17,7 @@ import { getVendasPorAtendente } from "@/lib/vendas.functions";
 import { listAtendentes } from "@/lib/atendentes.functions";
 import { brl } from "@/lib/format";
 import { BRAND } from "@/lib/config";
-import { supabase } from "@/integrations/supabase/client";
+import { useSignedFileUrl } from "@/lib/use-signed-file-url";
 import { ExportMenu } from "@/components/export-menu";
 import { downloadTableCSV, downloadRelatorioVendasPDF, downloadTableXLSX } from "@/lib/pdf";
 
@@ -29,6 +29,11 @@ export const Route = createFileRoute("/_authenticated/admin/vendas")({
   }),
   component: SalesAdminPage,
 });
+
+function AtendenteAvatarPhoto({ path, nome }: { path: string; nome: string }) {
+  const url = useSignedFileUrl("atendentes-v1-private", path, 3600);
+  return <img src={url} alt={nome} className="h-full w-full object-cover" />;
+}
 
 type Periodo = "semana" | "mes" | "ano" | "todos";
 
@@ -220,11 +225,7 @@ function SalesAdminPage() {
                       <div className="flex items-center gap-3">
                         <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted border border-border">
                           {item.foto_path ? (
-                            <img
-                              src={supabase.storage.from("atendentes-v1-private").getPublicUrl(item.foto_path).data.publicUrl}
-                              alt={item.nome}
-                              className="h-full w-full object-cover"
-                            />
+                            <AtendenteAvatarPhoto path={item.foto_path} nome={item.nome} />
                           ) : (
                             <User className="h-5 w-5 absolute inset-0 m-auto text-muted-foreground" />
                           )}

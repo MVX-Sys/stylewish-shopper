@@ -7,6 +7,7 @@ import { getImageUrl } from "@/lib/storage";
 import { Trash2, Plus, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/audit";
+import { uploadFileFn, fileToBase64 } from "@/lib/storage-files.functions";
 import { syncGestaoClick } from "@/lib/gestaoclick.functions";
 import { MODELOS_PERSONALIZACAO, parsePersonalizacoes, getGruposPersonalizacao, isBermudaPersonalizavel, OPCAO_BERMUDA, type OpcaoProduto } from "@/lib/personalizacao";
 
@@ -422,17 +423,22 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
         await new Promise((r) => setTimeout(r, 1500));
       }
 
-      // upload new images
+      // upload new images (via servidor: a pasta é privada no Supabase)
       for (let i = 0; i < imgs.length; i++) {
         const img = imgs[i];
         if (img._file && !img.storage_path) {
-          const ext = img._file.name.split(".").pop() ?? "jpg";
+          const { processImageFile } = await import("@/lib/images");
+          const file = await processImageFile(img._file);
+          const ext = file.name.split(".").pop() ?? "jpg";
           const path = `${pid}/${crypto.randomUUID()}.${ext}`;
-          const { error } = await supabase.storage
-            .from("product-images")
-            .upload(path, img._file, { upsert: false, contentType: img._file.type, cacheControl: "31536000" });
-
-          if (error) throw error;
+          await uploadFileFn({
+            data: {
+              bucket: "product-images",
+              path,
+              contentType: file.type || "image/jpeg",
+              base64: await fileToBase64(file),
+            },
+          });
           img.storage_path = path;
         }
       }

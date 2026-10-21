@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { signImagesFn } from "@/lib/image-urls.functions";
+import { uploadFileFn, fileToBase64 } from "@/lib/storage-files.functions";
 
 export interface ImageOptions {
   width?: number;
@@ -192,10 +193,15 @@ export async function uploadImage(file: File): Promise<string> {
   const processed = await processImageFile(file);
   const ext = processed.name.split(".").pop() ?? "webp";
   const path = `uploads/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
-    .from("product-images")
-    .upload(path, processed, { upsert: false, contentType: processed.type, cacheControl: "31536000" });
-  if (error) throw error;
+  // Envio via servidor: a pasta é privada no Supabase e o navegador não tem permissão direta.
+  await uploadFileFn({
+    data: {
+      bucket: "product-images",
+      path,
+      contentType: processed.type || "image/webp",
+      base64: await fileToBase64(processed),
+    },
+  });
   return path;
 }
 

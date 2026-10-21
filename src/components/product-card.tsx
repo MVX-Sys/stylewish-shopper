@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, memo } from "react";
 import { brl } from "@/lib/format";
+import { useAuth } from "@/lib/auth";
 import { getCachedImageUrl, getImageUrl } from "@/lib/storage";
 import { getPromoInfo, isEsgotado, type ProductListItem } from "@/lib/products";
 
@@ -13,6 +14,7 @@ export const ProductCard = memo(function ProductCard({
   p: ProductListItem;
   priority?: boolean;
 }) {
+  const logado = !!useAuth().session;
   const esgotado = isEsgotado(p);
   const promo = getPromoInfo(p);
   const principal =
@@ -102,7 +104,9 @@ export const ProductCard = memo(function ProductCard({
           {p.nome}
         </h3>
         
-        {promo.ativa && !esgotado ? (
+        {!logado ? (
+          <p className="text-xs font-semibold text-primary">Entre para ver o preço</p>
+        ) : promo.ativa && !esgotado ? (
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-2">
               <p className="font-display text-base font-extrabold tabular-nums text-primary">

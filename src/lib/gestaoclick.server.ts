@@ -6,7 +6,7 @@ type Db = SupabaseClient<Database>;
 
 /** Uses the service-role client when that key exists (Lovable hosting); otherwise the caller's client (self-hosting). */
 async function getDb(client?: Db): Promise<Db> {
-  if (process.env["SUPABASE_SERVICE_ROLE_KEY"]) {
+  if (process.env["SUPABASE_SERVICE_ROLE_KEY"] || process.env["MVX_SERVICE_ROLE_KEY"]) {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     return supabaseAdmin as unknown as Db;
   }

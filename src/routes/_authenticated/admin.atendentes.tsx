@@ -26,6 +26,7 @@ import { BRAND } from "@/lib/config";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadFileFn, signFilesFn, fileToBase64 } from "@/lib/storage-files.functions";
 
 const BUCKET = "atendentes-v1-private";
 const PAGE_SIZE = 12;
@@ -59,13 +60,12 @@ function useSignedPhoto(path?: string | null) {
       setUrl(cached);
       return;
     }
-    supabase.storage
-      .from(BUCKET)
-      .createSignedUrl(path, 60 * 60 * 24)
-      .then(({ data }) => {
-        if (data?.signedUrl) {
-          signedCache.set(path, data.signedUrl);
-          if (alive) setUrl(data.signedUrl);
+    signFilesFn({ data: { bucket: BUCKET, paths: [path], expiresIn: 60 * 60 * 24 } })
+      .then((out) => {
+        const u = out?.[path] ?? "";
+        if (u) {
+          signedCache.set(path, u);
+          if (alive) setUrl(u);
         }
       })
       .catch(() => {});
@@ -495,23 +495,15 @@ function AtendentesPage() {
                           const fileExt = file.name.split(".").pop();
                           const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
-                          const { error: uploadError } = await supabase.storage
-                            .from(BUCKET)
-                            .upload(filePath, file, {
-                              contentType: file.type,
-                              cacheControl: "31536000",
+                          await uploadFileFn({
+                            data: {
+                              bucket: BUCKET,
+                              path: filePath,
+                              contentType: file.type || "image/jpeg",
+                              base64: await fileToBase64(file),
                               upsert: true,
-                            });
-
-                          if (uploadError) {
-                            if (
-                              (uploadError as any).status === 403 ||
-                              uploadError.message?.includes("row-level security")
-                            ) {
-                              throw new Error("Erro de permissão ao enviar a imagem.");
-                            }
-                            throw uploadError;
-                          }
+                            },
+                          });
 
                           setForm((f) => (f ? { ...f, foto_path: filePath } : f));
                           toast.success("Foto carregada!");

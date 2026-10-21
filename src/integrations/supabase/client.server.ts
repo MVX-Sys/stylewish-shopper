@@ -30,8 +30,12 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env['SUPABASE_URL'];
-  const SUPABASE_SERVICE_ROLE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'];
+  // External Supabase project (self-hosted keys): URL comes from the Vite env,
+  // service key from the Lovable secret store (MVX_SERVICE_ROLE_KEY).
+  const SUPABASE_URL = process.env['SUPABASE_URL']
+    || (import.meta.env['VITE_SUPABASE_URL'] as string | undefined)
+    || 'https://pnqrpmiurvoikcerdaag.supabase.co';
+  const SUPABASE_SERVICE_ROLE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'] || process.env['MVX_SERVICE_ROLE_KEY'];
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [

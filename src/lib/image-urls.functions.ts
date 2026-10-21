@@ -21,8 +21,12 @@ function keyOf(path: string, width?: number, quality?: number) {
 export const signImagesFn = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => schema.parse(d))
   .handler(async ({ data }) => {
-    const url = process.env["SUPABASE_URL"];
-    const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
+    const url = process.env["SUPABASE_URL"]
+      || (import.meta.env["VITE_SUPABASE_URL"] as string | undefined)
+      || "https://pnqrpmiurvoikcerdaag.supabase.co";
+    // Sign with the service key when available: works even without storage RLS policies.
+    const key = process.env["SUPABASE_SERVICE_ROLE_KEY"] || process.env["MVX_SERVICE_ROLE_KEY"]
+      || process.env["SUPABASE_PUBLISHABLE_KEY"] || process.env["SUPABASE_ANON_KEY"];
     const out: Record<string, string> = {};
     if (!url || !key) return out;
 

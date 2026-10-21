@@ -16,6 +16,7 @@ import { validateCupon } from "@/lib/coupons.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSignedFileUrl } from "@/lib/use-signed-file-url";
 
 type Atendente = { id: string; nome: string; whatsapp: string; foto_path: string | null; cargo?: string };
 
@@ -732,24 +733,7 @@ function CheckoutItemRow({ item, itemsWithDiscount, appliedCoupon, items }: { it
 }
 
 function AtendenteAvatar({ path, nome }: { path?: string | null; nome: string }) {
-  const [url, setUrl] = useState<string>("");
-
-  useEffect(() => {
-    let alive = true;
-    if (!path) {
-      setUrl("");
-      return;
-    }
-    supabase.storage
-      .from("atendentes-v1-private")
-      .createSignedUrl(path, 3600)
-      .then(({ data }) => {
-        if (alive && data?.signedUrl) setUrl(data.signedUrl);
-      });
-    return () => {
-      alive = false;
-    };
-  }, [path]);
+  const url = useSignedFileUrl("atendentes-v1-private", path, 3600);
 
   return (
     <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-border group-hover:border-primary/30">

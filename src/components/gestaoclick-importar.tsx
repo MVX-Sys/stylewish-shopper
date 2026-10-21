@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Download, Plus, Settings2, Trash2, Upload, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { importarSelecionadosGc, listImportaveisGc } from "@/lib/gestaoclick.functions";
+import { uploadFileFn, fileToBase64 } from "@/lib/storage-files.functions";
 
 type Cor = { nome: string; hex: string; estoque: number };
 type Escolha = { preco: "atacado" | "varejo"; codigo: string; fotos: string[]; locais: File[]; link: string; cores: Cor[]; ativo: boolean };
@@ -55,11 +55,22 @@ export function GestaoClickImportar() {
           const e = sel[g.id];
           const storagePaths: string[] = [];
           for (const f of e.locais) {
-            const ext = (f.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+            const { processImageFile } = await import("@/lib/images");
+            const file = await processImageFile(f);
+            const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
             const path = `gc-import/${crypto.randomUUID()}.${ext}`;
-            const { error: upErr } = await supabase.storage.from("product-images")
-              .upload(path, f, { contentType: f.type, cacheControl: "31536000" });
-            if (upErr) throw new Error(`${g.nome}: imagem ${f.name} não enviada`);
+            try {
+              await uploadFileFn({
+                data: {
+                  bucket: "product-images",
+                  path,
+                  contentType: file.type || "image/jpeg",
+                  base64: await fileToBase64(file),
+                },
+              });
+            } catch {
+              throw new Error(`${g.nome}: imagem ${file.name} não enviada`);
+            }
             storagePaths.push(path);
           }
           const link = e.link.trim();
