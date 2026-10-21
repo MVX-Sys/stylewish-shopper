@@ -1,5 +1,5 @@
 -- Drop and recreate has_permission to ensure parameter name consistency
-DROP FUNCTION IF EXISTS public.has_permission(uuid, text);
+DROP FUNCTION IF EXISTS public.has_permission(uuid, text) CASCADE; 
 
 CREATE OR REPLACE FUNCTION public.has_permission(_user_id uuid, _permission text)
 RETURNS boolean
