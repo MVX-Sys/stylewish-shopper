@@ -6,7 +6,8 @@ import { getImageUrl, downloadOrderImagesZip } from "@/lib/storage";
 import { useCart, itemPrecoEfetivo, validarPersonalizacao, formatPersonalizacoes } from "@/lib/cart";
 import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
-import { BRAND, VALOR_MINIMO_COMPRA } from "@/lib/config";
+import { BRAND, VALOR_MINIMO_COMPRA, QUANTIDADE_MINIMA_PECAS } from "@/lib/config";
+import { LoginParaVerPreco } from "@/components/login-para-ver-preco";
 import { ChevronLeft, MessageCircle, FileText, X, User, Ticket, Loader2, ShoppingBag, Phone } from "lucide-react";
 import { downloadOrderPDF } from "@/lib/pdf";
 import { toast } from "sonner";
@@ -38,6 +39,27 @@ type FormaEntrega = "TRANSPORTADORA A COMBINAR";
 type FormaPagamento = "PIX";
 
 function CheckoutPage() {
+  const { session, loading } = useAuth();
+  if (!session) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <SiteHeader />
+        <main className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-4 px-4 py-16 text-center">
+          {loading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
+            <>
+              <p className="text-sm text-muted-foreground">Entre na sua conta para ver os preços e finalizar o pedido.</p>
+              <LoginParaVerPreco />
+            </>
+          )}
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+  return <CheckoutConteudo />;
+}
+
+function CheckoutConteudo() {
   const { items, total, clear } = useCart();
   const nav = useNavigate();
   const { session } = useAuth();
@@ -93,13 +115,19 @@ function CheckoutPage() {
 
   const valorFinal = total - discountAmount;
   const minAtingido = useMemo(
-    () => VALOR_MINIMO_COMPRA <= 0 || total >= VALOR_MINIMO_COMPRA,
-    [total],
+    () =>
+      (VALOR_MINIMO_COMPRA <= 0 || total >= VALOR_MINIMO_COMPRA) &&
+      items.reduce((s, i) => s + i.quantidade, 0) >= QUANTIDADE_MINIMA_PECAS,
+    [total, items],
   );
 
   const finalizar = () => {
     if (items.length === 0) {
       toast.error("Seu carrinho está vazio.");
+      return;
+    }
+    if (items.reduce((s, i) => s + i.quantidade, 0) < QUANTIDADE_MINIMA_PECAS) {
+      toast.error(`O pedido precisa ter no mínimo ${QUANTIDADE_MINIMA_PECAS} produtos.`);
       return;
     }
     if (!minAtingido) {

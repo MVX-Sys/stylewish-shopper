@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { listProdutos, type ProductListItem } from "@/lib/products";
+import { listProdutos, listCategorias, type ProductListItem } from "@/lib/products";
 import { getImageUrl } from "@/lib/storage";
 import { parsePersonalizacoes, getVinculo, normVinculo } from "@/lib/personalizacao";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +35,9 @@ function VinculosPage() {
   const [nome, setNome] = useState("");
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [busca, setBusca] = useState("");
+  const [filtroCat, setFiltroCat] = useState("");
+  const [filtroCod, setFiltroCod] = useState("");
+  const { data: categorias = [] } = useQuery({ queryKey: ["categorias"], queryFn: listCategorias });
   const [saving, setSaving] = useState(false);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
 
@@ -95,7 +98,17 @@ function VinculosPage() {
     }
   }
 
-  const lista = personalizaveis.filter((p) => p.nome.toLowerCase().includes(busca.toLowerCase()));
+  const cod = filtroCod.trim().toUpperCase();
+  const lista = personalizaveis.filter((p) => {
+    if (!p.nome.toLowerCase().includes(busca.toLowerCase())) return false;
+    if (filtroCat && p.categoria_id !== filtroCat) return false;
+    if (cod) {
+      const c = `${p.hash_id ?? ""} ${(p as any).codigo_base ?? ""}`.toUpperCase();
+      if (!c.includes(cod)) return false;
+    }
+    return true;
+  });
+  const marcarVisiveis = () => setSel((prev) => new Set([...prev, ...lista.map((p) => p.id)]));
 
   return (
     <div className="space-y-6">
@@ -139,6 +152,28 @@ function VinculosPage() {
               {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
               Salvar ({sel.size} produtos)
             </Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              aria-label="Filtrar por categoria"
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              value={filtroCat}
+              onChange={(e) => setFiltroCat(e.target.value)}
+            >
+              <option value="">Todas as categorias</option>
+              {categorias.map((c) => (
+                <option key={c.id} value={c.id}>{c.nome}</option>
+              ))}
+            </select>
+            <Input className="max-w-[180px]" placeholder="Filtrar por código" value={filtroCod} onChange={(e) => setFiltroCod(e.target.value)} />
+            <Button size="sm" variant="outline" onClick={marcarVisiveis} disabled={lista.length === 0}>
+              Marcar todos da lista ({lista.length})
+            </Button>
+            {(filtroCat || filtroCod || busca) && (
+              <Button size="sm" variant="ghost" onClick={() => { setFiltroCat(""); setFiltroCod(""); setBusca(""); }}>
+                Limpar filtros
+              </Button>
+            )}
           </div>
           {isLoading ? (
             <Loader2 className="h-5 w-5 animate-spin" />

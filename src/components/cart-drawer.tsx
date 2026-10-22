@@ -4,13 +4,17 @@ import { useCart, itemPrecoEfetivo, validarPersonalizacao, formatPersonalizacoes
 import { brl } from "@/lib/format";
 import { getImageUrl } from "@/lib/storage";
 import { useEffect, useState } from "react";
-import { VALOR_MINIMO_COMPRA } from "@/lib/config";
+import { VALOR_MINIMO_COMPRA, QUANTIDADE_MINIMA_PECAS } from "@/lib/config";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
 export function CartDrawer({ continueSearch }: { continueSearch?: { cat?: string } } = {}) {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
   const nav = useNavigate();
-  const minAtingido = total >= VALOR_MINIMO_COMPRA;
+  const logado = !!useAuth().session;
+  const totalPecas = items.reduce((s, i) => s + i.quantidade, 0);
+  const pecasAtingido = totalPecas >= QUANTIDADE_MINIMA_PECAS;
+  const minAtingido = total >= VALOR_MINIMO_COMPRA && pecasAtingido;
 
   const continuarComprando = () => {
     setOpen(false);
@@ -19,6 +23,10 @@ export function CartDrawer({ continueSearch }: { continueSearch?: { cat?: string
 
   const finalizar = () => {
     if (items.length === 0) return;
+    if (!pecasAtingido) {
+      toast.error(`O pedido precisa ter no mínimo ${QUANTIDADE_MINIMA_PECAS} produtos.`);
+      return;
+    }
     if (!minAtingido) {
       toast.error(`Valor mínimo para compra: ${brl(VALOR_MINIMO_COMPRA)}`);
       return;
@@ -99,15 +107,21 @@ export function CartDrawer({ continueSearch }: { continueSearch?: { cat?: string
             <ResumoQuantidades items={items} />
             <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
               <span>Subtotal</span>
-              <span className="tabular-nums">{brl(total)}</span>
+              <span className="tabular-nums">{logado ? brl(total) : "—"}</span>
             </div>
             <div className="mb-4 flex items-center justify-between">
               <span className="text-sm font-semibold">Total</span>
               <span className="font-display text-xl font-bold tabular-nums">
-                {brl(total)}
+                {logado ? brl(total) : "—"}
               </span>
             </div>
-            {!minAtingido && (
+            {!pecasAtingido && (
+              <div className="mb-2 flex items-center gap-2 rounded-lg bg-primary/10 p-3 text-[11px] font-medium text-primary">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>Mínimo de {QUANTIDADE_MINIMA_PECAS} produtos para finalizar o pedido (você tem {totalPecas}).</span>
+              </div>
+            )}
+            {pecasAtingido && !minAtingido && (
               <div className="mb-4 flex items-center gap-2 rounded-lg bg-primary/10 p-3 text-[11px] font-medium text-primary">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>Mínimo de {brl(VALOR_MINIMO_COMPRA)} para finalizar o pedido.</span>
@@ -203,6 +217,7 @@ function ResumoQuantidades({ items }: { items: any[] }) {
 
 function CartItemRow({ item: i, setQty, remove }: { item: any, setQty: any, remove: any }) {
   const [img, setImg] = useState<string>("");
+  const logado = !!useAuth().session;
 
   useEffect(() => {
     if (i.foto && i.foto.includes("/")) {
@@ -271,7 +286,7 @@ function CartItemRow({ item: i, setQty, remove }: { item: any, setQty: any, remo
         </div>
       </div>
       <div className="shrink-0 text-right text-sm font-semibold tabular-nums">
-        {(() => {
+        {logado && (() => {
           const eff = itemPrecoEfetivo(i);
           const promo = eff < i.preco;
           return (
