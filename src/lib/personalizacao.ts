@@ -2,6 +2,8 @@ export type OpcaoPersonalizacao = {
   id: string;
   label: string;
   preco: number;
+  // Quantidade mínima de peças com esta personalização no pedido (0 = sem mínimo)
+  minimo?: number;
 };
 
 export const OPCOES_OCULOS: OpcaoPersonalizacao[] = [
@@ -160,6 +162,7 @@ export function parsePersonalizacoes(raw: unknown): OpcaoProduto[] {
       id: o.id,
       label: o.label,
       preco: Math.max(0, Number(o.preco) || 0),
+      minimo: Math.max(0, Math.floor(Number(o.minimo) || 0)),
       grupo: typeof o.grupo === "string" ? o.grupo : "",
       vinculo: typeof o.vinculo === "string" ? o.vinculo : "",
     }));
@@ -170,7 +173,7 @@ export function agruparPersonalizacoes(opcoes: OpcaoProduto[]): GrupoPersonaliza
   for (const o of opcoes) {
     const g = o.grupo?.trim() || "Opções";
     if (!m.has(g)) m.set(g, []);
-    m.get(g)!.push({ id: o.id, label: o.label, preco: o.preco });
+    m.get(g)!.push({ id: o.id, label: o.label, preco: o.preco, minimo: o.minimo || 0 });
   }
   return [...m.entries()].map(([titulo, opcoes]) => ({ titulo, opcoes }));
 }

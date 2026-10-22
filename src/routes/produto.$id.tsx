@@ -131,7 +131,7 @@ function ProductPage() {
       ...gruposPerso
         .flatMap((g) => g.opcoes)
         .filter((o) => persoSel.includes(o.id)),
-      ...(personalizado && opcaoUnica ? [{ id: opcaoUnica.id, label: opcaoUnica.label, preco: opcaoUnica.preco }] : []),
+      ...(personalizado && opcaoUnica ? [{ id: opcaoUnica.id, label: opcaoUnica.label, preco: opcaoUnica.preco, minimo: (opcaoUnica as any).minimo || 0 }] : []),
     ],
     [gruposPerso, persoSel, personalizado, opcaoUnica],
   );
@@ -798,7 +798,7 @@ function ProductPage() {
                                     onChange={() => togglePerso(o.id)}
                                     className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
                                   />
-                                  <span className="text-foreground">{o.label}</span>
+                                  <span className="text-foreground">{o.label}{(o.minimo ?? 0) > 0 && <span className="ml-1 text-[10px] text-muted-foreground">(mín. {o.minimo} peças)</span>}</span>
                                 </span>
                                 <span className="text-xs font-semibold tabular-nums text-primary">
                                   + {brl(o.preco)}

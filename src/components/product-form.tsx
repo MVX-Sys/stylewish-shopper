@@ -394,6 +394,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
           grupo: (o.grupo ?? "").trim(),
           vinculo: (o.vinculo ?? "").trim(),
           preco: Math.round(Math.max(0, Number(o.preco) || 0) * 100) / 100,
+          minimo: Math.max(0, Math.floor(Number(o.minimo) || 0)),
         }))
         .filter((o) => o.label);
       if (pid) {
@@ -1156,7 +1157,7 @@ function PersonalizacoesCard({
       ) : (
         <ul className="space-y-2">
           {value.map((o, i) => (
-            <li key={o.id} className="grid grid-cols-[1fr_1fr_90px_auto] items-center gap-2">
+            <li key={o.id} className="grid grid-cols-[1fr_1fr_80px_90px_auto] items-center gap-2">
               <input
                 value={o.grupo ?? ""}
                 onChange={(e) => upd(i, { grupo: e.target.value })}
@@ -1176,6 +1177,17 @@ function PersonalizacoesCard({
                 value={o.preco}
                 onChange={(e) => upd(i, { preco: Number(e.target.value) })}
                 aria-label="Preço"
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              />
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={o.minimo || ""}
+                onChange={(e) => upd(i, { minimo: Math.max(0, Math.floor(Number(e.target.value) || 0)) })}
+                placeholder="Mín. peças"
+                title="Quantidade mínima de peças com esta personalização no pedido (vazio = sem mínimo)"
+                aria-label="Mínimo de peças"
                 className="h-9 rounded-md border border-input bg-background px-2 text-sm"
               />
               <button

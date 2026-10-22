@@ -17,7 +17,7 @@ export type CartItem = {
   categoriaId?: string | null;
   categoriaNome?: string | null;
   personalizado?: boolean;
-  personalizacoes?: { id: string; label: string; preco: number }[];
+  personalizacoes?: { id: string; label: string; preco: number; minimo?: number }[];
   vinculo?: string | null; // vínculo de personalização (mesma escolha para todos)
   estoque?: number | null;
 };
@@ -44,6 +44,30 @@ export function validarPersonalizacao(items: CartItem[]): string | null {
       .reduce((s, i) => s + i.quantidade, 0);
     if (totalCat < MIN_PECAS_PERSONALIZACAO) {
       return `Produtos personalizados exigem no mínimo ${MIN_PECAS_PERSONALIZACAO} peças de ${catNome}. Você tem ${totalCat}.`;
+    }
+  }
+  return validarMinimoPorPersonalizacao(items);
+}
+
+// Cada opção pode exigir um mínimo de peças no pedido com essa mesma
+// personalização (comparada pelo nome da opção, sem acentos/maiúsculas).
+export function validarMinimoPorPersonalizacao(
+  items: Pick<CartItem, "quantidade" | "personalizacoes">[],
+): string | null {
+  const n = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const grupos = new Map<string, { label: string; minimo: number; total: number }>();
+  for (const i of items) {
+    for (const o of i.personalizacoes ?? []) {
+      const k = n(o.label);
+      const g = grupos.get(k) ?? { label: o.label, minimo: 0, total: 0 };
+      g.minimo = Math.max(g.minimo, Number(o.minimo) || 0);
+      g.total += i.quantidade;
+      grupos.set(k, g);
+    }
+  }
+  for (const g of grupos.values()) {
+    if (g.minimo > 0 && g.total < g.minimo) {
+      return `A personalização "${g.label}" exige no mínimo ${g.minimo} peças com ela. Você tem ${g.total}.`;
     }
   }
   return null;
