@@ -11,7 +11,7 @@ import { brl } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { LoginParaVerPreco } from "@/components/login-para-ver-preco";
 import { useCart, MIN_PECAS_PERSONALIZACAO } from "@/lib/cart";
-import { parsePersonalizacoes, agruparPersonalizacoes } from "@/lib/personalizacao";
+import { parsePersonalizacoes, agruparPersonalizacoes, getVinculo, normVinculo } from "@/lib/personalizacao";
 import { Plus, Minus, ShoppingBag, ChevronLeft, Download, Images, FileText, Bell, X, Share2, Copy, Check, QrCode } from "lucide-react";
 import React from "react";
 const downloadProductPDF = async (p: any) => {
@@ -135,6 +135,24 @@ function ProductPage() {
     ],
     [gruposPerso, persoSel, personalizado, opcaoUnica],
   );
+  // Vínculo: se já existe no carrinho um produto personalizado com o mesmo vínculo,
+  // este produto recebe obrigatoriamente a mesma personalização.
+  const vinculo = useMemo(() => getVinculo(opcoesProduto), [opcoesProduto]);
+  const itemVinculado = useMemo(
+    () =>
+      vinculo
+        ? cartItems.find((i) => i.personalizado && i.vinculo && normVinculo(i.vinculo) === normVinculo(vinculo)) ?? null
+        : null,
+    [cartItems, vinculo],
+  );
+  const persoTravada = !!itemVinculado;
+  useEffect(() => {
+    if (!itemVinculado) return;
+    const labels = new Set((itemVinculado.personalizacoes ?? []).map((o) => normVinculo(o.label)));
+    setPersonalizado(true);
+    setPersoSel(opcoesProduto.filter((o) => labels.has(normVinculo(o.label))).map((o) => o.id));
+  }, [itemVinculado, opcoesProduto]);
+
   const adicionalPerso = opcoesPersoSelecionadas.reduce((s, o) => s + o.preco, 0);
 
   const enviarSolicitacao = async () => {
@@ -293,6 +311,7 @@ function ProductPage() {
           categoriaNome: categoriaAtual?.nome ?? null,
           personalizado,
           personalizacoes: personalizado ? opcoesPersoSelecionadas : [],
+          vinculo: vinculo || null,
           estoque: v.quantidade_estoque,
         },
         q,
@@ -729,6 +748,7 @@ function ProductPage() {
                     <input
                       type="checkbox"
                       checked={personalizado}
+                      disabled={persoTravada}
                       onChange={(e) => setPersonalizado(e.target.checked)}
                       className="mt-0.5 h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
                     />
@@ -750,6 +770,12 @@ function ProductPage() {
                       )}
                     </span>
                   </label>
+                  {persoTravada && (
+                    <p className="mt-3 rounded-lg bg-primary/10 p-2.5 text-[11px] font-medium text-primary">
+                      Mesma personalização de "{itemVinculado?.nome}", já escolhida no seu carrinho. Para mudar,
+                      remova esse item do carrinho.
+                    </p>
+                  )}
                   {personalizado && gruposPerso.length > 0 && (
                     <div className="mt-4 space-y-4 border-t border-border pt-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -768,6 +794,7 @@ function ProductPage() {
                                   <input
                                     type="checkbox"
                                     checked={persoSel.includes(o.id)}
+                                    disabled={persoTravada}
                                     onChange={() => togglePerso(o.id)}
                                     className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
                                   />

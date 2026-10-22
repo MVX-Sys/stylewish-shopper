@@ -134,7 +134,14 @@ export function getGruposPersonalizacao(
 // produtos.personalizacoes). As listas acima servem apenas como atalhos
 // ("modelos") no formulário do admin.
 
-export type OpcaoProduto = OpcaoPersonalizacao & { grupo?: string };
+export type OpcaoProduto = OpcaoPersonalizacao & { grupo?: string; vinculo?: string };
+
+// Vínculo: produtos com o mesmo vínculo (ex: "regulagem", "pala", "oculos")
+// recebem a mesma personalização escolhida no primeiro deles colocado no carrinho.
+export function getVinculo(opcoes: OpcaoProduto[]): string {
+  return (opcoes.find((o) => o.vinculo?.trim())?.vinculo ?? "").trim();
+}
+export const normVinculo = (s?: string | null) => norm(s).trim();
 
 export const MODELOS_PERSONALIZACAO: GrupoPersonalizacao[] = [
   { titulo: "Óculos", opcoes: OPCOES_OCULOS },
@@ -154,6 +161,7 @@ export function parsePersonalizacoes(raw: unknown): OpcaoProduto[] {
       label: o.label,
       preco: Math.max(0, Number(o.preco) || 0),
       grupo: typeof o.grupo === "string" ? o.grupo : "",
+      vinculo: typeof o.vinculo === "string" ? o.vinculo : "",
     }));
 }
 

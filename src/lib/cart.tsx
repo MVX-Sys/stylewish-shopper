@@ -18,6 +18,7 @@ export type CartItem = {
   categoriaNome?: string | null;
   personalizado?: boolean;
   personalizacoes?: { id: string; label: string; preco: number }[];
+  vinculo?: string | null; // vínculo de personalização (mesma escolha para todos)
   estoque?: number | null;
 };
 

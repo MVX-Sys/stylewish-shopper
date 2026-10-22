@@ -392,6 +392,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
           id: String(o.id),
           label: o.label.trim(),
           grupo: (o.grupo ?? "").trim(),
+          vinculo: (o.vinculo ?? "").trim(),
           preco: Math.round(Math.max(0, Number(o.preco) || 0) * 100) / 100,
         }))
         .filter((o) => o.label);
@@ -894,7 +895,7 @@ export function ProductForm({ produtoId }: { produtoId?: string }) {
             )}
           </Card>
 
-          <PersonalizacoesCard value={persos} onChange={changePersos} />
+          <PersonalizacoesCard value={persos} onChange={changePersos} categoriaId={categoriaId} produtoId={produtoId} />
 
           <Card title="Visibilidade">
             <div className="space-y-2.5">
@@ -1017,10 +1018,52 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function PersonalizacoesCard({
   value,
   onChange,
+  categoriaId,
+  produtoId,
 }: {
   value: OpcaoProduto[];
   onChange: (v: OpcaoProduto[]) => void;
+  categoriaId?: string | null;
+  produtoId?: string;
 }) {
+  const vinculo = value.find((o) => o.vinculo?.trim())?.vinculo ?? "";
+  const [vinculoTxt, setVinculoTxt] = useState(vinculo);
+  useEffect(() => setVinculoTxt(vinculo), [vinculo]);
+  const setVinculo = (v: string) => {
+    setVinculoTxt(v);
+    onChange(value.map((o) => ({ ...o, vinculo: v })));
+  };
+  const [aplicando, setAplicando] = useState(false);
+  const aplicarCategoria = async () => {
+    const v = vinculoTxt.trim();
+    if (!categoriaId) return toast.error("Escolha a categoria do produto primeiro.");
+    if (!confirm(v ? `Aplicar o vínculo "${v}" a todos os produtos personalizáveis desta categoria?` : "Remover o vínculo de todos os produtos desta categoria?")) return;
+    setAplicando(true);
+    try {
+      const { data, error } = await supabase
+        .from("produtos")
+        .select("id, personalizacoes")
+        .eq("categoria_id", categoriaId);
+      if (error) throw error;
+      let n = 0;
+      for (const p of data ?? []) {
+        if (p.id === produtoId) continue;
+        const ops = Array.isArray((p as any).personalizacoes) ? (p as any).personalizacoes : [];
+        if (!ops.length) continue;
+        const { error: e2 } = await supabase
+          .from("produtos")
+          .update({ personalizacoes: ops.map((o: any) => ({ ...o, vinculo: v })) } as any)
+          .eq("id", p.id);
+        if (e2) throw e2;
+        n++;
+      }
+      toast.success(`Vínculo aplicado a ${n} outro(s) produto(s). Salve este produto também.`);
+    } catch (e: any) {
+      toast.error("Erro ao aplicar vínculo: " + (e?.message ?? e));
+    } finally {
+      setAplicando(false);
+    }
+  };
   const has = (id: string) => value.some((o) => o.id === id);
   const toggleModelo = (grupo: string, o: { id: string; label: string; preco: number }) =>
     onChange(has(o.id) ? value.filter((x) => x.id !== o.id) : [...value, { ...o, grupo }]);
@@ -1078,6 +1121,32 @@ function PersonalizacoesCard({
       </details>
 
       <PresetsPersonalizacao value={value} onChange={onChange} />
+
+      {value.length > 0 && (
+        <div className="space-y-2 rounded-lg border border-border bg-background p-3">
+          <p className="text-xs font-semibold">Vínculo de personalização</p>
+          <p className="text-[11px] text-muted-foreground">
+            Produtos com o mesmo vínculo (ex: "regulagem", "pala", "óculos") recebem a mesma
+            personalização que o cliente escolher no primeiro deles. Deixe vazio para escolha livre.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              value={vinculoTxt}
+              onChange={(e) => setVinculo(e.target.value)}
+              placeholder="Ex: regulagem"
+              className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-sm"
+            />
+            <button
+              type="button"
+              disabled={aplicando}
+              onClick={aplicarCategoria}
+              className="rounded-md border border-border px-3 text-xs font-medium hover:bg-accent disabled:opacity-50"
+            >
+              {aplicando ? "Aplicando..." : "Aplicar à categoria toda"}
+            </button>
+          </div>
+        </div>
+      )}
 
 
       {value.length === 0 ? (
