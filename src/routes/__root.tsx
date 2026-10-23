@@ -44,6 +44,19 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    // Arquivos de uma versão antiga do site (após nova publicação/cache da Cloudflare):
+    // recarrega uma vez, ignorando o cache, para buscar a versão nova.
+    const msg = String(error?.message ?? "");
+    if (/reading 'component'|dynamically imported module|Importing a module script failed|Loading chunk/i.test(msg)) {
+      const key = "chunk-reload-at";
+      const last = Number(sessionStorage.getItem(key) || 0);
+      if (Date.now() - last > 10000) {
+        sessionStorage.setItem(key, String(Date.now()));
+        const url = new URL(window.location.href);
+        url.searchParams.set("_v", String(Date.now()));
+        window.location.replace(url.toString());
+      }
+    }
   }, [error]);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
