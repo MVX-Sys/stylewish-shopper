@@ -55,21 +55,6 @@ Crie uma aplicação web de e-commerce responsiva e completa para uma marca de r
 * Tabela variacoes_produto: id, produto_id, nome_cor, hex_cor, tamanho, quantidade_estoque.
 
 Certifique-se de que a aplicação possua um gerenciamento de estado robusto para assegurar a sincronização adequada dos dados do carrinho e da matriz de seleção de variações.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/07a0350e-8d9e-45a8-accc-22bbc9ef3783).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
 ```sh
 git clone <this-repository-url>
 cd <repository-name>
