@@ -84,14 +84,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ACHAEBUSCA — Moda masculina" },
+      { title: "ACHAEBUSCA — Moda masculina" }, // Você também pode querer atualizar o título aqui
       {
         name: "description",
-        content:
-          "Loja online ACHAEBUSCA — camisas, bermudas, calças e acessórios. Compre pelo WhatsApp.",
+        content: "Acha & Busca BRASIL — Atacado com sua marca. Preço de fábrica e mínimo de 10 peças. Abasteça sua loja. Calçados. Vestuário. Bolsas. Óculos.",
       },
       { property: "og:title", content: "ACHAEBUSCA — Moda masculina" },
-      { property: "og:description", content: "Loja online com checkout via WhatsApp." },
+      { 
+        property: "og:description", 
+        content: "Acha & Busca BRASIL — Atacado com sua marca. Preço de fábrica e mínimo de 10 peças. Abasteça sua loja. Calçados. Vestuário. Bolsas. Óculos." 
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
